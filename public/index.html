@@ -11,12 +11,12 @@
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
 :root{--a:#3dd68c;--a2:#38bdf8;--gw:rgba(61,214,140,.2);--bg:#0f1419;--pn:rgba(15,20,25,.97);--cd:rgba(22,30,40,.85);--bd:rgba(255,255,255,.07);--bd2:rgba(255,255,255,.12);--t:#e2e8f0;--td:#64748b;--r:#f87171;--go:#fbbf24;--bl:#60a5fa;--rr:12px;--mono:'Chakra Petch',monospace}
-body{font-family:'Barlow',sans-serif;background:var(--bg);color:var(--t);overflow:hidden;height:100vh}
+body{font-family:'Barlow',sans-serif;background:var(--bg);color:var(--t);overflow:hidden;height:100vh;font-size:15px}
 .leaflet-control-zoom{display:none!important}
 .leaflet-control-attribution{font-size:8px!important;opacity:.4}
 
 /* ═══ TOP BAR ═══ */
-.top-bar{position:fixed;top:0;left:0;right:0;z-index:900;display:flex;align-items:center;justify-content:space-between;padding:0 14px;background:rgba(12,18,26,.95);backdrop-filter:blur(16px);border-bottom:1px solid var(--bd);height:56px}
+.top-bar{position:fixed;top:0;left:0;right:0;z-index:5500;pointer-events:auto;display:flex;align-items:center;justify-content:space-between;padding:0 14px;background:rgba(12,18,26,.95);backdrop-filter:blur(16px);border-bottom:1px solid var(--bd);height:56px}
 .top-left{display:flex;align-items:center;gap:16px}
 .top-right{display:flex;align-items:center;gap:6px}
 .logo{font-family:var(--mono);font-weight:700;font-size:20px;color:var(--a);letter-spacing:3px;text-shadow:0 0 14px var(--gw)}.logo b{color:var(--a2)}
@@ -30,8 +30,8 @@ body{font-family:'Barlow',sans-serif;background:var(--bg);color:var(--t);overflo
 .top-btn.glow:hover{background:rgba(61,214,140,.12);box-shadow:0 0 20px var(--gw)}
 
 /* ═══ HAMBURGER ═══ */
-.hamburger-wrap{position:relative}
-.hb-menu{display:none;position:absolute;top:100%;right:0;margin-top:6px;background:var(--bg);border:1px solid var(--bd2);border-radius:var(--rr);overflow:hidden;min-width:200px;box-shadow:0 12px 40px rgba(0,0,0,.7);z-index:999}
+.hamburger-wrap{position:relative;pointer-events:auto}
+.hb-menu{display:none;position:fixed;top:56px;right:14px;background:var(--bg);border:1px solid var(--bd2);border-radius:var(--rr);overflow:hidden;min-width:200px;box-shadow:0 12px 40px rgba(0,0,0,.7);z-index:9999}
 .hb-menu.open{display:block}
 .hb-item{padding:12px 16px;font-size:14px;cursor:pointer;transition:.12s;font-family:var(--mono);color:var(--td);border-bottom:1px solid var(--bd)}
 .hb-item:hover{background:rgba(61,214,140,.06);color:var(--t)}.hb-item:last-child{border-bottom:none}
@@ -40,7 +40,7 @@ body{font-family:'Barlow',sans-serif;background:var(--bg);color:var(--t);overflo
 #gameScreen{position:fixed;inset:0;z-index:1}
 #mapHost{position:absolute;inset:0;top:56px}
 /* map is now fixed on body, controlled via JS */
-#mapSearchSlot{position:fixed;top:66px;left:50%;transform:translateX(-50%);z-index:901;width:340px}
+#mapSearchSlot{position:fixed;top:66px;left:50%;transform:translateX(-50%);z-index:5501;width:340px}
 #mapSearchSlot #sw{width:100%;background:rgba(12,18,26,.9);backdrop-filter:blur(12px);border:1px solid var(--bd2);border-radius:12px;padding:4px}
 #mapSearchSlot #si{width:100%;background:transparent;border:none;padding:10px 12px 10px 32px;font-size:15px}
 #mapSearchSlot #si:focus{width:100%}
@@ -55,10 +55,10 @@ body{font-family:'Barlow',sans-serif;background:var(--bg);color:var(--t);overflo
 .dash-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
 @media(max-width:700px){.dash-grid{grid-template-columns:1fr}}
 .dash-card{background:var(--cd);border:1px solid var(--bd);border-radius:var(--rr);padding:14px}
-.dash-card-title{font-family:var(--mono);font-size:11px;text-transform:uppercase;letter-spacing:1.5px;color:var(--td);margin-bottom:8px;padding-bottom:4px;border-bottom:1px solid var(--bd)}
+.dash-card-title{font-family:var(--mono);font-size:14px;text-transform:uppercase;letter-spacing:1.5px;color:var(--td);margin-bottom:8px;padding-bottom:4px;border-bottom:1px solid var(--bd)}
 .dash-big{font-family:var(--mono);font-size:26px;font-weight:700;color:var(--a);margin-bottom:2px}
 .dash-big.sec{color:var(--a2)}
-.dash-sub{font-size:12px;color:var(--td)}
+.dash-sub{font-size:13px;color:var(--td)}
 
 /* ═══ SEARCH ═══ */
 #sw{position:relative}
@@ -104,13 +104,13 @@ body{font-family:'Barlow',sans-serif;background:var(--bg);color:var(--t);overflo
 .ex-city:hover{color:var(--t);background:rgba(255,255,255,.04)}
 .ex-city.sel{background:rgba(61,214,140,.1);color:var(--a);font-weight:600}
 .ex-cc{font-size:9px;color:var(--td);opacity:.6;min-width:16px}
-.comp-body{flex:1;overflow-y:auto;padding:16px;scrollbar-width:thin}
+.comp-body{flex:1;overflow-y:auto;padding:16px;scrollbar-width:thin;font-size:14px}
 .comp-body::-webkit-scrollbar{width:4px}
 .comp-body::-webkit-scrollbar-thumb{background:rgba(255,255,255,.08);border-radius:2px}
 .comp-status{display:flex;gap:18px;padding:12px 20px;background:rgba(0,0,0,.2);border-top:1px solid var(--bd);font-family:var(--mono);font-size:14px;color:var(--td);flex-shrink:0}
 
 /* ═══ SHARED COMPONENTS ═══ */
-.sec-label{font-family:var(--mono);font-size:10px;font-weight:600;color:var(--td);text-transform:uppercase;letter-spacing:1.5px;margin:10px 0 5px;padding-bottom:3px;border-bottom:1px solid var(--bd)}
+.sec-label{font-family:var(--mono);font-size:13px;font-weight:600;color:var(--td);text-transform:uppercase;letter-spacing:1.5px;margin:10px 0 5px;padding-bottom:3px;border-bottom:1px solid var(--bd)}
 .crd{background:var(--cd);border:1px solid var(--bd);border-radius:var(--rr);padding:10px 12px;margin-bottom:6px;font-size:13px;transition:.12s}
 .crd:hover{border-color:rgba(61,214,140,.2);background:rgba(61,214,140,.02)}
 .crd.glow{border-color:rgba(61,214,140,.3);background:rgba(61,214,140,.04);animation:qglow 2s infinite}
@@ -197,7 +197,7 @@ body{font-family:'Barlow',sans-serif;background:var(--bg);color:var(--t);overflo
 #minimap-wrap .leaflet-control-attribution{display:none!important}
 
 /* ═══ ZOOM CONTROLS ═══ */
-.map-zoom{position:fixed;bottom:14px;left:14px;z-index:902;display:flex;flex-direction:column;gap:2px}
+.map-zoom{position:fixed;bottom:14px;left:14px;z-index:5502;display:flex;flex-direction:column;gap:2px}
 .zb{width:28px;height:28px;border-radius:6px;border:1px solid var(--bd);background:rgba(12,18,26,.9);color:var(--t);font-size:16px;cursor:pointer;backdrop-filter:blur(8px)}
 .zb:hover{color:var(--a);border-color:var(--a)}
 
@@ -303,6 +303,7 @@ body{font-family:'Barlow',sans-serif;background:var(--bg);color:var(--t);overflo
 /* ═══ SCALE UP for large screens ═══ */
 @media(min-width:1400px){
   .top-bar{height:64px}
+  .hb-menu{top:64px!important}
   #dashPanel{top:64px}
   #map{top:64px!important}
   .logo{font-size:24px}
@@ -325,6 +326,7 @@ body{font-family:'Barlow',sans-serif;background:var(--bg);color:var(--t);overflo
 }
 @media(min-width:1800px){
   .top-bar{height:72px}
+  .hb-menu{top:72px!important}
   #dashPanel{top:72px}
   #map{top:72px!important}
   .logo{font-size:28px}
@@ -393,6 +395,152 @@ body{font-family:'Barlow',sans-serif;background:var(--bg);color:var(--t);overflo
 /* ═══ ALLIANCE PANEL ═══ */
 .ally-panel{position:fixed;inset:0;z-index:1500;background:rgba(0,0,0,.7);backdrop-filter:blur(8px);display:none;align-items:center;justify-content:center;padding:20px}
 .ally-panel.open{display:flex}
+
+/* ═══ MOBILE: Beautiful responsive design ═══ */
+@media(max-width:768px){
+  body{font-size:14px}
+  /* Top bar: compact */
+  .top-bar{height:48px;padding:0 8px;gap:4px}
+  .logo{font-size:15px;letter-spacing:2px}
+  .top-stats{gap:3px}
+  .top-stat{padding:2px 5px;font-size:10px;border-radius:8px}
+  .top-stat-lbl{display:none}
+  .top-stat-val{font-size:11px}
+  .top-btn{padding:5px 8px;font-size:11px;border-radius:6px}
+  .top-right{gap:3px}
+  /* Hide some stats on very small screens */
+  .top-stat:nth-child(n+4){display:none}
+
+  /* Dashboard */
+  #dashPanel{top:48px}
+  .dash-body{padding:10px}
+  .dash-grid{grid-template-columns:1fr;gap:8px}
+  .dash-card{padding:10px;border-radius:10px}
+  .dash-card-title{font-size:12px;letter-spacing:1px}
+  .dash-big{font-size:22px}
+  .dash-scroll{padding:10px}
+
+  /* Map */
+  #map{top:48px!important}
+  #mapSearchSlot{top:56px;width:calc(100% - 20px);left:10px;transform:none}
+  .map-zoom{bottom:10px;left:10px}
+  .map-zoom .zb{width:40px;height:40px;font-size:20px}
+
+  /* Terminal: fullscreen */
+  #computer{padding:0;align-items:stretch;justify-content:stretch}
+  .comp-win{width:100%!important;max-width:100%!important;height:100%!important;max-height:100%!important;border-radius:0!important;border:none!important}
+  .comp-bar{padding:6px 10px}
+  .comp-title{font-size:12px;letter-spacing:1px}
+  .comp-bar-right{gap:4px}
+
+  /* Explorer sidebar: collapsible on mobile */
+  .comp-main{flex-direction:column}
+  .comp-explorer{width:100%!important;min-width:100%!important;max-height:none;border-right:none;border-bottom:1px solid var(--bd);padding:4px;overflow-x:auto;overflow-y:hidden;display:flex;flex-wrap:wrap;gap:2px}
+  .comp-explorer .sec-label{display:none}
+  .comp-explorer .ex-city{display:inline-flex;padding:5px 10px!important;border-radius:8px!important;font-size:11px!important;white-space:nowrap;border:1px solid var(--bd);background:rgba(255,255,255,.03)}
+  .comp-explorer .ex-city.sel{background:rgba(61,214,140,.1);border-color:var(--a)}
+  .comp-explorer .ex-cont{display:none}
+  .comp-body{padding:10px;font-size:13px}
+
+  /* Tabs: scrollable on mobile */
+  .comp-tabs{scrollbar-width:none;-webkit-overflow-scrolling:touch}
+  .comp-tabs::-webkit-scrollbar{display:none}
+  .ctab{padding:8px 10px;font-size:11px;white-space:nowrap}
+
+  /* Cards */
+  .crd{padding:8px 10px;border-radius:8px}
+  .sec-label{font-size:12px;padding:4px 0}
+  .sub{font-size:12px}
+
+  /* Buttons: bigger touch targets */
+  .btn{padding:8px 14px;font-size:12px;min-height:36px}
+  .btn.sm{padding:6px 10px;font-size:11px;min-height:32px}
+  .btn.full{padding:10px 16px;font-size:13px;min-height:40px}
+
+  /* Popups: full width */
+  .unlock-bg,.mbg{padding:10px}
+  .unlock-popup{width:100%!important;max-width:100%!important;border-radius:12px!important}
+  .unlock-map{height:150px}
+
+  /* Vehicle checkboxes: bigger */
+  .veh-check{padding:6px 10px!important;font-size:12px!important}
+  .veh-check input[type="checkbox"]{width:18px;height:18px}
+
+  /* Progress bars */
+  .pb{height:5px;border-radius:3px}
+
+  /* Hamburger menu */
+  .hb-menu{top:48px!important;right:8px;width:calc(100vw - 16px);max-width:280px}
+  .hb-item{padding:14px 16px;font-size:15px}
+
+  /* Tutorial widget */
+  #tutWidget{right:8px!important;bottom:8px!important;width:calc(100vw - 16px)!important;max-width:380px}
+
+  /* Status bar */
+  .comp-status{padding:8px 10px;font-size:12px;gap:10px;flex-wrap:wrap}
+
+  /* Tags */
+  .tg{padding:3px 8px;font-size:11px;border-radius:6px}
+
+  /* Alliance panel */
+  .ally-panel .comp-win{width:100%!important;max-width:100%!important;height:100%!important;border-radius:0!important}
+
+  /* Search in terminal */
+  #termSearch{width:120px!important;font-size:10px!important}
+  #termSearchRes{min-width:calc(100vw - 40px)!important;right:-10px}
+
+  /* Auth/Login */
+  .auth-box{width:100%!important;max-width:100%!important;padding:16px!important;border-radius:12px!important}
+  .auth-input{font-size:16px!important;padding:10px!important}
+
+  /* Wiki */
+  .wk-grid{grid-template-columns:1fr!important}
+  .wk-hero{padding:20px!important}
+}
+
+/* Extra small screens (phones in portrait) */
+@media(max-width:400px){
+  .top-bar{height:44px;padding:0 6px}
+  .logo{font-size:13px;letter-spacing:1px}
+  .top-stat{display:none}
+  .top-stat:first-child{display:flex}
+  .top-btn{padding:4px 6px;font-size:10px}
+  #dashPanel{top:44px}
+  #map{top:44px!important}
+  .hb-menu{top:44px!important}
+  .comp-body{padding:8px}
+  .dash-body{padding:8px}
+  .dash-big{font-size:20px}
+}
+
+/* Landscape phones */
+@media(max-height:500px){
+  .top-bar{height:40px}
+  #dashPanel{top:40px}
+  #map{top:40px!important}
+  .hb-menu{top:40px!important}
+  #computer{padding:0}
+  .comp-bar{padding:4px 8px}
+  .comp-body{padding:8px}
+}
+
+/* Touch-friendly enhancements */
+@media(hover:none){
+  .btn:active{transform:scale(.97);opacity:.85}
+  .crd:active{opacity:.9}
+  .hb-item:active{background:rgba(61,214,140,.1)}
+  .sri:active{background:rgba(61,214,140,.08)}
+  .top-btn:active{background:rgba(61,214,140,.15)}
+}
+
+/* Smooth scrolling everywhere */
+.comp-body,.comp-explorer,.dash-scroll,.unlock-popup{-webkit-overflow-scrolling:touch;scroll-behavior:smooth}
+
+/* Safe area for notched phones */
+@supports(padding-top: env(safe-area-inset-top)){
+  .top-bar{padding-top:env(safe-area-inset-top);height:calc(56px + env(safe-area-inset-top))}
+  @media(max-width:768px){.top-bar{height:calc(48px + env(safe-area-inset-top))}}
+}
 </style>
 </head>
 <body>
@@ -457,10 +605,8 @@ body{font-family:'Barlow',sans-serif;background:var(--bg);color:var(--t);overflo
   <div id="regionCards" class="region-grid"></div>
 </div></div>
 
-<!-- ═══ GAME SCREEN ═══ -->
-<div id="gameScreen" style="display:none">
-  <!-- Top bar -->
-  <div class="top-bar">
+<!-- ═══ TOP BAR (outside gameScreen for z-index) ═══ -->
+<div class="top-bar" id="topBar" style="display:none">
     <div class="top-left">
       <div class="logo">LOGISTI<b>X</b></div>
       <div class="top-stats">
@@ -477,18 +623,22 @@ body{font-family:'Barlow',sans-serif;background:var(--bg);color:var(--t);overflo
       <button class="top-btn glow" onclick="openComputer()">💻 Terminal</button>
       <button class="top-btn" style="border-color:rgba(168,85,247,.3);color:#a855f7" onclick="openAlliancePanel()">🤝 Allianz</button>
       <div class="hamburger-wrap">
-        <button class="top-btn" onclick="toggleHamburger()">☰</button>
+        <button class="top-btn" onclick="event.stopPropagation();toggleHamburger()">☰</button>
         <div class="hb-menu" id="hbMenu">
           <div class="hb-item" onclick="showProfile();closeHamburger()"><i class="ri-user-3-line"></i> Profil</div>
           <div class="hb-item" onclick="showLeaderboard();closeHamburger()"><i class="ri-trophy-line"></i> Leaderboard</div>
           <div class="hb-item" onclick="showWiki();closeHamburger()"><i class="ri-book-open-line"></i> LogistiX-Wiki</div>
+          <div class="hb-item" onclick="showTutorial(0);closeHamburger()"><i class="ri-graduation-cap-line"></i> Tutorial</div>
           <div class="hb-item" onclick="openSettings();closeHamburger()"><i class="ri-settings-3-line"></i> Einstellungen</div>
           <div class="hb-item" onclick="toggleAdmin();closeHamburger()"><i class="ri-tools-line"></i> Admin</div>
           <div class="hb-item" onclick="doLogout();closeHamburger()"><i class="ri-logout-box-r-line"></i> Abmelden</div>
         </div>
       </div>
     </div>
-  </div>
+</div>
+
+<!-- ═══ GAME SCREEN ═══ -->
+<div id="gameScreen" style="display:none">
 
   <!-- Dashboard panel (default view) -->
   <div id="dashPanel">
@@ -506,8 +656,9 @@ body{font-family:'Barlow',sans-serif;background:var(--bg);color:var(--t);overflo
 <div id="computer" style="display:none">
   <div class="comp-frame">
     <div class="comp-bar">
-      <div class="comp-bar-left"><span class="comp-title">💻 LOGISTIX–Terminal</span></div>
+      <div class="comp-bar-left"><span class="comp-title">💻 LOGISTIX–Terminal</span><span id="compMoney" style="font-family:var(--mono);font-size:13px;color:var(--a);margin-left:12px;font-weight:700"></span></div>
       <div class="comp-bar-right">
+        <div style="position:relative"><input id="termSearch" class="auth-input" placeholder="🔍 Stadt suchen..." style="width:160px;padding:4px 8px;font-size:11px;border-radius:6px" oninput="termCitySearch(this.value)" onfocus="renderBlocked=true" onblur="setTimeout(()=>{renderBlocked=false;document.getElementById('termSearchRes')&&(document.getElementById('termSearchRes').style.display='none')},200)"/><div id="termSearchRes" style="display:none;position:absolute;top:100%;right:0;background:var(--bg);border:1px solid var(--bd2);border-radius:8px;max-height:200px;overflow-y:auto;min-width:250px;z-index:999;box-shadow:0 8px 30px rgba(0,0,0,.5)"></div></div>
         <div class="comp-loc" id="compLoc">📍 —</div>
         <button class="comp-close" onclick="toggleMinimap()" id="mmToggle">🗺️ Karte</button>
         <button class="comp-close accent" onclick="closeComputer()">✕ Schließen</button>
@@ -561,7 +712,7 @@ body{font-family:'Barlow',sans-serif;background:var(--bg);color:var(--t);overflo
 // Routes ALL data through /api/ for cross-device access
 // ══════════════════════════════════════════
 (function(){
-  if(window.storage) return; // Claude.ai hat eigene Storage-API
+  if(window.storage) return;
   const API='/api/';
   async function api(action,params){
     try{
@@ -1223,10 +1374,11 @@ function genExpressOrder(){
   const sendAmt=Math.min(amt,Math.max(3,Math.floor(amt*0.4)));
   const toReg=getRegion((toC.co||'').toUpperCase());
   const mktPrice=typeof marketPrice==='function'?marketPrice(good,toReg):(BASE_PRICES[good]||100);
-  // Express pays 2× market (better than normal orders but not insane)
-  const rew=Math.round(mktPrice*sendAmt*2);
-  // Cap at 5% of company value to prevent doubling
-  const maxRew=Math.max(20000,Math.round(companyValue()*0.05));
+  // Express pays 150-200% of market per unit
+  const mult=1.5+Math.random()*0.5; // 1.5x to 2.0x market
+  const rew=Math.round(mktPrice*sendAmt*mult);
+  // Cap at 10% of company value
+  const maxRew=Math.max(40000,Math.round(companyValue()*0.10));
   const cappedRew=Math.min(rew,maxRew);
   const timeLimit=Math.max(60,Math.floor(dist/80*3.6+30));
   return{id:uid(),type:'express',from:fromC.id,to:toC.id,good,amt:sendAmt,rew:cappedRew,
@@ -1301,33 +1453,61 @@ function C(id){return cities.find(c=>c.id===id)}
 function Cx(id){
   const c=C(id);if(c)return c;
   // Check if any order has this as target with stored coords
-  if(G&&G.orders){const o=G.orders.find(x=>x.to===id);
-    if(o&&o.toName)return{id,name:o.toName,co:'',lat:o.toLat||0,lng:o.toLng||0,pop:0}}
-  // Check DB
-  if(typeof DB!=='undefined'){for(const d of DB){const did=d[0].toLowerCase().replace(/\s+/g,'_');
-    if(id.startsWith(did))return{id,name:d[0],co:d[1],lat:d[3],lng:d[4],pop:d[2]}}}
+  if(G&&G.orders){const o=G.orders.find(x=>x.to===id||x.from===id);
+    if(o){if(o.to===id&&o.toName)return{id,name:o.toName,co:'',lat:o.toLat||0,lng:o.toLng||0,pop:0};
+      if(o.from===id){const fc=C(o.from);if(fc)return fc}}}
+  // Check history for coords
+  if(G&&G.history){const h2=G.history.find(x=>x.to===id);if(h2&&h2.toName)return{id,name:h2.toName,co:'',lat:0,lng:0,pop:0}}
+  // Check DB (handle db_ prefix)
+  if(typeof DB!=='undefined'){const cleanId=id.startsWith('db_')?id.slice(3):id;
+    for(const d of DB){const did=d[0].toLowerCase().replace(/\s+/g,'-').replace(/[^a-z0-9\-]/g,'');
+      if(cleanId===did||cleanId.startsWith(did))return{id,name:d[0],co:d[1],lat:d[3],lng:d[4],pop:d[2]}}}
   return null;
 }
 function addLog(m){if(!G)return;G.log.unshift(m);if(G.log.length>40)G.log.pop()}
 
-// ── Auth System (window.storage → localStorage → in-memory fallback) ──
+// ── Auth System (window.storage with in-memory fallback) ──
 const _memStore={};
-const _hasLS=(()=>{try{localStorage.setItem('_t','1');localStorage.removeItem('_t');return true}catch(e){return false}})();
 async function storeGet(k){
-  if(window.storage){try{const r=await window.storage.get(k);return r?r.value:null}catch(e){}}
-  if(_hasLS){try{const v=localStorage.getItem(k);if(v!==null)return v}catch(e){}}
+  if(window.storage){try{const r=await window.storage.get(k);return r?r.value:null}catch(e){return null}}
   return _memStore[k]||null;
 }
 async function storeSet(k,v){
   _memStore[k]=v;
   if(window.storage){try{await window.storage.set(k,v)}catch(e){}}
-  if(_hasLS){try{localStorage.setItem(k,v)}catch(e){}}
 }
 async function storeDel(k){
   delete _memStore[k];
   if(window.storage){try{await window.storage.delete(k)}catch(e){}}
-  if(_hasLS){try{localStorage.removeItem(k)}catch(e){}}
 }
+
+// ═══ SECURITY: Password hashing with SHA-256 + salt ═══
+async function hashPassword(pass,salt){
+  if(!salt)salt=crypto.getRandomValues(new Uint8Array(16)).reduce((s,b)=>s+b.toString(16).padStart(2,'0'),'');
+  const enc=new TextEncoder();
+  const data=enc.encode(salt+':'+pass);
+  const hashBuf=await crypto.subtle.digest('SHA-256',data);
+  const hashArr=Array.from(new Uint8Array(hashBuf));
+  const hashHex=hashArr.map(b=>b.toString(16).padStart(2,'0')).join('');
+  return{hash:hashHex,salt};
+}
+async function verifyPassword(pass,storedHash,salt){
+  const{hash}=await hashPassword(pass,salt);
+  return hash===storedHash;
+}
+// Input sanitization
+function sanitize(s){return String(s||'').replace(/[<>&"']/g,c=>({'<':'&lt;','>':'&gt;','&':'&amp;','"':'&quot;',"'":'&#39;'}[c]||c)).trim()}
+// Rate limiting
+const _loginAttempts={};
+function checkRateLimit(user){
+  const key=user.toLowerCase();const now=Date.now();
+  if(!_loginAttempts[key])_loginAttempts[key]={count:0,first:now};
+  const la=_loginAttempts[key];
+  if(now-la.first>300000){la.count=0;la.first=now} // Reset after 5min
+  if(la.count>=5)return false; // Max 5 attempts per 5min
+  la.count++;return true;
+}
+function clearRateLimit(user){delete _loginAttempts[user.toLowerCase()]}
 
 async function getUsers(){
   try{const r=await storeGet('lx_users');return r?JSON.parse(r):{}}catch(e){return{}}
@@ -1376,12 +1556,25 @@ async function doChangeEmail(){
 }
 
 async function doLogin(){
-  const user=document.getElementById('loginUser').value.trim();
+  const user=sanitize(document.getElementById('loginUser').value);
   const pass=document.getElementById('loginPass').value;
   if(!user||!pass){authMsg('Bitte ausfüllen',false);return}
+  if(!checkRateLimit(user)){authMsg('Zu viele Versuche. Warte 5 Minuten.',false);return}
   const users=await getUsers();
   const u=users[user.toLowerCase()];
-  if(!u||u.pass!==pass){authMsg('Falscher Benutzername oder Passwort',false);return}
+  if(!u){authMsg('Falscher Benutzername oder Passwort',false);return}
+  // Support both hashed and legacy plaintext passwords
+  let valid=false;
+  if(u.salt&&u.hash){valid=await verifyPassword(pass,u.hash,u.salt)}
+  else{valid=u.pass===pass} // Legacy plaintext fallback
+  if(!valid){authMsg('Falscher Benutzername oder Passwort',false);return}
+  // Migrate legacy plaintext to hashed on successful login
+  if(!u.salt||!u.hash){
+    const{hash,salt}=await hashPassword(pass);
+    u.hash=hash;u.salt=salt;delete u.pass;
+    await saveUsers(users);
+  }
+  clearRateLimit(user);
   currentUser=user.toLowerCase();
   authMsg('');
   try{adminLog('auth','🔑 Login: '+user)}catch(e){}
@@ -1389,19 +1582,23 @@ async function doLogin(){
 }
 
 async function doRegister(){
-  const user=document.getElementById('regUser').value.trim();
-  const email=document.getElementById('regEmail').value.trim();
+  const user=sanitize(document.getElementById('regUser').value);
+  const email=sanitize(document.getElementById('regEmail').value);
   const pass=document.getElementById('regPass').value;
   const pass2=document.getElementById('regPass2').value;
-  const question=document.getElementById('regQuestion').value.trim();
+  const question=sanitize(document.getElementById('regQuestion').value);
   const answer=document.getElementById('regAnswer').value.trim();
   if(!user||!email||!pass||!question||!answer){authMsg('Bitte alle Felder ausfüllen',false);return}
   if(pass!==pass2){authMsg('Passwörter stimmen nicht überein',false);return}
-  if(user.length<2){authMsg('Benutzername zu kurz',false);return}
-  if(pass.length<3){authMsg('Passwort zu kurz',false);return}
+  if(user.length<2||user.length>20){authMsg('Benutzername: 2–20 Zeichen',false);return}
+  if(!/^[a-zA-Z0-9_\-äöüÄÖÜß]+$/.test(user)){authMsg('Benutzername: nur Buchstaben, Zahlen, _ und -',false);return}
+  if(pass.length<4){authMsg('Passwort: mindestens 4 Zeichen',false);return}
   const users=await getUsers();
   if(users[user.toLowerCase()]){authMsg('Benutzername bereits vergeben',false);return}
-  users[user.toLowerCase()]={user,email,pass,question,answer:answer.toLowerCase(),created:Date.now()};
+  // Hash password + security answer
+  const{hash,salt}=await hashPassword(pass);
+  const{hash:ansHash,salt:ansSalt}=await hashPassword(answer.toLowerCase());
+  users[user.toLowerCase()]={user:sanitize(user),email:sanitize(email),hash,salt,question,ansHash,ansSalt,created:Date.now()};
   await saveUsers(users);
   try{adminLog('auth','📝 Neuer Spieler: '+user)}catch(e){}
   authMsg('✅ Registrierung erfolgreich! Bitte melde dich jetzt an.',true);
@@ -1425,10 +1622,15 @@ async function doResetStep2(){
   const newPass=document.getElementById('resetNewPass').value;
   if(!answer||!newPass){authMsg('Bitte ausfüllen',false);return}
   const users=await getUsers();
-  const u=users[userKey];
-  if(!u||u.answer!==answer){authMsg('Falsche Antwort',false);return}
-  if(newPass.length<3){authMsg('Passwort zu kurz',false);return}
-  u.pass=newPass;
+  const u=users[userKey];if(!u){authMsg('Fehler',false);return}
+  // Verify security answer (hashed or legacy)
+  let ansValid=false;
+  if(u.ansSalt&&u.ansHash){ansValid=await verifyPassword(answer,u.ansHash,u.ansSalt)}
+  else{ansValid=u.answer===answer}
+  if(!ansValid){authMsg('Falsche Antwort',false);return}
+  if(newPass.length<4){authMsg('Passwort: mindestens 4 Zeichen',false);return}
+  const{hash,salt}=await hashPassword(newPass);
+  u.hash=hash;u.salt=salt;delete u.pass;
   await saveUsers(users);
   authMsg('Passwort geändert! Du kannst dich jetzt anmelden.',true);
   setTimeout(()=>showAuth('login'),1500);
@@ -1440,7 +1642,7 @@ function doLogout(){
   if(tickIv){clearInterval(tickIv);tickIv=null}
   document.getElementById('loginScreen').style.display='flex';
   document.getElementById('startScreen').style.display='none';
-  ['gameScreen','computer'].forEach(id=>document.getElementById(id).style.display='none');
+  ['gameScreen','computer','topBar'].forEach(id=>{const e=document.getElementById(id);if(e)e.style.display='none'});
   if(MP){Object.values(cMk).forEach(m=>MP.removeLayer(m));Object.values(cLb).forEach(m=>MP.removeLayer(m));
   Object.values(vMk).forEach(m=>MP.removeLayer(m));Object.values(rLn).forEach(l=>MP.removeLayer(l));
   Object.values(bMk).forEach(arr=>arr.forEach(m=>MP.removeLayer(m)));}
@@ -1489,12 +1691,25 @@ async function afterLogin(userData){
   }
 }
 
-// ── Init test account ──
+// ── Init test account (hashed) ──
 async function ensureTestAccount(){
   const users=await getUsers();
-  // Always overwrite test account to ensure correct password
-  users['test']={user:'Test',email:'test@logistix.de',pass:'test',question:'Was ist das Testpasswort?',answer:'test',created:Date.now()};
+  if(!users['test']||!users['test'].hash){
+    const{hash,salt}=await hashPassword('test');
+    const{hash:ansHash,salt:ansSalt}=await hashPassword('test');
+    users['test']={user:'Test',email:'test@logistix.de',hash,salt,question:'Was ist das Testpasswort?',ansHash,ansSalt,created:Date.now()};
+    await saveUsers(users);
+  }
+}
+
+async function changePassword(newPass){
+  if(!currentUser)return;
+  if(!newPass||newPass.length<4){if(typeof toast==='function')toast('Mindestens 4 Zeichen','var(--r)');return}
+  const users=await getUsers();const u=users[currentUser];if(!u)return;
+  const{hash,salt}=await hashPassword(newPass);
+  u.hash=hash;u.salt=salt;delete u.pass;
   await saveUsers(users);
+  if(typeof toast==='function')toast('✅ Passwort geändert');
 }
 
 // ── Game State ──
@@ -1541,7 +1756,7 @@ async function reset(){
   cities=[];G=null;gameStarted=false;
   if(currentUser)try{await storeDel('lx_save_'+currentUser)}catch(e){}
   document.getElementById('startScreen').style.display='flex';
-  ['gameScreen','computer'].forEach(id=>document.getElementById(id).style.display='none');
+  ['gameScreen','computer','topBar'].forEach(id=>{const e=document.getElementById(id);if(e)e.style.display='none'});
   startIn.value='';startRes.innerHTML='<div class="start-hint">z.B. "Alzey", "Berlin", "Tokyo"...</div>';startIn.focus();
   if(MP)MP.setView([30,10],3);
 }
@@ -1572,7 +1787,9 @@ function genOrd(){
   const toReg=getRegion((tCo||'').toUpperCase());
   const mktPrice=typeof marketPrice==='function'?marketPrice(pick.good,toReg):(g.bp||100);
   const distFactor=Math.min(d/maxDist,1);
-  const orderMult=1.3+distFactor*1.2+Math.random()*0.5;
+  // Normal orders: 50% to 150% of market price per unit
+  // Longer distance = slightly better price, but still within range
+  const orderMult=0.5+Math.random()*1.0+distFactor*0.15;
   const rew=Math.round(mktPrice*amt*orderMult);
   const tl=Math.max(3600,Math.floor(d/20*60+1800+Math.random()*3600));
   if(!G.orderNum)G.orderNum=0;G.orderNum++;
@@ -1628,25 +1845,25 @@ function setCachedSearch(q,data){
 
 // ═══ TUTORIAL: Core mechanics (always 2 visible) ═══
 const TUTORIAL=[
-  {id:'t1',name:'Fahrzeug kaufen',desc:'Öffne den Händler-Tab und kaufe deinen ersten Transporter',icon:'🚐',reward:5000,
+  {id:'t1',name:'Fahrzeug kaufen',desc:'Öffne das 💻 Terminal → 🛒 Händler und kaufe deinen ersten Kleintransporter',icon:'🚐',reward:5000,
     check:()=>G.vehs.length>=1,prog:()=>[G.vehs.length,1]},
-  {id:'t2',name:'Gebäude errichten',desc:'Wechsel zum Gebäude-Tab und baue einen Bauernhof oder Forstwirtschaft',icon:'🌾',reward:6000,
+  {id:'t2',name:'Gebäude errichten',desc:'Im Terminal → 🏭 Gebäude → Bauen: Errichte einen Bauernhof oder Forstwirtschaft',icon:'🌾',reward:6000,
     check:()=>Object.values(G.blds).flat().length>=1,prog:()=>[Object.values(G.blds).flat().length,1]},
-  {id:'t3',name:'Zweite Stadt',desc:'Öffne die Suchleiste (oben) und kaufe eine zweite Stadt',icon:'🏙️',reward:8000,
+  {id:'t3',name:'Zweite Stadt',desc:'Nutze die 🔍 Suchleiste auf der Karte oder im Terminal um eine zweite Stadt freizuschalten',icon:'🏙️',reward:8000,
     check:()=>cities.length>=2,prog:()=>[cities.length,2]},
-  {id:'t4',name:'Auftrag annehmen',desc:'Schau in den Aufträge-Tab und nimm einen Transportauftrag an',icon:'📋',reward:4000,
+  {id:'t4',name:'Auftrag annehmen',desc:'Terminal → 📋 Logistik → Aufträge: Nimm einen Auftrag an sobald Waren im Lager sind',icon:'📋',reward:4000,
     check:()=>G.orders.some(o=>o.acc)||G.dels>=1,prog:()=>[G.orders.some(o=>o.acc)||G.dels>=1?1:0,1]},
-  {id:'t5',name:'Erste Lieferung',desc:'Gehe zu Routen, weise ein Fahrzeug zu und liefere den Auftrag aus',icon:'✅',reward:12000,
+  {id:'t5',name:'Erste Lieferung',desc:'Terminal → Logistik → Routen: Weise einem Auftrag ein Fahrzeug zu oder nutze ⚡ Auto',icon:'✅',reward:12000,
     check:()=>G.dels>=1,prog:()=>[Math.min(G.dels,1),1]},
-  {id:'t6',name:'Lager erweitern',desc:'Kaufe unter Gebäude → Infra eine Lagererweiterung',icon:'📦',reward:5000,
+  {id:'t6',name:'Lager erweitern',desc:'Terminal → 🏭 Gebäude → Infrastruktur: Kaufe eine Lagererweiterung oder ein Depot',icon:'📦',reward:5000,
     check:()=>{if(!G.infra)return false;return Object.values(G.infra).flat().some(i=>INFRA[i.type]?.storCap)},prog:()=>[Object.values(G.infra||{}).flat().filter(i=>INFRA[i.type]?.storCap).length?1:0,1]},
-  {id:'t7',name:'Verarbeitung',desc:'Baue eine Mühle, Bäckerei oder ähnliche Fabrik',icon:'🏭',reward:10000,
+  {id:'t7',name:'Verarbeitung',desc:'Terminal → 🏭 Gebäude → Bauen: Baue eine Verarbeitungsfabrik (Mühle, Bäckerei o.ä.)',icon:'🏭',reward:10000,
     check:()=>Object.values(G.blds).flat().some(b=>{const d=BLD[b.type];return d&&(d.inp||d.tp==='recipe')}),prog:()=>[Object.values(G.blds).flat().filter(b=>{const d=BLD[b.type];return d&&(d.inp||d.tp==='recipe')}).length?1:0,1]},
-  {id:'t8',name:'Upgrade',desc:'Upgrade ein Gebäude im Verwalten-Tab',icon:'⬆️',reward:8000,
+  {id:'t8',name:'Upgrade',desc:'Terminal → 🏭 Gebäude → Verwalten: Klicke ein Gebäude und kaufe ein Upgrade',icon:'⬆️',reward:8000,
     check:()=>Object.values(G.blds).flat().some(b=>b.ups&&Object.values(b.ups).some(l=>l>=1)),prog:()=>[Object.values(G.blds).flat().some(b=>b.ups&&Object.values(b.ups).some(l=>l>=1))?1:0,1]},
-  {id:'t9',name:'Warentransfer',desc:'Sende Waren zu einem anderen Standort (Routen → Warentransfer)',icon:'📤',reward:8000,
+  {id:'t9',name:'Warentransfer',desc:'Terminal → Logistik → Transfer: Sende Waren per Fahrzeug zu einem anderen Standort',icon:'📤',reward:8000,
     check:()=>G.vehs.some(v=>v.cargo?.internal),prog:()=>[G.vehs.some(v=>v.cargo?.internal)?1:0,1]},
-  {id:'t10',name:'Dauerauftrag',desc:'Erstelle einen Dauerauftrag für automatische Lieferungen',icon:'🔄',reward:10000,
+  {id:'t10',name:'Dauerauftrag',desc:'Terminal → Logistik → Daueraufträge: Richte einen automatischen Warentransport ein',icon:'🔄',reward:10000,
     check:()=>(G.standingOrders||[]).length>=1,prog:()=>[(G.standingOrders||[]).length,1]},
 ];
 
@@ -2432,6 +2649,37 @@ function remoteAssign(vid,oid){
   if(typeof toast==='function')toast('🚛 '+vehName(v)+' unterwegs zum Abholort');
   ua();
 }
+
+// ═══ INTERCEPT RETURNING VEHICLE: reassign to new order ═══
+function interceptVehicle(vid,oid){
+  const v=G.vehs.find(x=>x.id===vid);if(!v)return;
+  const o=G.orders.find(x=>x.id===oid&&x.acc);if(!o)return;
+  // Cancel current return trip, send to order pickup
+  v.st='moving';v.rt={from:v.rt?.to||v.loc,to:o.from};v.prog=0;
+  v.cargo=null;v.recallToDepot=false;v.postDelivery=null;
+  v.followUpOrder=oid;
+  if(typeof ensureRoute==='function')ensureRoute(v);
+  const loc=Cx(v.rt.from);
+  addLog('🔄 '+vehName(v)+' umgeleitet → '+(C(o.from)?.name||'?')+' für Auftrag '+fmtOrd(o.num));
+  if(typeof toast==='function')toast('🔄 '+vehName(v)+' umgeleitet');
+  ua();
+}
+function isReturning(v){return v.st==='moving'&&(!v.cargo||v.cargo.returning||v.recallToDepot||v.postDelivery)&&!v.cargo?.oid}
+
+// ═══ SEND MULTIPLE REMOTE VEHICLES ═══
+function sendSelectedRemote(oid){
+  const checks=document.querySelectorAll('.rc-v:checked');
+  if(!checks.length){if(typeof toast==='function')toast('Keine Fahrzeuge ausgewählt','var(--r)');return}
+  let sent=0;
+  checks.forEach(cb=>{
+    const vid=cb.dataset.vid;const type=cb.dataset.type;
+    if(type==='returning'){interceptVehicle(vid,oid);sent++}
+    else{remoteAssign(vid,oid);sent++}
+  });
+  G._remoteOid=null;
+  if(typeof toast==='function')toast('🚛 '+sent+' Fahrzeuge losgeschickt','var(--a)');
+  ua();
+}
 // ALLIANCE SYSTEM v3 — Country-based territories
 const ALLIANCE_LEVELS=[
   {lvl:1,name:'Startup',maxMembers:10,slots:3,maxTerr:2},
@@ -2522,7 +2770,7 @@ async function saveTerritoryMarket(d){_allyCache.market=d;try{await window.stora
 function RA(){if(typeof renderAlliance==='function')renderAlliance()}
 
 // Actions
-async function createAlliance(name,tag){if(!G||!currentUser)return;if(G.alliance){addLog('❌ Bereits in Allianz');return}if(!name||name.length<3){addLog('❌ Name min. 3');return}if(!tag||tag.length<2||tag.length>4){addLog('❌ Tag 2-4');return}const cost=300000;if(G.money<cost){addLog('❌ '+fmt(cost)+' nötig (150.000€ Startkapital)');return}G.money-=cost;const id=uid();const a={id,name,tag:tag.toUpperCase(),level:1,leader:currentUser,members:[{user:currentUser,role:'leader',joined:Date.now()}],treasury:250000,storage:{},buildings:[],territories:[],orders:[],created:Date.now()};await saveAlliance(a);G.alliance=id;addLog('🤝 ['+tag.toUpperCase()+'] '+name+' gegründet!');if(typeof toast==='function')toast('🤝 Allianz gegründet! 250.000€ Startkapital','#a855f7');ua();RA()}
+async function createAlliance(name,tag){if(!G||!currentUser)return;if(G.alliance){addLog('❌ Bereits in Allianz');return}if(!name||name.length<3){addLog('❌ Name min. 3');return}if(!tag||tag.length<2||tag.length>4){addLog('❌ Tag 2-4');return}const cost=300000;if(G.money<cost){addLog('❌ '+fmt(cost)+' nötig (150.000€ Startkapital)');return}G.money-=cost;const id=uid();const a={id,name:sanitize(name),tag:sanitize(tag).toUpperCase(),level:1,leader:currentUser,members:[{user:currentUser,role:'leader',joined:Date.now()}],treasury:250000,storage:{},buildings:[],territories:[],orders:[],created:Date.now()};await saveAlliance(a);G.alliance=id;addLog('🤝 ['+tag.toUpperCase()+'] '+name+' gegründet!');if(typeof toast==='function')toast('🤝 Allianz gegründet! 250.000€ Startkapital','#a855f7');ua();RA()}
 async function joinAlliance(id){
   if(!G||!currentUser||G.alliance)return;
   const a=await getAlliance(id);if(!a)return;
@@ -2759,6 +3007,35 @@ function tickCore(){
     if(G.priceHist.length>20)G.priceHist.shift();
   }
 
+  // ── Order timer: accepted orders lose value over time, expire with penalty ──
+  G.orders.forEach(o=>{
+    if(!o.acc)return;
+    const age=G.tick-o.born;
+    // After 80% of time limit, reward starts decreasing
+    if(age>o.tl*0.8){const decay=Math.min(0.3,(age-o.tl*0.8)/(o.tl*0.2)*0.3);o.rew=Math.max(Math.round(o.origRew*(1-decay)),Math.round(o.origRew*0.5))}
+    // Store original reward on first check
+    if(!o.origRew)o.origRew=o.rew;
+    // Expire accepted orders: auto-cancel with penalty
+    if(age>=o.tl*1.5){
+      const pen=Math.round(o.origRew*0.4);G.money-=pen;
+      addLog('❌ Auftrag '+fmtOrd(o.num)+' abgelaufen! -'+fmt(pen)+' Strafe');markCompDirty();
+      o._expired=true;
+    }
+  });
+  G.orders=G.orders.filter(o=>!o._expired);
+
+  // ── Rescue stuck idle vehicles at non-unlocked cities (every 10 ticks) ──
+  if(G.tick%10===0){
+    G.vehs.filter(v=>v.st==='idle'&&!cities.find(c=>c.id===v.loc)).forEach(v=>{
+      const nearest=cities.reduce((best,c)=>{const cl=C(c.id);if(!cl)return best;
+        const vLoc=Cx(v.loc);if(!vLoc)return best;
+        const d=hav(cl.lat,cl.lng,vLoc.lat,vLoc.lng);return(!best||d<best.d)?{id:c.id,d}:best},null);
+      if(nearest){v.st='moving';v.rt={from:v.loc,to:nearest.id};v.prog=0;
+        if(typeof ensureRoute==='function')ensureRoute(v);
+        addLog('🔄 '+vehName(v)+' kehrt zurück → '+(C(nearest.id)?.name||''))}
+    });
+  }
+
   // ── Events: spawn every ~6h (21600 ticks), max 2 active ──
   if(G.tick%3600===0&&activeEvents().length<2&&Math.random()<0.6){
     const pool=EVENTS.filter(e=>!activeEvents().find(a=>a.id===e.id));
@@ -2928,8 +3205,14 @@ function tickCore(){
     for(let vi=0;vi<G.vehs.length;vi++){
       const v=G.vehs[vi];
       if(v.st!=='moving'||!v.rt)continue;
-      const vt=VT[v.type],f=C(v.rt.from)||Cx(v.rt.from),t=C(v.rt.to)||Cx(v.rt.to)||(v.rt.toLat?{lat:v.rt.toLat,lng:v.rt.toLng,name:v.rt.toName||'?'}:null);
-      if(!f||!t)continue;
+      const vt=VT[v.type],f=C(v.rt.from)||Cx(v.rt.from)||(v.rt.fromLat?{lat:v.rt.fromLat,lng:v.rt.fromLng,name:v.rt.fromName||'?'}:null);
+      const t=C(v.rt.to)||Cx(v.rt.to)||(v.rt.toLat?{lat:v.rt.toLat,lng:v.rt.toLng,name:v.rt.toName||'?'}:null);
+      // If can't resolve destination, force arrive at target
+      if(!t||!f){
+        v.st='idle';v.loc=v.rt.to||v.rt.from||v.loc;v.cargo=null;v.rt=null;v.prog=0;
+        v.postDelivery=null;v.followUpOrder=null;
+        continue;
+      }
       // Apply speed modifiers from events + maintenance
       let spdMult=1;
       if(vt.cat==='sea')spdMult=seaSpd;
@@ -2938,6 +3221,8 @@ function tickCore(){
       if(v.needsMaint)spdMult*=0.8; // 20% slower when needs maintenance
       const tn=v.rt.tripTime||tripT(f,t,vt.spd*spdMult);
       v.prog++;
+      // Safety: if stuck way past arrival, force arrive
+      if(v.prog>tn+60){v.prog=tn}
       if(v.prog>=tn){
         // Arrived
         if(v.cargo&&v.cargo.oid){
@@ -2952,7 +3237,7 @@ function tickCore(){
               if(!G.history)G.history=[];
               G.history.push({good:o.good,amt:o.amt,rew:o.rew,from:o.from,to:o.to,tick:G.tick,ts:Date.now(),express:o.type==='express',toName:o.toName||''});
               if(G.history.length>200)G.history.shift();
-              addLog('✅ '+(GOODS[o.good]?.em||'')+o.amt+'×→'+t.name+' +'+fmt(o.rew));
+              addLog('✅ '+(GOODS[o.good]?.em||'')+o.amt+'×→'+t.name+' +'+fmt(o.rew));markCompDirty();
               G.orders=G.orders.filter(x=>x.id!==o.id);
             } else {
               trackSupply(o.good,v.cargo.amt);addLog('📦 Teillieferung '+(GOODS[o.good]?.em||'')+v.cargo.amt+'× ('+o.delivered+'/'+o.amt+')');
@@ -2995,7 +3280,7 @@ function tickCore(){
         } else if(v.cargo&&v.cargo.internal){
           if(!G.stor[v.rt.to])G.stor[v.rt.to]={};
           G.stor[v.rt.to][v.cargo.good]=(G.stor[v.rt.to][v.cargo.good]||0)+v.cargo.amt;
-          addLog('📦 '+v.cargo.amt+'× '+(GOODS[v.cargo.good]?.em||'')+' → '+t.name);
+          addLog('📦 '+v.cargo.amt+'× '+(GOODS[v.cargo.good]?.em||'')+' → '+t.name);markCompDirty();
         }
         v.st='idle';v.loc=v.rt.to||v.rt.from;
         // Track kilometers
@@ -3004,13 +3289,31 @@ function tickCore(){
         // Market/alliance trips return to origin
         if(v.cargo&&(v.cargo.market||v.cargo.allianceDelivery)){v.loc=v.rt.to||v.rt.from||v.loc}
         v.cargo=null;
-        // Check if arrived at non-unlocked city → go to nearest unlocked
-        if(!cities.find(c=>c.id===v.loc)){
-          const nearest=cities.reduce((best,c)=>{const d=hav(f.lat,f.lng,c.lat,c.lng);return(!best||d<best.d)?{id:c.id,d}:best},null);
-          if(nearest){v.st='moving';v.rt={from:v.loc,to:nearest.id};v.prog=0;
-            addLog('🔄 '+vehName(v)+' kehrt zurück → '+(C(nearest.id)?.name||''));}
+        // Handle pending transfer (remote vehicle arrived at origin)
+        if(v.pendingTransfer&&v.st==='idle'){
+          const pt=v.pendingTransfer;const s=G.stor[v.loc];
+          if(s&&(s[pt.good]||0)>0){
+            const canLoad=Math.min(pt.amt,s[pt.good]||0,vehCap(v));
+            if(canLoad>0){
+              s[pt.good]-=canLoad;if(s[pt.good]<=0)delete s[pt.good];
+              v.st='moving';v.rt={from:v.loc,to:pt.dest};
+              v.cargo={internal:true,good:pt.good,amt:canLoad};v.prog=0;
+              if(typeof ensureRoute==='function')ensureRoute(v);
+              addLog('📦 '+vehName(v)+': '+canLoad+'× '+(GOODS[pt.good]?.em||'')+' geladen → '+(C(pt.dest)?.name||''));
+            }
+          }
+          v.pendingTransfer=null;
+          if(v.st==='moving')continue;
         }
-        v.rt=null;v.prog=0;
+        // Check if arrived at non-unlocked city → go to nearest unlocked
+        if(v.st==='idle'&&!cities.find(c=>c.id===v.loc)){
+          const nearest=cities.reduce((best,c)=>{const cl=C(c.id);if(!cl)return best;const d=hav(cl.lat,cl.lng,C(v.loc)?.lat||0,C(v.loc)?.lng||0);return(!best||d<best.d)?{id:c.id,d}:best},null);
+          if(nearest){v.st='moving';v.rt={from:v.loc,to:nearest.id};v.prog=0;
+            if(typeof ensureRoute==='function')ensureRoute(v);
+            addLog('🔄 '+vehName(v)+' kehrt zurück → '+(C(nearest.id)?.name||''));
+            continue;}
+        }
+        if(v.st==='idle'){v.rt=null;v.prog=0;}
         // Maintenance check based on km
         const vt2=VT[v.type];if(vt2){
           const maintKm2={land:10000,rail:25000,sea:50000,air:15000}[vt2.cat]||10000;
@@ -3040,11 +3343,16 @@ function tickCore(){
           }
           v.followUpOrder=null;
         }
-        // Post-delivery destination
-        if(v.st==='idle'&&v.postDelivery&&typeof canVehTravel==='function'&&canVehTravel(v,v.postDelivery)&&v.loc!==v.postDelivery){
-          v.st='moving';v.rt={from:v.loc,to:v.postDelivery};v.prog=0;
+        // Post-delivery destination (return trip for standing orders etc.)
+        if(v.st==='idle'&&v.postDelivery&&v.loc!==v.postDelivery){
+          const pdFrom=C(v.loc)||Cx(v.loc);const pdTo=C(v.postDelivery)||Cx(v.postDelivery);
+          const pdTt=pdFrom&&pdTo?tripT(pdFrom,pdTo,vt.spd):300;
+          v.st='moving';v.rt={from:v.loc,to:v.postDelivery,tripTime:pdTt};v.prog=0;
           if(typeof ensureRoute==='function')ensureRoute(v);
           v.postDelivery=null;
+          continue;
+        } else if(v.st==='idle'&&v.postDelivery&&v.loc===v.postDelivery){
+          v.postDelivery=null; // Already at destination
         } else if(v.st==='idle'&&v.queue&&v.queue.length){
           v.queue.shift();
           if(v.queue.length&&typeof startNextRoute==='function')startNextRoute(v);
@@ -3074,7 +3382,7 @@ function tickCore(){
   }
 
   // Standing orders (every 60s)
-  if(G.tick%60===0&&G.standingOrders){
+  if(G.tick%5===0&&G.standingOrders){
     try{
       G.standingOrders.forEach(so=>{
         // Auto-resume check: if auto-paused and dest now has space, resume
@@ -3091,9 +3399,8 @@ function tickCore(){
         // Find and send vehicles
         const s=G.stor[so.from];if(!s||(s[so.good]||0)<1)return;
         const vids=so.vehicleIds||(so.vehicleId?[so.vehicleId]:[]);
-        const candidates=vids.length
-          ?G.vehs.filter(x=>vids.includes(x.id)&&x.st==='idle'&&x.loc===so.from)
-          :[G.vehs.find(x=>x.st==='idle'&&x.loc===so.from&&(typeof canVehTravel!=='function'||canVehTravel(x,so.to)))].filter(Boolean);
+        if(!vids.length)return; // No vehicles assigned
+        const candidates=G.vehs.filter(x=>vids.includes(x.id)&&x.st==='idle'&&x.loc===so.from);
         candidates.forEach(v=>{
           if((s[so.good]||0)<1)return;
           let loadAmt;
@@ -3101,10 +3408,14 @@ function tickCore(){
           else{loadAmt=Math.min(so.amt,s[so.good]||0,vehCap(v))}
           if(loadAmt<=0)return;
           s[so.good]-=loadAmt;if(s[so.good]<=0)delete s[so.good];
-          v.st='moving';v.rt={from:so.from,to:so.to};
+          v.st='moving';
+          const fc2=C(so.from),tc2=C(so.to);
+          const tt=fc2&&tc2?tripT(fc2,tc2,vt.spd):300;
+          v.rt={from:so.from,to:so.to,tripTime:tt};
           v.cargo={internal:true,good:so.good,amt:loadAmt};v.prog=0;
           v.postDelivery=so.from;
           if(typeof ensureRoute==='function')ensureRoute(v);
+          addLog('🔄 '+vehName(v)+': '+(GOODS[so.good]?.em||'')+loadAmt+'× → '+(C(so.to)?.name||'?'));markCompDirty();
         });
       });
     }catch(e){}
@@ -3147,10 +3458,18 @@ function tick(){
   try{tickCore()}catch(e){console.error('TICK ERROR:',e)}
   tc++;
   if(tc%2===0){try{uhud()}catch(e){}}
-  // Only re-render dashboard on tick, not terminal (terminal re-renders on ua())
-  if(tc%2===0&&!renderBlocked){try{if(computerOpen)renComp();else ren()}catch(e){}}
+  // Dashboard: re-render every 2s. Terminal: only when dirty or every 10s
+  if(tc%2===0&&!renderBlocked){
+    try{
+      if(computerOpen){
+        updateLiveElements();
+        if(_compDirty||tc%10===0){_compDirty=false;renComp()}
+      } else {ren()}
+    }catch(e){}
+  }
   if(tc%3===0){try{uvmk()}catch(e){}}
   if(tc%5===0)try{uvmk()}catch(e){}
+  if(tc%2===0){try{if(typeof tutorialTick==='function')tutorialTick()}catch(e){}}
   if(tc%30===0)try{markDirty()}catch(e){}
 }
 // ══════════════════════════════════════════
@@ -3485,9 +3804,15 @@ let bldSub='build'; // 'build', 'manage', 'infra'
 function getContinent(co){const r=getRegion(co);return REGIONS[r]?REGIONS[r].name:'Sonstige'}
 
 // ═══ HAMBURGER MENU ═══
-function toggleHamburger(){document.getElementById('hbMenu').classList.toggle('open')}
-function closeHamburger(){document.getElementById('hbMenu').classList.remove('open')}
-document.addEventListener('click',e=>{const w=document.querySelector('.hamburger-wrap');if(w&&!w.contains(e.target))closeHamburger()});
+function toggleHamburger(){const m=document.getElementById('hbMenu');if(m)m.classList.toggle('open')}
+function closeHamburger(){const m=document.getElementById('hbMenu');if(m)m.classList.remove('open')}
+document.addEventListener('click',e=>{
+  const wrap=document.querySelector('.hamburger-wrap');
+  const menu=document.getElementById('hbMenu');
+  if(!wrap||!menu)return;
+  // Close if click is outside both the wrap AND the menu
+  if(!wrap.contains(e.target)&&!menu.contains(e.target))closeHamburger();
+});
 
 // ═══ VIEW TOGGLE: Dashboard ↔ Map ═══
 function toggleView(){
@@ -3551,7 +3876,7 @@ function renDash(){
   DASHBOARDS.forEach(d=>{
     if(d.id==='alliance'&&!G.alliance)return;
     const active=window._dashTab===d.id;
-    h+='<button style="padding:4px 10px;border-radius:8px;border:1px solid '+(active?'var(--a)':'var(--bd)')+';background:'+(active?'rgba(61,214,140,.1)':'transparent')+';color:'+(active?'var(--a)':'var(--td)')+';font-size:11px;font-family:var(--mono);cursor:pointer;transition:.15s" onclick="window._dashTab=\''+d.id+'\';renDash()">'+d.em+' '+d.name+'</button>'});
+    h+='<button style="padding:4px 10px;border-radius:8px;border:1px solid '+(active?'var(--a)':'var(--bd)')+';background:'+(active?'rgba(61,214,140,.1)':'transparent')+';color:'+(active?'var(--a)':'var(--td)')+';font-size:12px;font-family:var(--mono);cursor:pointer;transition:.15s" onclick="window._dashTab=\''+d.id+'\';renDash()">'+d.em+' '+d.name+'</button>'});
   h+='</div>';
 
   const tab=window._dashTab||'hq';
@@ -3587,13 +3912,13 @@ function dashHQ(){
   h+='<div class="dash-card"><div class="dash-card-title">'+li.em+' Level '+lvl+' · '+li.name+'</div>';
   h+='<div class="dash-big">'+fmt(cv)+'</div><div class="dash-sub">Unternehmenswert</div>';
   h+='<div class="dash-big sec" style="font-size:16px;margin-top:4px">'+fmt(G.money)+'</div><div class="dash-sub">Kontostand</div>';
-  h+='<div style="margin-top:4px;font-size:10px;color:var(--td)">💰 '+fmt(G.earned)+' verdient · 📦 '+(G.dels||0)+' Lieferungen</div>';
+  h+='<div style="margin-top:4px;font-size:12px;color:var(--td)">💰 '+fmt(G.earned)+' verdient · 📦 '+(G.dels||0)+' Lieferungen</div>';
   // Level requirements
   if(lvl<LEVELS.length){
     const next=LEVELS[lvl]; // next level (0-indexed: lvl=1 → LEVELS[1] is lvl 2)
     const lu=canLevelUp();
     h+='<div style="margin-top:6px;padding:6px 8px;border-radius:8px;border:1px solid var(--bd);background:rgba(255,255,255,.02)">';
-    h+='<div style="font-size:10px;color:var(--td);margin-bottom:4px">⬆️ <b>Level '+(lvl+1)+' · '+next.em+' '+next.name+'</b></div>';
+    h+='<div style="font-size:12px;color:var(--td);margin-bottom:4px">⬆️ <b>Level '+(lvl+1)+' · '+next.em+' '+next.name+'</b></div>';
     // Requirements with progress bars
     const reqs=[
       {label:'Lieferungen',cur:G.dels||0,need:next.dels,em:'📦'},
@@ -3602,7 +3927,7 @@ function dashHQ(){
       {label:'Kosten',cur:G.money,need:next.cost,em:'🪙',fmt:true},
     ];
     reqs.forEach(rq=>{const pct=Math.min(rq.cur/Math.max(rq.need,1),1);const done=rq.cur>=rq.need;
-      h+='<div style="margin:3px 0"><div style="display:flex;justify-content:space-between;font-size:9px;color:'+(done?'var(--a)':'var(--td)')+'">';
+      h+='<div style="margin:3px 0"><div style="display:flex;justify-content:space-between;font-size:11px;color:'+(done?'var(--a)':'var(--td)')+'">';
       h+='<span>'+rq.em+' '+rq.label+'</span><span>'+(rq.fmt?fmt(rq.cur)+'/'+fmt(rq.need):rq.cur+'/'+rq.need)+(done?' ✅':'')+'</span></div>';
       h+='<div class="pb" style="height:3px;margin-top:1px"><div class="pf" style="width:'+pct*100+'%;background:'+(done?'var(--a)':'var(--go)')+'"></div></div></div>'});
     h+='<div class="sub" style="margin-top:3px">🆕 '+next.desc+'</div>';
@@ -3634,7 +3959,7 @@ function dashHQ(){
   if(openOrds.length>3)alerts.push({em:'📋',text:openOrds.length+' Aufträge warten',act:"openComputer();setCompTab('logistics')"});
   if(!alerts.length)h+='<div class="sub" style="padding:8px;text-align:center;color:var(--a)">✅ Alles läuft rund!</div>';
   alerts.slice(0,5).forEach(a=>{
-    h+='<div style="padding:4px 0;font-size:11px;cursor:pointer;border-bottom:1px solid var(--bd)" onclick="'+a.act+'"><span>'+a.em+' '+a.text+' <span style="color:var(--a)">→</span></span></div>'});
+    h+='<div style="padding:4px 0;font-size:12px;cursor:pointer;border-bottom:1px solid var(--bd)" onclick="'+a.act+'"><span>'+a.em+' '+a.text+' <span style="color:var(--a)">→</span></span></div>'});
   h+='</div>';
 
   // Orders + Vehicles summary
@@ -3655,7 +3980,7 @@ function dashHQ(){
   // Standorte + Vehicles
   h+='<div class="dash-card"><div class="dash-card-title">🏙️ Standorte · '+cities.length+'</div>';
   cities.slice(0,6).forEach(c=>{const bCount=(G.blds[c.id]||[]).length;const vCount=G.vehs.filter(v=>v.loc===c.id&&v.st==='idle').length;
-    h+='<div style="display:flex;justify-content:space-between;padding:2px 0;font-size:11px;border-bottom:1px solid var(--bd);cursor:pointer" onclick="selectLocation(\''+c.id+'\');toggleView()"><span>📍 '+c.name+'</span><span class="sub">🏭'+bCount+' 🚛'+vCount+'</span></div>'});
+    h+='<div style="display:flex;justify-content:space-between;padding:2px 0;font-size:12px;border-bottom:1px solid var(--bd);cursor:pointer" onclick="selectLocation(\''+c.id+'\');toggleView()"><span>📍 '+c.name+'</span><span class="sub">🏭'+bCount+' 🚛'+vCount+'</span></div>'});
   if(cities.length>6)h+='<div class="sub" style="margin-top:3px">+'+(cities.length-6)+' weitere</div>';
   h+='<button class="btn sm" style="margin-top:4px" onclick="toggleView()">🗺️ Karte öffnen</button>';
   h+='<div class="dash-card-title" style="margin-top:8px">🚛 Fahrzeuge · '+G.vehs.length+'</div>';
@@ -3721,7 +4046,7 @@ function dashMarket(){
   h+='<div class="dash-card"><div class="dash-card-title">💰 Höchste Preise</div>';
   const priceList=Object.keys(BASE_PRICES).map(g=>{const maxP=Math.max(...regs.map(r=>marketPrice(g,r)));return{g,p:maxP}}).sort((a,b)=>b.p-a.p);
   priceList.slice(0,10).forEach(({g,p})=>{const gd=GOODS[g];const bp=BASE_PRICES[g]||100;const diff=Math.round((p/bp-1)*100);
-    h+='<div style="display:flex;justify-content:space-between;padding:2px 0;font-size:11px;border-bottom:1px solid var(--bd)"><span>'+(gd?.em||'')+' '+(gd?.name||g)+'</span><span style="font-family:var(--mono)"><span style="color:var(--a)">'+fmt(p)+'</span> <span style="color:'+(diff>10?'var(--a)':'var(--td)')+';font-size:9px">'+(diff>0?'+':'')+diff+'%</span></span></div>'});
+    h+='<div style="display:flex;justify-content:space-between;padding:2px 0;font-size:12px;border-bottom:1px solid var(--bd)"><span>'+(gd?.em||'')+' '+(gd?.name||g)+'</span><span style="font-family:var(--mono)"><span style="color:var(--a)">'+fmt(p)+'</span> <span style="color:'+(diff>10?'var(--a)':'var(--td)')+';font-size:9px">'+(diff>0?'+':'')+diff+'%</span></span></div>'});
   h+='<button class="btn sm" style="margin-top:4px" onclick="openComputer();setCompTab(\'market\')">→ Markt</button></div>';
   // Regional
   h+='<div class="dash-card" style="grid-column:span 2"><div class="dash-card-title">🌍 Regionale Preise</div>';
@@ -3759,7 +4084,7 @@ function dashProduction(){
       if(stock<need)bottlenecks.push({city:b.cityName,building:d.name,good:g,have:stock,need})})});
   if(!bottlenecks.length)h+='<div class="sub" style="padding:6px;text-align:center;color:var(--a)">✅ Keine Engpässe</div>';
   bottlenecks.slice(0,6).forEach(bn=>{
-    h+='<div style="padding:3px 0;font-size:11px;border-bottom:1px solid var(--bd)"><span style="color:var(--r)">'+(GOODS[bn.good]?.em||'')+' '+(GOODS[bn.good]?.name||'')+' fehlt</span> <span class="sub">'+bn.building+' in '+bn.city+' ('+bn.have+'/'+bn.need+')</span></div>'});
+    h+='<div style="padding:3px 0;font-size:12px;border-bottom:1px solid var(--bd)"><span style="color:var(--r)">'+(GOODS[bn.good]?.em||'')+' '+(GOODS[bn.good]?.name||'')+' fehlt</span> <span class="sub">'+bn.building+' in '+bn.city+' ('+bn.have+'/'+bn.need+')</span></div>'});
   h+='</div>';
   // Per city
   h+='<div class="dash-card" style="grid-column:span 2"><div class="dash-card-title">📍 Standorte</div>';
@@ -3797,14 +4122,14 @@ function dashLogistics(){
     const f=Cx(v.rt?.from);const t=Cx(v.rt?.to)||(v.rt?.toLat?{name:v.rt.toName||'?'}:null);if(!f||!t)return;
     const tn=v.rt?.tripTime||tripT(f,t,vt.spd);const pct=Math.min(v.prog/(tn||1),1);
     const isM=v.cargo?.market;const isA=v.cargo?.allianceDelivery;
-    h+='<div style="padding:3px 0;font-size:11px;border-bottom:1px solid var(--bd)"><div class="rw"><span>'+vt.em+' '+vehName(v)+(isM?' 💰':isA?' 🤝':'')+'</span><span style="color:var(--a)">'+Math.floor(pct*100)+'%</span></div>';
+    h+='<div style="padding:3px 0;font-size:12px;border-bottom:1px solid var(--bd)"><div class="rw"><span>'+vt.em+' '+vehName(v)+(isM?' 💰':isA?' 🤝':'')+'</span><span style="color:var(--a)">'+Math.floor(pct*100)+'%</span></div>';
     h+='<div class="pb" style="height:2px"><div class="pf" style="width:'+pct*100+'%;background:'+(isA?'#a855f7':isM?'var(--go)':'var(--a)')+'"></div></div></div>'});
   h+='<button class="btn sm" style="margin-top:4px" onclick="openComputer();setCompTab(\'logistics\');G.logSub=\'vehicles\'">→ Alle Fahrzeuge</button></div>';
   // By city
   h+='<div class="dash-card" style="grid-column:span 2"><div class="dash-card-title">📍 Fahrzeuge pro Standort</div>';
   const byCty={};G.vehs.forEach(v=>{const loc=v.st==='idle'?v.loc:(v.depot||v.loc);if(!byCty[loc])byCty[loc]={idle:0,moving:0};if(v.st==='idle')byCty[loc].idle++;else byCty[loc].moving++});
   Object.entries(byCty).sort((a,b)=>(b[1].idle+b[1].moving)-(a[1].idle+a[1].moving)).forEach(([loc,d])=>{const c=C(loc);if(!c)return;
-    h+='<div style="display:flex;justify-content:space-between;padding:3px 0;font-size:11px;border-bottom:1px solid var(--bd)"><span>📍 '+c.name+'</span><span><span style="color:var(--a)">🟢'+d.idle+'</span> <span style="color:var(--go)">🔶'+d.moving+'</span></span></div>'});
+    h+='<div style="display:flex;justify-content:space-between;padding:3px 0;font-size:12px;border-bottom:1px solid var(--bd)"><span>📍 '+c.name+'</span><span><span style="color:var(--a)">🟢'+d.idle+'</span> <span style="color:var(--go)">🔶'+d.moving+'</span></span></div>'});
   h+='</div></div>';return h;
 }
 
@@ -3821,7 +4146,7 @@ function dashFinance(){
   const sorted=Object.entries(gS).sort((a,b)=>b[1]-a[1]);
   if(!sorted.length)h+='<div class="sub" style="padding:6px;text-align:center">Noch keine Umsätze</div>';
   sorted.slice(0,8).forEach(([g,rev])=>{const gd=GOODS[g];const pct=Math.round(rev/(G.earned||1)*100);
-    h+='<div style="padding:2px 0;font-size:11px;border-bottom:1px solid var(--bd)"><div class="rw"><span>'+(gd?.em||'')+' '+(gd?.name||g)+'</span><span style="font-family:var(--mono);color:var(--a)">'+fmt(rev)+' ('+pct+'%)</span></div></div>'});
+    h+='<div style="padding:2px 0;font-size:12px;border-bottom:1px solid var(--bd)"><div class="rw"><span>'+(gd?.em||'')+' '+(gd?.name||g)+'</span><span style="font-family:var(--mono);color:var(--a)">'+fmt(rev)+' ('+pct+'%)</span></div></div>'});
   h+='</div>';
   // Cost analysis
   h+='<div class="dash-card" style="grid-column:span 2"><div class="dash-card-title">📉 Kostenanalyse</div>';
@@ -3857,7 +4182,7 @@ function dashInventory(){
   const sorted=Object.entries(allStock).sort((a,b)=>b[1]-a[1]);
   if(!sorted.length)h+='<div class="sub" style="padding:6px;text-align:center">Leer</div>';
   sorted.forEach(([g,amt])=>{const gd=GOODS[g];const bp=BASE_PRICES[g]||gd?.bp||100;
-    h+='<div style="display:flex;justify-content:space-between;padding:2px 0;font-size:11px;border-bottom:1px solid var(--bd)"><span>'+(gd?.em||'')+' '+(gd?.name||g)+'</span><span><b>'+amt+'×</b> <span style="color:var(--a)">~'+fmt(amt*bp)+'</span></span></div>'});
+    h+='<div style="display:flex;justify-content:space-between;padding:2px 0;font-size:12px;border-bottom:1px solid var(--bd)"><span>'+(gd?.em||'')+' '+(gd?.name||g)+'</span><span><b>'+amt+'×</b> <span style="color:var(--a)">~'+fmt(amt*bp)+'</span></span></div>'});
   h+='</div>';
   // Per city capacity
   h+='<div class="dash-card" style="grid-column:span 2"><div class="dash-card-title">📍 Lager pro Standort</div>';
@@ -3889,7 +4214,7 @@ function dashMap(){
     h+='<div class="crd" style="padding:5px 8px;cursor:pointer" onclick="selectLocation(\''+c.id+'\');toggleView()">';
     h+='<div class="rw"><span style="font-weight:600">📍 '+c.name+'</span>';
     h+='<span style="font-size:10px">'+(hasRail?'🚉':'')+(hasPort?'⚓':'')+(hasAir?'✈️':'')+'</span></div>';
-    h+='<div style="display:flex;gap:8px;font-size:10px;color:var(--td)">';
+    h+='<div style="display:flex;gap:8px;font-size:12px;color:var(--td)">';
     h+='<span>🏭'+bCount+'</span><span>🚛'+vIdle+'<span style="color:var(--go)">/'+vMoving+'</span></span>';
     h+='<span>📦'+items+'/'+cap+'</span></div></div>'});
   h+='<button class="btn sm" style="margin-top:4px" onclick="toggleView()">🗺️ Vollbild-Karte</button></div>';
@@ -3899,7 +4224,7 @@ function dashMap(){
   const infraCount={depot:0,bahnhof:0,hafen:0,flughafen:0,logistikzentrum:0,tankstelle:0};
   cities.forEach(c=>{(G.infra[c.id]||[]).forEach(i=>{if(infraCount[i.type]!==undefined)infraCount[i.type]++})});
   Object.entries(infraCount).forEach(([k,n])=>{const d=typeof INFRA!=='undefined'?INFRA[k]:null;
-    if(d)h+='<div style="display:flex;justify-content:space-between;padding:2px 0;font-size:11px;border-bottom:1px solid var(--bd)"><span>'+d.em+' '+d.name+'</span><span style="font-family:var(--mono);color:var(--a)">'+n+'×</span></div>'});
+    if(d)h+='<div style="display:flex;justify-content:space-between;padding:2px 0;font-size:12px;border-bottom:1px solid var(--bd)"><span>'+d.em+' '+d.name+'</span><span style="font-family:var(--mono);color:var(--a)">'+n+'×</span></div>'});
   h+='</div>';
 
   // Active routes map
@@ -3912,7 +4237,7 @@ function dashMap(){
     routes[key].count++;routes[key].types.add(VT[v.type]?.em||'🚛')});
   if(!Object.keys(routes).length)h+='<div class="sub" style="padding:6px;text-align:center">Keine aktiven Routen</div>';
   Object.entries(routes).sort((a,b)=>b[1].count-a[1].count).forEach(([route,d])=>{
-    h+='<div style="display:flex;justify-content:space-between;padding:3px 0;font-size:11px;border-bottom:1px solid var(--bd)"><span>'+[...d.types].join('')+' '+route+'</span><span class="tg">'+d.count+'×</span></div>'});
+    h+='<div style="display:flex;justify-content:space-between;padding:3px 0;font-size:12px;border-bottom:1px solid var(--bd)"><span>'+[...d.types].join('')+' '+route+'</span><span class="tg">'+d.count+'×</span></div>'});
   h+='</div></div>';return h;
 }
 
@@ -3939,7 +4264,7 @@ function dashAnalytics(){
   const topRoutes=Object.entries(routeStats).sort((a,b)=>b[1].rev-a[1].rev).slice(0,8);
   if(!topRoutes.length)h+='<div class="sub" style="padding:6px;text-align:center">Noch keine Daten</div>';
   topRoutes.forEach(([route,s],i)=>{
-    h+='<div style="display:flex;justify-content:space-between;padding:3px 0;font-size:11px;border-bottom:1px solid var(--bd)"><span>'+(i+1)+'. '+route+'</span><span style="font-family:var(--mono)"><span style="color:var(--a)">'+fmt(s.rev)+'</span> <span style="color:var(--td)">'+s.cnt+'×</span></span></div>'});
+    h+='<div style="display:flex;justify-content:space-between;padding:3px 0;font-size:12px;border-bottom:1px solid var(--bd)"><span>'+(i+1)+'. '+route+'</span><span style="font-family:var(--mono)"><span style="color:var(--a)">'+fmt(s.rev)+'</span> <span style="color:var(--td)">'+s.cnt+'×</span></span></div>'});
   h+='</div>';
 
   // Vehicle efficiency
@@ -3972,7 +4297,7 @@ function dashAnalytics(){
   bottlenecks.sort((a,b)=>b.severity-a.severity);
   if(!bottlenecks.length)h+='<div style="padding:8px;text-align:center;color:var(--a)">✅ Keine Engpässe erkannt</div>';
   bottlenecks.slice(0,8).forEach(bn=>{const clr=bn.severity>=3?'var(--r)':bn.severity>=2?'var(--go)':'var(--td)';
-    h+='<div style="padding:3px 0;font-size:11px;border-bottom:1px solid var(--bd)"><span style="color:'+clr+'">'+bn.em+' '+bn.text+'</span></div>'});
+    h+='<div style="padding:3px 0;font-size:12px;border-bottom:1px solid var(--bd)"><span style="color:'+clr+'">'+bn.em+' '+bn.text+'</span></div>'});
   h+='</div></div>';return h;
 }
 
@@ -4023,22 +4348,22 @@ function dashAlerts(){
   h+='<div class="dash-card" style="grid-column:span 2"><div class="dash-card-title" style="color:var(--r)">🔴 Probleme · '+problems.length+'</div>';
   if(!problems.length)h+='<div style="padding:8px;text-align:center;color:var(--a)">✅ Keine Probleme!</div>';
   problems.sort((a,b)=>b.sev-a.sev).forEach(p=>{const clr=p.sev>=3?'var(--r)':p.sev>=2?'var(--go)':'var(--td)';
-    h+='<div style="padding:4px 0;font-size:11px;border-bottom:1px solid var(--bd);cursor:pointer" onclick="'+p.act+'"><span style="color:'+clr+'">'+p.em+' '+p.text+' <span style="color:var(--a)">→</span></span></div>'});
+    h+='<div style="padding:4px 0;font-size:12px;border-bottom:1px solid var(--bd);cursor:pointer" onclick="'+p.act+'"><span style="color:'+clr+'">'+p.em+' '+p.text+' <span style="color:var(--a)">→</span></span></div>'});
   h+='</div>';
 
   h+='<div class="dash-card"><div class="dash-card-title" style="color:var(--go)">💡 Chancen · '+opportunities.length+'</div>';
   if(!opportunities.length)h+='<div class="sub" style="padding:6px;text-align:center">Keine besonderen Chancen</div>';
   opportunities.forEach(o=>{
-    h+='<div style="padding:4px 0;font-size:11px;border-bottom:1px solid var(--bd);cursor:pointer" onclick="'+o.act+'"><span style="color:var(--go)">'+o.em+' '+o.text+' <span style="color:var(--a)">→</span></span></div>'});
+    h+='<div style="padding:4px 0;font-size:12px;border-bottom:1px solid var(--bd);cursor:pointer" onclick="'+o.act+'"><span style="color:var(--go)">'+o.em+' '+o.text+' <span style="color:var(--a)">→</span></span></div>'});
   h+='</div>';
 
   h+='<div class="dash-card"><div class="dash-card-title">ℹ️ Status</div>';
-  info.forEach(i=>{h+='<div style="padding:3px 0;font-size:11px;border-bottom:1px solid var(--bd)">'+i.em+' '+i.text+'</div>'});
+  info.forEach(i=>{h+='<div style="padding:3px 0;font-size:12px;border-bottom:1px solid var(--bd)">'+i.em+' '+i.text+'</div>'});
   // Recent events log
   const log=document.getElementById('log');
   if(log){const entries=log.textContent.split('\n').filter(x=>x.trim()).slice(0,5);
     if(entries.length){h+='<div class="dash-card-title" style="margin-top:6px">📝 Letzte Aktionen</div>';
-      entries.forEach(e=>{h+='<div style="padding:1px 0;font-size:10px;color:var(--td)">'+e+'</div>'})}}
+      entries.forEach(e=>{h+='<div style="padding:1px 0;font-size:12px;color:var(--td)">'+e+'</div>'})}}
   h+='</div></div>';return h;
 }
 // ═══ COMPUTER ═══
@@ -4067,9 +4392,12 @@ function uhud(){if(!G)return;const m=fmt(G.money),cv=fmt(companyValue());
   document.getElementById('hVeh').textContent=G.vehs.length;document.getElementById('hCit').textContent=cities.length;document.getElementById('hDel').textContent=G.dels}catch(e){}
   try{document.getElementById('cMoney').textContent=m;document.getElementById('cVeh').textContent=G.vehs.length;
   document.getElementById('cCities').textContent=cities.length;document.getElementById('cDel').textContent=G.dels}catch(e){}
+  try{document.getElementById('compMoney').textContent='💰 '+m}catch(e){}
 }
 
 let _dashDirty=true;
+let _compDirty=false;
+function markCompDirty(){_compDirty=true}
 function ren(){
   if(!G)return;
   if(computerOpen){try{renComp()}catch(e){console.error('renComp error',e)};return}
@@ -4090,6 +4418,37 @@ function updateSelInfo(oid,needed){
   el.innerHTML='<span style="font-family:var(--mono);font-size:11px;font-weight:700;color:'+color+'">'+count+' Fahrzeug'+(count>1?'e':'')+' · Kapazität: '+totalCap+'/'+needed+(enough?' ✅':' ⚠️ reicht nicht')+'</span>';
 }
 
+
+// ═══ LIVE UPDATE: Update progress bars & timers without full rebuild ═══
+function updateLiveElements(){
+  // Update progress bars for moving vehicles
+  document.querySelectorAll('[data-live-vid]').forEach(el=>{
+    const vid=el.dataset.liveVid;const v=G.vehs.find(x=>x.id===vid);if(!v||v.st!=='moving'||!v.rt)return;
+    const vt=VT[v.type];if(!vt)return;
+    const f=C(v.rt.from)||Cx(v.rt.from);const t=C(v.rt.to)||Cx(v.rt.to)||(v.rt.toLat?{lat:v.rt.toLat,lng:v.rt.toLng}:null);
+    if(!f||!t)return;
+    const tn=v.rt.tripTime||tripT(f,t,vt.spd);const pct=Math.min(v.prog/(tn||1),1);
+    const bar=el.querySelector('.pf');if(bar)bar.style.width=pct*100+'%';
+    const pctEl=el.querySelector('[data-live-pct]');if(pctEl)pctEl.textContent=Math.floor(pct*100)+'%';
+    const etaEl=el.querySelector('[data-live-eta]');if(etaEl)etaEl.textContent=ftime(Math.max(0,tn-v.prog));
+  });
+  // Update order timers
+  document.querySelectorAll('[data-live-oid]').forEach(el=>{
+    const oid=el.dataset.liveOid;const o=G.orders.find(x=>x.id===oid);if(!o)return;
+    const rem=Math.max(0,o.tl-(G.tick-o.born));
+    const timerEl=el.querySelector('[data-live-timer]');
+    if(timerEl){timerEl.textContent='⏱ '+ftime(rem);timerEl.style.color=rem<120?'var(--r)':rem<300?'var(--go)':'var(--td)'}
+  });
+  // Update bottom status bar
+  try{
+    const m=fmt(G.money);
+    document.getElementById('cMoney').textContent=m;
+    document.getElementById('cVeh').textContent=G.vehs.length;
+    document.getElementById('cCities').textContent=cities.length;
+    document.getElementById('cDel').textContent=G.dels;
+    const cm=document.getElementById('compMoney');if(cm)cm.textContent='💰 '+m;
+  }catch(e){}
+}
 // ═══ TAB TUTORIALS & TIPS ═══
 const TAB_TIPS={
   missions:{title:'🎯 Missionen',tutorial:'Missionen geben dir Ziele und Belohnungen. Tutorial-Missionen führen dich durch die Grundlagen. Tägliche und wöchentliche Aufgaben erneuern sich automatisch und zeigen Fortschrittsbalken.',
@@ -4139,6 +4498,95 @@ function tabHead(tab,title,sub){
   return'<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px"><div style="font-family:var(--mono);font-size:20px;font-weight:700;color:var(--a)">'+title+'</div><button class="tip-btn" onclick="showTabTip(\''+tab+'\')">💡 Hilfe</button></div>'+(sub?'<div class="sub" style="margin-bottom:8px">'+sub+'</div>':'');
 }
 
+
+// ═══ INTERACTIVE TUTORIAL: Explain → Act → Verify → Next ═══
+const TUT_STEPS=[
+  {title:'Willkommen bei LogistiX!',text:'Du bist CEO eines Logistikunternehmens. Baue Fabriken, kaufe Fahrzeuge und liefere Waren!<br><br>Dieses Tutorial führt dich durch die ersten Schritte. Nach jeder Erklärung musst du die Aufgabe selbst erledigen.',btn:'Los geht\'s!',instant:true},
+  {title:'① Kaufe ein Fahrzeug',text:'Öffne das <b>💻 Terminal</b> (oben rechts), dann den <b>🛒 Händler</b> Tab.<br><br>Kaufe einen <b>Kleintransporter</b> — dein erstes Fahrzeug!<br><br><span style="color:var(--go)">🎯 Aufgabe: 1 Fahrzeug kaufen</span>',
+    btn:'Terminal öffnen',action:"openComputer();setCompTab('dealer')",
+    check:()=>G.vehs.length>=1,reward:'🎉 Erstes Fahrzeug! +5.000€ Bonus'},
+  {title:'② Baue ein Gebäude',text:'Wechsle zu <b>🏭 Gebäude → Bauen</b>.<br><br>Baue einen <b>Bauernhof</b> oder eine <b>Forstwirtschaft</b>. Gebäude produzieren automatisch Waren alle ~30 Sekunden.<br><br><span style="color:var(--go)">🎯 Aufgabe: 1 Gebäude bauen</span>',
+    btn:'Zu Gebäude',action:"openComputer();setCompTab('buildings');bldSub='build'",
+    check:()=>Object.values(G.blds).flat().length>=1,reward:'🏭 Erstes Gebäude! +6.000€ Bonus'},
+  {title:'③ Kaufe eine zweite Stadt',text:'Du brauchst mindestens 2 Städte, damit Transportaufträge erscheinen!<br><br>Nutze die <b>🔍 Suchleiste</b> auf der Karte oder im Terminal (oben rechts) und suche eine nahegelegene Stadt. Klicke darauf und kaufe sie frei!<br><br><span style="color:var(--go)">🎯 Aufgabe: 2 Standorte besitzen</span>',
+    btn:'Zur Karte',action:'closeComputer()',
+    check:()=>cities.length>=2,reward:'🏙️ Zweiter Standort! +8.000€ Bonus'},
+  {title:'④ Warte auf Produktion',text:'Deine Gebäude produzieren jetzt automatisch!<br><br>Schau im <b>📦 Lager</b> Tab nach, ob schon Waren angekommen sind. Du brauchst mindestens 2 Einheiten für einen Auftrag.<br><br><span style="color:var(--go)">🎯 Aufgabe: Mindestens 2 Waren im Lager</span>',
+    btn:'Zum Lager',action:"openComputer();setCompTab('inventory')",
+    check:()=>{const s=G.stor;return Object.values(s).some(c=>Object.values(c).some(a=>a>=2))},reward:'📦 Erste Waren produziert!'},
+  {title:'⑤ Nimm einen Auftrag an',text:'Unter <b>📋 Logistik → Aufträge</b> erscheinen jetzt Transportaufträge.<br><br>Klicke <b>Annehmen</b> bei einem Auftrag. Grüne Prozente = über Marktpreis!<br><br><span style="color:var(--go)">🎯 Aufgabe: 1 Auftrag annehmen</span>',
+    btn:'Zu Aufträgen',action:"openComputer();setCompTab('logistics');G.logSub='orders'",
+    check:()=>G.orders.some(o=>o.acc)||G.dels>=1,reward:'📋 Erster Auftrag! +4.000€ Bonus'},
+  {title:'⑥ Liefere den Auftrag aus',text:'Wechsle zu <b>Logistik → Routen</b> und weise einem Auftrag ein Fahrzeug zu.<br><br>Du kannst auch direkt bei einem Auftrag <b>⚡ Auto</b> nutzen — das zählt ebenfalls!<br><br><span style="color:var(--go)">🎯 Aufgabe: Fahrzeug losschicken oder Lieferung abschließen</span>',
+    btn:'Zu Routen',action:"openComputer();setCompTab('logistics');G.logSub='routes'",
+    check:()=>G.dels>=1||G.vehs.some(v=>v.st==='moving'&&v.cargo?.oid),reward:'🎉 Erste Lieferung gestartet! +12.000€ Bonus'},
+  {title:'Tutorial abgeschlossen! 🎉',text:'Du kennst die Grundlagen! Hier sind deine nächsten Ziele:<br><br>• Baue <b>Verarbeitungsfabriken</b> (Mühle, Bäckerei) für wertvollere Waren<br>• Erweitere dein <b>Lager</b> und <b>Depot</b> unter Infrastruktur<br>• Richte <b>Daueraufträge</b> für automatischen Transport ein<br>• Schau ins <b>📖 Wiki</b> (☰ Menü) für alle Details<br><br>Schau dir auch deine <b>Missionen</b> an — dort gibt es weitere Belohnungen!',
+    btn:'🚀 Starten!',action:"openComputer();setCompTab('missions')",instant:true},
+];
+
+let _tutStep=0;let _tutOpen=true;
+function showTutorial(step){
+  if(typeof step!=='undefined'){_tutStep=step;_tutOpen=true}
+  let existing=document.getElementById('tutWidget');if(existing)existing.remove();
+  if(!G||_tutStep>=TUT_STEPS.length){if(G){G.tutDone=true;try{save()}catch(e){}}return}
+  const s=TUT_STEPS[_tutStep];
+  if(s.check&&s.check()){_tutStep++;if(G)G.tutStep=_tutStep;showTutorial();return}
+
+  const w=document.createElement('div');w.id='tutWidget';
+  if(_tutOpen){
+    // Expanded view
+    w.style.cssText='position:fixed;bottom:16px;right:16px;z-index:9998;width:380px;max-height:80vh;overflow-y:auto;border-radius:14px;border:1px solid var(--a);background:var(--bg);box-shadow:0 12px 40px rgba(0,0,0,.6)';
+    let h='<div style="padding:16px 18px">';
+    // Header
+    h+='<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">';
+    h+='<span style="font-family:var(--mono);font-size:11px;color:var(--td)">🎓 Tutorial '+(_tutStep+1)+'/'+TUT_STEPS.length+'</span>';
+    h+='<div style="display:flex;gap:4px">';
+    h+='<button style="background:none;border:1px solid var(--bd);border-radius:6px;color:var(--td);cursor:pointer;font-size:11px;padding:2px 8px" onclick="_tutOpen=false;showTutorial()">▼ Minimieren</button>';
+    h+='<button style="background:none;border:1px solid var(--bd);border-radius:6px;color:var(--td);cursor:pointer;font-size:11px;padding:2px 8px" onclick="document.getElementById(\'tutWidget\').remove();G.tutDone=true;save()">✕</button>';
+    h+='</div></div>';
+    // Title
+    h+='<div style="font-family:var(--mono);font-size:16px;font-weight:700;color:var(--a);margin-bottom:8px">'+s.title+'</div>';
+    // Text
+    h+='<div style="font-size:13px;line-height:1.6;color:var(--t);margin-bottom:12px">'+s.text+'</div>';
+    // Progress dots
+    h+='<div style="display:flex;gap:5px;justify-content:center;margin-bottom:10px">';
+    for(let i=0;i<TUT_STEPS.length;i++){h+='<div style="width:8px;height:8px;border-radius:50%;background:'+(i===_tutStep?'var(--a)':i<_tutStep?'rgba(61,214,140,.4)':'var(--bd)')+'"></div>'}
+    h+='</div>';
+    // Button
+    if(s.instant){
+      h+='<button class="btn full" style="background:var(--a);color:var(--bg);border-color:var(--a);font-size:13px;padding:8px" onclick="'+(s.action||'')+';_tutStep++;if(G)G.tutStep=_tutStep;showTutorial()">'+s.btn+'</button>';
+    } else {
+      h+='<button class="btn full" style="background:var(--a);color:var(--bg);border-color:var(--a);font-size:13px;padding:8px" onclick="'+(s.action||'')+'">'+s.btn+'</button>';
+      h+='<div style="text-align:center;margin-top:6px;font-size:11px;color:var(--td)">Erledige die Aufgabe — nächster Schritt erscheint automatisch!</div>';
+    }
+    h+='</div>';
+    w.innerHTML=h;
+  } else {
+    // Minimized bar
+    w.style.cssText='position:fixed;bottom:16px;right:16px;z-index:9998;border-radius:10px;border:1px solid var(--a);background:var(--bg);box-shadow:0 8px 24px rgba(0,0,0,.5);cursor:pointer;padding:8px 14px;display:flex;align-items:center;gap:8px';
+    w.onclick=()=>{_tutOpen=true;showTutorial()};
+    w.innerHTML='<span style="font-size:14px">🎓</span><span style="font-family:var(--mono);font-size:12px;color:var(--a)">'+s.title+'</span><span style="font-size:10px;color:var(--td)">▲</span>';
+  }
+  document.body.appendChild(w);
+}
+
+function tutorialTick(){
+  if(!G||G.tutDone||_tutStep>=TUT_STEPS.length)return;
+  const s=TUT_STEPS[_tutStep];
+  if(!s||!s.check||s.instant)return;
+  if(s.check()){
+    if(s.reward){addLog('🎓 '+s.reward);if(typeof toast==='function')toast(s.reward,'var(--a)')}
+    _tutStep++;if(G)G.tutStep=_tutStep;
+    _tutOpen=true;
+    setTimeout(()=>showTutorial(),800);
+  }
+}
+
+function checkTutorial(){
+  if(!G)return;
+  if(G.tutStep)_tutStep=G.tutStep;
+  if(!G.tutDone&&_tutStep<TUT_STEPS.length)setTimeout(()=>showTutorial(),600);
+}
 function setCompTab(t){compTab=t;renComp()}
 
 function renComp(){
@@ -4230,6 +4678,88 @@ function renComp(){
 }
 
 // ═══ MISSIONS ═══
+
+// Terminal city search
+let _termNomTimer=null;
+function termCitySearch(q){
+  const el=document.getElementById('termSearchRes');if(!el)return;
+  if(!q||q.length<1){el.style.display='none';return}
+  el.style.display='block';
+  const ql=q.toLowerCase();
+  // Local: owned cities + DB
+  const ownedMatches=cities.filter(c=>c.name.toLowerCase().includes(ql));
+  const dbMatches=searchCities(q).filter(c=>!ownedMatches.find(x=>x.name===c.name));
+  renderTermResults(ownedMatches,dbMatches,[]);
+  // Remote: Nominatim after 400ms
+  clearTimeout(_termNomTimer);
+  if(q.length>=2)_termNomTimer=setTimeout(()=>termNomSearch(q),400);
+}
+async function termNomSearch(q){
+  const el=document.getElementById('termSearchRes');if(!el)return;
+  try{
+    const cached=typeof getCachedSearch==='function'?getCachedSearch(q):null;
+    let results;
+    if(cached){results=cached}
+    else{
+      const url='https://nominatim.openstreetmap.org/search?format=json&limit=8&addressdetails=1&accept-language=de&q='+encodeURIComponent(q);
+      const r=await fetch(url);if(!r.ok)return;const data=await r.json();if(!data||!data.length)return;
+      results=data.filter(d=>{const n=(d.display_name||'').split(',')[0].toLowerCase();
+        if(d.class==='boundary'&&d.type==='administrative'&&!d.address?.village&&!d.address?.town&&!d.address?.hamlet&&!d.address?.city)return false;
+        if(/^landkreis |^kreis |^regierungsbezirk /i.test(n))return false;return true;
+      }).map(d=>{
+        const name=d.address?.village||d.address?.hamlet||d.address?.town||d.address?.city||d.address?.municipality||d.name||d.display_name.split(',')[0];
+        const co=(d.address?.country_code||'').toUpperCase();
+        let pop=0;if(d.population)pop=parseInt(d.population);
+        else{const seed=Math.abs(Math.sin(parseFloat(d.lat)*1234.5+parseFloat(d.lon)*6789.1));const s=seed-Math.floor(seed);
+          if(d.address?.hamlet||d.type==='hamlet')pop=Math.floor(50+s*500);
+          else if(d.address?.village||d.type==='village')pop=Math.floor(300+s*3500);
+          else if(d.address?.town||d.type==='town')pop=Math.floor(5000+s*35000);
+          else pop=Math.floor(150+s*2000);}
+        return{name,co,pop,lat:parseFloat(d.lat),lng:parseFloat(d.lon),harbor:0,airport:0,rail:pop>50000?1:0,_nom:true};
+      });
+      if(typeof setCachedSearch==='function')setCachedSearch(q,results);
+    }
+    const ql2=q.toLowerCase();
+    const ownedMatches=cities.filter(c=>c.name.toLowerCase().includes(ql2));
+    const dbMatches=searchCities(q).filter(c=>!ownedMatches.find(x=>x.name===c.name));
+    renderTermResults(ownedMatches,dbMatches,results);
+  }catch(e){}
+}
+function renderTermResults(owned,db,remote){
+  const el=document.getElementById('termSearchRes');if(!el)return;
+  // Robust dedup: by name (lowercase) AND by coordinates (within 2km)
+  const seen=new Set();
+  owned.forEach(c=>{seen.add(c.name.toLowerCase())});
+  function isDup(c){
+    const nl=c.name.toLowerCase();
+    if(seen.has(nl))return true;
+    // Check coordinate proximity to owned cities
+    for(const oc of cities){if(Math.abs(oc.lat-c.lat)<.02&&Math.abs(oc.lng-c.lng)<.02)return true}
+    return false;
+  }
+  const dbClean=db.filter(c=>{if(isDup(c))return false;seen.add(c.name.toLowerCase());return true});
+  const remClean=(remote||[]).filter(c=>{if(isDup(c))return false;seen.add(c.name.toLowerCase());return true});
+  window._termResults=[...dbClean,...remClean];
+  let h='';
+  owned.slice(0,4).forEach(c=>{
+    h+='<div style="padding:6px 10px;cursor:pointer;border-bottom:1px solid var(--bd);font-size:13px;background:rgba(61,214,140,.03)" onclick="selectLocation(\''+c.id+'\');document.getElementById(\'termSearch\').value=\'\';document.getElementById(\'termSearchRes\').style.display=\'none\';renComp()">';
+    h+='<div class="rw"><span>'+cSzIcon(c.pop)+' '+c.name+' <span style="color:var(--td)">'+(c.co||'')+'</span></span>';
+    h+='<span style="color:var(--a)">📍 Besitz</span></div></div>'});
+  window._termResults.slice(0,8-owned.length).forEach((c,i)=>{const isNom=c._nom;
+    const cost=typeof unlockCost==='function'?unlockCost(c.lat,c.lng,c.pop):Math.round((c.pop||500)/2);
+    h+='<div style="padding:6px 10px;cursor:pointer;border-bottom:1px solid var(--bd);font-size:13px" onclick="termUnlock('+i+')">';
+    h+='<div class="rw"><span>'+cSzIcon(c.pop||500)+' '+c.name+(isNom?' <span style="font-size:9px;color:var(--a2)">🌐</span>':'')+' <span style="color:var(--td)">'+(c.co||'')+'</span></span>';
+    h+='<span style="color:var(--go)">🔓 '+fmt(cost)+'</span></div></div>'});
+  if(!h)h='<div style="padding:8px;font-size:12px;color:var(--td);text-align:center">'+(remote?'Keine Stadt gefunden':'Suche läuft...')+'</div>';
+  el.innerHTML=h;
+}
+function termUnlock(idx){
+  const c=window._termResults?.[idx];if(!c)return;
+  const cost=typeof unlockCost==='function'?unlockCost(c.lat,c.lng,c.pop):Math.round((c.pop||500)/2);
+  document.getElementById('termSearch').value='';
+  document.getElementById('termSearchRes').style.display='none';
+  showUnlockPopup(c,cost,idx);
+}
 function compMissions(el){let h=tabHead('missions','<i class="ri-flag-line"></i> Missionen','Erfülle Aufgaben für Belohnungen');
   const tutDone=TUTORIAL.filter(q=>G.quests.tutorial[q.id]==='claimed').length;
   if(!G.quests.levelMissions)G.quests.levelMissions={};
@@ -4507,13 +5037,19 @@ function compFleet(el){
   if(here.length){h+='<div class="sec-label">🟢 Vor Ort · '+here.length+'</div>';
     here.forEach(v=>{const vt=VT[v.type];const km=v.km||0;const needsM=v.needsMaint;const cond=vehCondition(v);
       const condClr=cond>60?'var(--a)':cond>30?'var(--go)':'var(--r)';
+      // Check if there's a matching order from this city
+      const matchingOrds=G.orders.filter(o=>o.acc&&o.from===sc.id&&(o.amt-(o.shipped||0))>0&&!G.vehs.find(x=>x.cargo?.oid===o.id&&x.st==='moving'));
       h+='<div class="crd" style="padding:6px 8px;'+(needsM?'border-color:rgba(248,113,113,.4);background:rgba(248,113,113,.04)':'')+'">';
       h+='<div class="rw"><span>'+vt.em+' <b>'+vehName(v)+'</b> <span class="sub">'+vt.name+'</span></span>';
-      h+='<span style="font-family:var(--mono);font-size:10px"><span style="color:'+condClr+'">'+cond+'%</span> · Kap: '+vehCap(v)+' · '+km.toLocaleString('de-DE')+' km</span></div>';
-      // Condition bar
+      h+='<span style="font-family:var(--mono);font-size:12px"><span style="color:'+condClr+'">'+cond+'%</span> · Kap: '+vehCap(v)+' · '+km.toLocaleString('de-DE')+' km</span></div>';
       h+='<div class="pb" style="margin:3px 0;height:4px"><div class="pf" style="width:'+cond+'%;background:'+condClr+'"></div></div>';
-      h+='<div style="display:flex;gap:4px;margin-top:3px">';
+      // Show available orders for this vehicle
+      if(matchingOrds.length){h+='<div style="margin:3px 0;font-size:11px;color:var(--go)">📋 '+matchingOrds.length+' Auftrag'+(matchingOrds.length>1?'e':'')+' verfügbar: ';
+        matchingOrds.slice(0,2).forEach(o=>{const t=Cx(o.to);h+=(GOODS[o.good]?.em||'')+' '+(o.amt-(o.shipped||0))+'× → '+(t?.name||'?')+' <span style="color:var(--a)">'+fmt(o.rew)+'</span> '});
+        h+='</div>';}
+      h+='<div style="display:flex;gap:4px;margin-top:3px;flex-wrap:wrap">';
       h+='<button class="btn sm" onclick="showSendPopup(\''+v.id+'\')">📤 Versenden</button>';
+      if(matchingOrds.length)h+='<button class="btn sm" style="background:rgba(251,191,36,.1);color:var(--go);border-color:rgba(251,191,36,.3)" onclick="autoAssign(\''+matchingOrds[0].id+'\')">⚡ Auftrag zuweisen</button>';
       if(cond<50||needsM)h+='<button class="btn sm" style="background:rgba(248,113,113,.1);color:var(--r);border-color:rgba(248,113,113,.3)" onclick="doMaintenance(\''+v.id+'\')">🔧 Warten ('+fmt(maintCost(v))+')</button>';
       h+='</div></div>'});
   } else h+='<div class="sub" style="padding:6px;text-align:center;opacity:.5">Keine Fahrzeuge vor Ort</div>';
@@ -4524,11 +5060,14 @@ function compFleet(el){
       const tn=tripT(sc,t,vt.spd),pct=Math.min(v.prog/tn,1);
       const cargo=v.cargo?(GOODS[v.cargo.good]?.em||'')+' '+v.cargo.amt+'×':'leer';
       const isOrd=v.cargo?.oid;const ord=isOrd?G.orders.find(x=>x.id===v.cargo.oid):null;
-      h+='<div class="crd fleet-exp" style="padding:5px 8px;cursor:pointer" onclick="this.classList.toggle(\'open\')">';
-      h+='<div class="rw"><span style="font-size:10px">'+vt.em+' → '+t.name+'</span><span class="eta">'+Math.floor(pct*100)+'% · '+ftime(tn-v.prog)+'</span></div>';
-      h+='<div class="pb" style="margin:2px 0"><div class="pf" style="width:'+pct*100+'%"></div></div>';
+      const isMarket=v.cargo?.market;const isAlly=v.cargo?.allianceDelivery;
+      const tripLabel=isMarket?(v.cargo.returning?'🔙 Rückfahrt':'💰 Marktfahrt'):isAlly?(v.cargo.returning?'🔙 Rückfahrt':'🤝 Allianzlieferung'):'';
+      h+='<div class="crd fleet-exp" style="padding:5px 8px;cursor:pointer;'+(isMarket?'border-left:3px solid var(--go)':isAlly?'border-left:3px solid #a855f7':'')+'" onclick="this.classList.toggle(\'open\')">';
+      h+='<div class="rw"><span>'+vt.em+' <b>'+vehName(v)+'</b> → '+t.name+(tripLabel?' <span class="tg" style="font-size:10px;'+(isAlly?'color:#a855f7':'color:var(--go)')+'">'+tripLabel+'</span>':'')+'</span><span class="eta">'+Math.floor(pct*100)+'% · '+ftime(Math.max(0,tn-v.prog))+'</span></div>';
+      h+='<div class="pb" style="margin:2px 0"><div class="pf" style="width:'+pct*100+'%;background:'+(isAlly?'#a855f7':isMarket?'var(--go)':'var(--a)')+'"></div></div>';
       h+='<div class="fleet-details"><div class="sub">'+vt.name+' · Kap: '+vehCap(v)+' · 🛣️ '+km.toLocaleString('de-DE')+' km</div>';
-      h+='<div class="sub">Ladung: '+cargo+(ord?' · Auftrag '+fmtOrd(ord.num)+' ('+fmt(ord.rew)+')':'')+'</div>';
+      if(cargo!=='leer')h+='<div class="sub">Ladung: '+cargo+'</div>';
+      if(ord)h+='<div style="font-size:12px;color:var(--a);font-weight:600">📋 Auftrag '+fmtOrd(ord.num)+' · '+(GOODS[ord.good]?.em||'')+(GOODS[ord.good]?.name||'')+' · '+fmt(ord.rew)+'</div>';
       if(v.postDelivery){const pd=C(v.postDelivery);h+='<div class="sub">Danach: → '+(pd?.name||'?')+'</div>'}
       h+='<button class="btn red sm" style="margin-top:3px" onclick="event.stopPropagation();recallVehicle(\''+v.id+'\')"><i class="ri-arrow-go-back-line"></i> Zurückrufen</button>';
       h+='</div></div>'})}
@@ -4544,6 +5083,29 @@ function compFleet(el){
       h+='<div class="fleet-details"><div class="sub">'+vt.name+' · Kap: '+vehCap(v)+(cargo?' · '+cargo:'')+'</div>';
       h+='<button class="btn red sm" style="margin-top:3px" onclick="event.stopPropagation();recallVehicle(\''+v.id+'\')"><i class="ri-arrow-go-back-line"></i> Zurückrufen</button>';
       h+='</div></div>'})}
+
+  // Vehicles at non-unlocked locations or unaccounted
+  const knownIds=new Set([...here,...outgoing,...incoming].map(v=>v.id));
+  const other=G.vehs.filter(v=>!knownIds.has(v.id)&&(v.depot===sc.id||(v.loc===sc.id)));
+  const stranded=G.vehs.filter(v=>!knownIds.has(v.id)&&v.depot===sc.id&&v.loc!==sc.id);
+  if(stranded.length){h+='<div class="sec-label" style="color:var(--go)">⚠️ Auswärts · '+stranded.length+'</div>';
+    stranded.forEach(v=>{const vt=VT[v.type];if(!vt)return;
+      const loc=Cx(v.loc)||(v.rt?.toLat?{name:v.rt.toName||'?'}:null);
+      const isMoving=v.st==='moving';
+      h+='<div class="crd" style="padding:5px 8px;border-left:3px solid var(--go)">';
+      h+='<div class="rw"><span>'+vt.em+' <b>'+vehName(v)+'</b></span>';
+      h+='<span class="sub">'+(isMoving?'🔶 unterwegs':'📍 '+(loc?.name||v.loc))+'</span></div>';
+      if(isMoving&&v.rt){
+        const f2=Cx(v.rt.from);const t2=Cx(v.rt.to)||(v.rt.toLat?{lat:v.rt.toLat,lng:v.rt.toLng,name:v.rt.toName||'?'}:null);
+        if(f2&&t2){const tn=tripT(f2,t2,vt.spd);const pct=Math.min(v.prog/(tn||1),1);
+          h+='<div class="sub">'+(f2.name||'?')+' → '+(t2.name||'?')+'</div>';
+          h+='<div class="pb" style="height:3px;margin:2px 0"><div class="pf" style="width:'+pct*100+'%"></div></div>';
+          h+='<div class="sub">'+Math.floor(pct*100)+'% · '+ftime(Math.max(0,tn-v.prog))+'</div>';}
+        if(v.cargo?.oid){const ord=G.orders.find(x=>x.id===v.cargo.oid);if(ord)h+='<div style="font-size:12px;color:var(--a)">📋 '+fmtOrd(ord.num)+' · '+fmt(ord.rew)+'</div>'}
+      }
+      if(v.st==='idle')h+='<button class="btn sm" style="margin-top:3px" onclick="quickRecall(\''+v.id+'\')">🔙 Zum Depot zurückrufen</button>';
+      if(isMoving)h+='<button class="btn sm" style="margin-top:3px" onclick="recallVehicle(\''+v.id+'\')">🔙 Zurückrufen</button>';
+      h+='</div>'});}
 
   el.innerHTML=h}
 
@@ -4588,13 +5150,25 @@ function showSendGoodsPopup(fromCid,good,maxAmt){
 
   // Step 3: Vehicles
   h+='<div style="margin:12px 0"><div style="font-family:var(--mono);font-size:15px;color:var(--a);font-weight:700;margin-bottom:4px">③ Fahrzeuge auswählen ('+idleHere.length+' vor Ort)</div>';
-  if(!idleHere.length)h+='<div class="sub" style="color:var(--r);padding:8px;text-align:center">⚠️ Keine Fahrzeuge in '+fc.name+'!<br>Sende erst welche im Fuhrpark-Tab.</div>';
+  if(!idleHere.length)h+='<div class="sub" style="color:var(--r);padding:6px;text-align:center">⚠️ Keine Fahrzeuge in '+fc.name+'</div>';
   else{
     idleHere.forEach(v=>{const vt=VT[v.type],km=v.km||0;
       h+='<label class="veh-check"><input type="checkbox" class="sg-vc" data-vid="'+v.id+'" data-cap="'+vehCap(v)+'" onchange="updateSgInfo()" onfocus="renderBlocked=true" onblur="renderBlocked=false"/>';
       h+='<span>'+vt.em+' '+vt.name+' · Kap: <b>'+vehCap(v)+'</b> · 🛣️ '+km.toLocaleString('de-DE')+' km</span></label>'});
     h+='<div class="sel-info" id="sgSelInfo"><span class="sub">Keine Fahrzeuge ausgewählt</span></div>';
   }
+  // Remote vehicles from other cities
+  const remoteVehs=G.vehs.filter(v=>v.st==='idle'&&v.loc!==fromCid).sort((a,b)=>{
+    const da=hav(C(a.loc)?.lat||0,C(a.loc)?.lng||0,fc.lat,fc.lng);
+    const db=hav(C(b.loc)?.lat||0,C(b.loc)?.lng||0,fc.lat,fc.lng);return da-db});
+  if(remoteVehs.length){
+    h+='<div style="margin-top:6px;padding-top:6px;border-top:1px solid var(--bd)">';
+    h+='<div style="font-family:var(--mono);font-size:12px;color:var(--a2);margin-bottom:4px">📍 Von anderem Standort (fährt erst hierher)</div>';
+    remoteVehs.slice(0,5).forEach(v=>{const vt=VT[v.type];const loc=C(v.loc);if(!loc)return;
+      const dist=Math.round(hav(loc.lat,loc.lng,fc.lat,fc.lng));const tt=tripT(loc,fc,vt.spd);
+      h+='<label class="veh-check" style="border-color:rgba(56,189,248,.2)"><input type="checkbox" class="sg-vc" data-vid="'+v.id+'" data-cap="'+vehCap(v)+'" data-remote="1" onchange="updateSgInfo()" onfocus="renderBlocked=true" onblur="renderBlocked=false"/>';
+      h+='<span>'+vt.em+' '+vehName(v)+' · Kap: <b>'+vehCap(v)+'</b> · 📍 '+loc.name+' ('+dist+' km · '+ftime(tt)+' Anfahrt)</span></label>'});
+    h+='</div>';}
   h+='</div>';
 
   // Buttons
@@ -4626,22 +5200,34 @@ function execSendGoods(fromCid,good){
   const checks=document.querySelectorAll('.sg-vc:checked');
   if(!checks.length){addLog('❌ Kein Fahrzeug ausgewählt');return}
   const fc=C(fromCid),tc=C(dest);
-  let totalSent=0,vehCount=0;
+  let totalSent=0,vehCount=0,remoteCount=0;
   checks.forEach(cb=>{
     const vid=cb.dataset.vid;const v=G.vehs.find(x=>x.id===vid);
     if(!v||v.st!=='idle')return;
+    const isRemote=cb.dataset.remote==='1';
     const remaining=amt-totalSent;if(remaining<=0)return;
-    const avail=s[good]||0;
-    const canLoad=Math.min(remaining,avail,vehCap(v));
-    if(canLoad<=0)return;
-    s[good]-=canLoad;if(s[good]<=0)delete s[good];
-    totalSent+=canLoad;vehCount++;
-    v.st='moving';v.rt={from:fromCid,to:dest};
-    v.cargo={internal:true,good,amt:canLoad};v.prog=0;
-    if(typeof ensureRoute==='function')ensureRoute(v);
+
+    if(isRemote){
+      // Remote vehicle: send to origin first, then do the transfer
+      v.st='moving';v.rt={from:v.loc,to:fromCid};v.prog=0;
+      v.pendingTransfer={good,amt:Math.min(remaining,vehCap(v)),dest};
+      if(typeof ensureRoute==='function')ensureRoute(v);
+      totalSent+=Math.min(remaining,vehCap(v));remoteCount++;vehCount++;
+    } else {
+      // Local vehicle: load and send immediately
+      const avail=s[good]||0;
+      const canLoad=Math.min(remaining,avail,vehCap(v));
+      if(canLoad<=0)return;
+      s[good]-=canLoad;if(s[good]<=0)delete s[good];
+      totalSent+=canLoad;vehCount++;
+      v.st='moving';v.rt={from:fromCid,to:dest};
+      v.cargo={internal:true,good,amt:canLoad};v.prog=0;
+      if(typeof ensureRoute==='function')ensureRoute(v);
+    }
   });
   if(totalSent>0){
-    addLog('📦 '+vehCount+' Fahrzeuge · '+totalSent+'× '+(GOODS[good]?.em||'')+' '+fc?.name+' → '+tc?.name);
+    addLog('📦 '+vehCount+' Fzg · '+totalSent+'× '+(GOODS[good]?.em||'')+' '+(fc?.name||'')+' → '+(tc?.name||'')+(remoteCount?' ('+remoteCount+' auf Anfahrt)':''));
+    if(typeof toast==='function')toast('📦 '+totalSent+'× '+(GOODS[good]?.name||'')+' unterwegs');
   } else addLog('❌ Nichts geladen');
   const popup=document.getElementById('sendGoodsPopup');if(popup)popup.remove();
   ua();
@@ -4679,16 +5265,21 @@ function compOrders(el){
       const vehs=G.vehs.filter(x=>x.cargo?.oid===o.id&&x.st==='moving');
       const shipped=o.shipped||0;const delivered=o.delivered||0;const remaining=o.amt-shipped;
       const pctDel=delivered/o.amt;const transitAmt=vehs.reduce((s,v)=>s+(v.cargo?.amt||0),0);
+      let transitPct=0;vehs.forEach(v=>{const vt2=VT[v.type];if(!vt2)return;const tn2=tripT(f,t,vt2.spd);transitPct+=(v.cargo?.amt||0)/o.amt*Math.min(v.prog/(tn2||1),1)});
+      const totalPct=Math.min((pctDel+transitPct)*100,100);
       h+='<div class="crd"><div class="rw"><span style="font-weight:600">'+(GOODS[o.good]?.em||'')+' '+o.amt+'× '+(GOODS[o.good]?.name||'')+'</span>';
-      h+='<span style="color:var(--a);font-family:var(--mono);font-weight:700">'+fmt(o.rew)+'</span></div>';
-      h+='<div class="sub">'+f.name+' → '+t.name+' · '+fdist(f,t)+' km</div>';
-      h+='<div class="pb" style="margin:4px 0"><div class="pf" style="width:'+Math.min(pctDel*100,100)+'%"></div></div>';
-      h+='<div style="display:flex;gap:8px;font-size:10px;color:var(--td)"><span>✅ '+delivered+'/'+o.amt+'</span>';
+      h+='<span style="color:var(--a);font-family:var(--mono);font-weight:700;font-size:14px">'+fmt(o.rew)+'</span></div>';
+      // Timer for accepted orders
+      const oAge=G.tick-(o.born||0);const oRemain=Math.max(0,o.tl-oAge);const oDecay=oAge>o.tl*0.8;const oUrgent=oRemain<300;
+      h+='<div class="rw"><span class="sub">'+f.name+' → '+t.name+' · '+fdist(f,t)+' km</span>';
+      h+='<span style="font-family:var(--mono);font-size:11px;'+(oUrgent?'color:var(--r);font-weight:700':oDecay?'color:var(--go)':'color:var(--td)')+'">⏱ '+ftime(oRemain)+(oDecay?' ⚠️':'')+'</span></div>';
+      h+='<div class="pb" style="margin:4px 0;height:6px"><div class="pf" style="width:'+totalPct+'%"></div></div>';
+      h+='<div style="display:flex;gap:8px;font-size:12px;color:var(--td)"><span>✅ '+delivered+'/'+o.amt+'</span>';
       if(transitAmt>0)h+='<span>🚛 '+transitAmt+' unterwegs</span>';
       if(remaining>0&&!vehs.length)h+='<span style="color:var(--go)">📦 '+remaining+' verbleibend</span>';
       h+='</div>';
       vehs.forEach(v=>{const vt=VT[v.type],tn=tripT(f,t,vt.spd),pct=Math.min(v.prog/tn,1);
-        h+='<div style="display:flex;align-items:center;gap:6px;margin-top:3px;font-size:10px;color:var(--td)">'+vt.em+' '+vehName(v)+' · '+v.cargo.amt+'× · <b style="color:var(--a)">'+Math.floor(pct*100)+'%</b> · '+ftime(Math.max(0,tn-v.prog))+'</div>'});
+        h+='<div style="display:flex;align-items:center;gap:6px;margin-top:3px;font-size:12px;color:var(--td)">'+vt.em+' '+vehName(v)+' · '+v.cargo.amt+'× · <b style="color:var(--a)">'+Math.floor(pct*100)+'%</b> · '+ftime(Math.max(0,tn-v.prog))+'</div>'});
       // Approaching vehicles
       const approaching=G.vehs.filter(v=>v.st==='moving'&&v.followUpOrder===o.id&&!v.cargo?.oid);
       approaching.forEach(v=>{const vt=VT[v.type];h+='<div style="font-size:10px;color:#a855f7;margin-top:2px">'+vt.em+' '+vehName(v)+' auf Anfahrt...</div>'});
@@ -4697,23 +5288,31 @@ function compOrders(el){
         h+='<div style="display:flex;gap:4px;margin-top:5px;flex-wrap:wrap">';
         const avlL=G.vehs.filter(v=>v.st==='idle'&&v.loc===o.from&&canVehTravel(v,o.to));
         const avlR=G.vehs.filter(v=>v.st==='idle'&&v.loc!==o.from&&canVehTravel(v,o.from));
+        const retV=G.vehs.filter(v=>typeof isReturning==='function'&&isReturning(v));
         if(avlL.length)h+='<button class="btn sm" style="background:rgba(251,191,36,.1);color:var(--go);border-color:rgba(251,191,36,.3)" onclick="autoAssign(\''+o.id+'\')">⚡ Senden (🚛'+avlL.length+')</button>';
-        if(avlR.length)h+='<button class="btn sm" style="color:var(--a2);border-color:rgba(56,189,248,.3)" onclick="G._remoteOid=\''+o.id+'\';renComp()">📍 Anderer Standort ('+avlR.length+')</button>';
-        if(!avlL.length&&!avlR.length)h+='<span class="sub" style="color:var(--r);padding:3px 0">❌ Kein Fahrzeug</span>';
+        if(avlR.length||retV.length)h+='<button class="btn sm" style="color:var(--a2);border-color:rgba(56,189,248,.3)" onclick="G._remoteOid=\''+o.id+'\';renComp()">📍 Anderer Standort ('+(avlR.length+retV.length)+')</button>';
+        if(!avlL.length&&!avlR.length&&!retV.length)h+='<span class="sub" style="color:var(--r);padding:3px 0">❌ Kein Fahrzeug</span>';
         h+='<button class="btn red sm" onclick="cancelO(\''+o.id+'\')">Stornieren</button></div>';}
-      // Remote picker
+      // Remote picker with multi-select
       if(G._remoteOid===o.id){
-        const remV=G.vehs.filter(v=>v.st==='idle'&&v.loc!==o.from&&canVehTravel(v,o.from)).sort((a2,b)=>{
+        const remV=G.vehs.filter(v=>v.st==='idle'&&v.loc!==o.from).sort((a2,b)=>{
           const da=hav(C(a2.loc)?.lat||0,C(a2.loc)?.lng||0,f.lat,f.lng);const db=hav(C(b.loc)?.lat||0,C(b.loc)?.lng||0,f.lat,f.lng);return da-db});
+        const retV2=G.vehs.filter(v=>typeof isReturning==='function'&&isReturning(v));
         h+='<div style="margin-top:6px;padding:8px;border:1px solid rgba(56,189,248,.2);border-radius:8px;background:rgba(56,189,248,.03)">';
-        h+='<div style="font-size:11px;font-weight:600;color:var(--a2);margin-bottom:3px">📍 Fahrzeug von anderem Standort</div>';
-        h+='<div class="sub" style="margin-bottom:4px">Fährt erst zum Abholort, dann startet der Auftrag automatisch.</div>';
-        remV.slice(0,6).forEach(v=>{const vt=VT[v.type];const loc=C(v.loc);if(!loc)return;
+        h+='<div style="font-size:12px;font-weight:600;color:var(--a2);margin-bottom:3px">📍 Fahrzeuge zuweisen (Mehrfachauswahl)</div>';
+        h+='<div class="sub" style="margin-bottom:4px">Fahren erst zum Abholort, dann startet der Auftrag automatisch.</div>';
+        remV.slice(0,8).forEach(v=>{const vt=VT[v.type];const loc=C(v.loc);if(!loc)return;
           const dist=Math.round(hav(loc.lat,loc.lng,f.lat,f.lng));const tt=tripT(loc,f,vt.spd);
-          h+='<div class="crd" style="padding:3px 8px;cursor:pointer" onclick="remoteAssign(\''+v.id+'\',\''+o.id+'\');G._remoteOid=null">';
-          h+='<div class="rw"><span>'+vt.em+' <b>'+vehName(v)+'</b> · Kap: '+vehCap(v)+'</span>';
-          h+='<span class="sub">📍 '+loc.name+' · '+dist+' km · '+ftime(tt)+'</span></div></div>'});
-        h+='<button class="btn sm" style="margin-top:4px" onclick="G._remoteOid=null;renComp()">✕ Schließen</button></div>';}
+          h+='<label class="veh-check" style="border-color:rgba(56,189,248,.2)"><input type="checkbox" class="rc-v" data-vid="'+v.id+'" data-type="remote" onfocus="renderBlocked=true" onblur="renderBlocked=false"/>';
+          h+='<span>'+vt.em+' <b>'+vehName(v)+'</b> · Kap: '+vehCap(v)+' · 📍 '+loc.name+' · '+dist+' km · '+ftime(tt)+'</span></label>'});
+        if(retV2.length){h+='<div style="font-size:12px;font-weight:600;color:var(--go);margin-top:6px;margin-bottom:3px">🔙 Auf dem Rückweg (umleitbar)</div>';
+          retV2.slice(0,4).forEach(v=>{const vt=VT[v.type];
+            const dest=Cx(v.rt?.to)||{name:'?'};
+            h+='<label class="veh-check" style="border-color:rgba(251,191,36,.2)"><input type="checkbox" class="rc-v" data-vid="'+v.id+'" data-type="returning" onfocus="renderBlocked=true" onblur="renderBlocked=false"/>';
+            h+='<span>'+vt.em+' <b>'+vehName(v)+'</b> · Kap: '+vehCap(v)+' · 🔙 → '+dest.name+'</span></label>'})}
+        h+='<div style="display:flex;gap:4px;margin-top:6px">';
+        h+='<button class="btn full" style="background:rgba(56,189,248,.1);color:var(--a2);border-color:rgba(56,189,248,.3)" onclick="sendSelectedRemote(\''+o.id+'\')">🚀 Ausgewählte senden</button>';
+        h+='<button class="btn sm" onclick="G._remoteOid=null;renComp()">✕</button></div></div>';}
       h+='</div>'});}
 
     // Available
@@ -4733,15 +5332,15 @@ function compOrders(el){
       h+='<span style="color:var(--a);font-family:var(--mono);font-weight:700">'+fmt(o.rew)+'</span></div>';
       h+='<div class="rw"><span class="sub">'+f.name+' → '+t.name+(o.toUnlocked===false?' 🔓':'')+' · '+fdist(f,t)+' km</span>';
       h+='<span class="sub" style="font-family:var(--mono);'+(tl<120?'color:var(--r)':'')+'">⏱ '+ftime(tl)+'</span></div>';
-      h+='<div style="display:flex;gap:8px;margin-top:3px;font-size:10px;color:var(--td)">';
-      h+='<span>'+fmt(ppu)+'/St.</span><span style="color:var(--a)">+'+prem+'%</span><span>📦 '+inS+'/'+o.amt+'</span>';
+      h+='<div style="display:flex;gap:8px;margin-top:3px;font-size:12px;color:var(--td)">';
+      h+='<span>'+fmt(ppu)+'/St.</span><span style="color:'+(prem>=0?'var(--a)':'var(--r)')+'">'+(prem>=0?'+':'')+prem+'%</span><span>📦 '+inS+'/'+o.amt+'</span>';
       if(avlL.length)h+='<span>🚛 '+avlL.length+'</span>';
       else if(avlR.length)h+='<span style="color:var(--a2)">📍 '+avlR.length+' andernorts</span>';
       h+='</div>';
       h+='<div style="display:flex;gap:4px;margin-top:5px">';
       h+='<button class="btn sm'+(canAcc?'':' off')+'" onclick="accO(\''+o.id+'\')">Annehmen</button>';
       if(canAcc&&avlL.length)h+='<button class="btn sm" style="background:rgba(251,191,36,.1);color:var(--go);border-color:rgba(251,191,36,.3)" onclick="accO(\''+o.id+'\');setTimeout(()=>autoAssign(\''+o.id+'\'),50)">⚡ Auto</button>';
-      if(canAcc&&avlR.length)h+='<button class="btn sm" style="color:var(--a2);border-color:rgba(56,189,248,.3)" onclick="accO(\''+o.id+'\');setTimeout(()=>{G._remoteOid=\''+o.id+'\';renComp()},50)">📍 Fernfahrzeug</button>';
+      if(canAcc&&avlR.length)h+='<button class="btn sm" style="color:var(--a2);border-color:rgba(56,189,248,.3)" onclick="accO(\''+o.id+'\');setTimeout(()=>{G._remoteOid=\''+o.id+'\';renComp()},50)">📍 Weiteres Fzg</button>';
       h+='<button class="btn red sm" onclick="declineO(\''+o.id+'\')">✕</button></div></div>'});
   }
 
@@ -5096,7 +5695,7 @@ function compRoutes(el){
         h+='<div class="sub" style="margin:4px 0;font-weight:600">Fahrzeuge wählen ('+remaining+' verbleibend):</div>';
         avl.forEach(x=>{const xvt=VT[x.type],cap=vehCap(x);
           h+='<label class="veh-check"><input type="checkbox" class="vc" data-oid="'+o.id+'" data-vid="'+x.id+'" data-cap="'+cap+'" onchange="updateSelInfo(\''+o.id+'\','+remaining+')" onfocus="renderBlocked=true" onblur="renderBlocked=false"/>';
-          h+='<span>'+xvt.em+' '+xvt.name+' · Kap: <b>'+cap+'</b> · '+ftime(tripT(f,t,xvt.spd))+'</span></label>'});
+          h+='<span>'+xvt.em+' <b>'+vehName(x)+'</b> · Kap: <b>'+cap+'</b> · '+ftime(tripT(f,t,xvt.spd))+'</span></label>'});
         h+='<div class="sel-info" id="selInfo_'+o.id+'"><span class="sub">Keine Fahrzeuge ausgewählt</span></div>';
         h+='<div style="display:flex;gap:4px;margin-top:6px"><button class="btn full" onclick="multiAssign(\''+o.id+'\')">🚀 Ausgewählte losschicken</button>';
         h+='<button class="btn" style="background:rgba(251,191,36,.15);color:var(--go);border:1px solid rgba(251,191,36,.3)" onclick="autoAssign(\''+o.id+'\')">⚡ Auto</button></div>';
@@ -5110,32 +5709,30 @@ function compRoutes(el){
       h+='</div>'})}
   // Running orders
   if(running.length){h+='<div class="sec-label">Laufend · '+running.length+'</div>';
-    const unasOrd=acc.filter(o2=>{const rem2=o2.amt-(o2.shipped||0);return rem2>0});
-    running.forEach(o=>{const f=Cx(o.from),t=Cx(o.to);if(!f||!t)return;const v=G.vehs.find(x=>x.cargo?.oid===o.id);if(!v)return;const vt=VT[v.type],tn=tripT(f,t,vt.spd),pct=Math.min(v.prog/tn,1);
-      h+='<div class="crd"><div class="rw"><span>'+fmtOrd(o.num)+' '+vt.em+'</span><span class="eta">'+Math.floor(pct*100)+'%</span></div><div class="sub">'+f.name+' → '+t.name+'</div>';
-      h+='<div class="pb"><div class="pf" style="width:'+pct*100+'%"></div></div>';
-      // Show current post-delivery / follow-up status
-      const pd=v.postDelivery?C(v.postDelivery):null;
-      const fuo=v.followUpOrder?G.orders.find(x=>x.id===v.followUpOrder):null;
-      h+='<div style="margin-top:5px">';
-      if(fuo){const fc=C(fuo.from),tc2=C(fuo.to);
-        h+='<div class="sub" style="margin-bottom:3px"><span class="tg b">📋 Folgeauftrag</span> '+(GOODS[fuo.good]?.em||'')+' '+(fc?.name||'?')+' → '+(tc2?.name||'?')+' <button class="rs-rm" onclick="setFollowUpOrder(\''+v.id+'\',null)">✕</button></div>';
-      } else if(pd){
-        h+='<div class="sub" style="margin-bottom:3px"><span class="tg g">→ '+pd.name+'</span> <button class="rs-rm" onclick="setPostDelivery(\''+v.id+'\',null)">✕</button></div>';
+    running.forEach(o=>{const f=Cx(o.from),t=Cx(o.to);if(!f||!t)return;
+      const vehs=G.vehs.filter(x=>x.cargo?.oid===o.id&&x.st==='moving');if(!vehs.length)return;
+      const delivered=o.delivered||0;const shipped=o.shipped||0;
+      h+='<div class="crd"><div class="rw"><span style="font-weight:600">'+fmtOrd(o.num)+' '+(GOODS[o.good]?.em||'')+' '+o.amt+'× '+(GOODS[o.good]?.name||'')+'</span><span style="color:var(--a);font-family:var(--mono);font-size:14px;font-weight:700">'+fmt(o.rew)+'</span></div>';
+      h+='<div class="sub">'+f.name+' → '+t.name+' · '+fdist(f,t)+' km · ✅ '+delivered+'/'+o.amt+'</div>';
+      vehs.forEach(v=>{const vt=VT[v.type],tn=tripT(f,t,vt.spd),pct=Math.min(v.prog/(tn||1),1);
+        h+='<div style="display:flex;align-items:center;gap:6px;margin-top:4px;padding:4px 6px;border-radius:6px;background:rgba(255,255,255,.02)">';
+        h+='<span style="font-size:12px">'+vt.em+' <b>'+vehName(v)+'</b></span>';
+        h+='<span class="sub">'+(v.cargo?.amt||0)+'×</span>';
+        h+='<div class="pb" style="flex:1;height:5px"><div class="pf" style="width:'+pct*100+'%"></div></div>';
+        h+='<span style="font-family:var(--mono);font-size:12px;color:var(--a);font-weight:700">'+Math.floor(pct*100)+'%</span>';
+        h+='<span class="sub">'+ftime(Math.max(0,tn-v.prog))+'</span>';
+        h+='</div>'});
+      // Approaching vehicles
+      const approaching=G.vehs.filter(v=>v.st==='moving'&&v.followUpOrder===o.id&&!v.cargo?.oid);
+      approaching.forEach(v=>{const vt=VT[v.type];
+        h+='<div style="font-size:12px;color:#a855f7;margin-top:3px;padding:2px 6px">'+vt.em+' <b>'+vehName(v)+'</b> auf Anfahrt zum Abholort...</div>'});
+      // Remaining to ship
+      const remaining=o.amt-shipped;
+      if(remaining>0){
+        const avlL=G.vehs.filter(x=>x.st==='idle'&&x.loc===o.from);
+        if(avlL.length)h+='<div style="margin-top:4px"><button class="btn sm" style="background:rgba(251,191,36,.1);color:var(--go);border-color:rgba(251,191,36,.3)" onclick="autoAssign(\''+o.id+'\')">⚡ Nachsenden ('+remaining+'× · 🚛'+avlL.length+')</button></div>';
       }
-      // Combined dropdown: cities + follow-up orders
-      h+='<select class="sl-action" onchange="const v2=this.value;if(!v2)return;if(v2.startsWith(\'ord:\'))setFollowUpOrder(\''+v.id+'\',v2.substr(4));else setPostDelivery(\''+v.id+'\',v2)">';
-      h+='<option value="">Nach Lieferung…</option>';
-      // Optgroup: follow-up orders
-      if(unasOrd.length){h+='<optgroup label="📋 Folgeauftrag">';
-        unasOrd.forEach(uo=>{const uf=C(uo.from),ut=C(uo.to);if(!uf||!ut)return;
-          h+='<option value="ord:'+uo.id+'">'+fmtOrd(uo.num)+' '+(GOODS[uo.good]?.em||'')+' '+uf.name+'→'+ut.name+' '+fmt(uo.rew)+'</option>'});
-        h+='</optgroup>'}
-      // Optgroup: destination cities
-      h+='<optgroup label="📍 Zielort">';
-      reachableCities(v).forEach(x=>{h+='<option value="'+x.id+'">'+x.name+'</option>'});
-      h+='</optgroup></select>';
-      h+='</div></div>'})}
+      h+='</div>'})}
   // Market trips
   const mktVehs=G.vehs.filter(v=>v.st==='moving'&&v.cargo?.market);
   if(mktVehs.length){h+='<div class="sec-label" style="color:var(--go)">💰 Marktverkäufe · '+mktVehs.length+'</div>';
@@ -5179,76 +5776,204 @@ function compTransfer(el){
     const cCap3=cityCap(c.id);const tot=items.reduce((a,[,v])=>a+v,0);
     h+='<div class="crd"><div class="rw"><span style="font-weight:600">📍 '+c.name+'</span><span class="sub">📦 '+tot+'/'+cCap3+' · 🚛 '+vHere+'</span></div>';
     items.forEach(([g,amt])=>{
+      const remV=G.vehs.filter(v=>v.st==='idle'&&v.loc!==c.id).length;
       h+='<div style="display:flex;align-items:center;justify-content:space-between;padding:3px 0;font-size:12px;border-top:1px solid var(--bd)">';
       h+='<span>'+(GOODS[g]?.em||'')+' '+(GOODS[g]?.name||'')+' <b>'+amt+'</b>×</span>';
+      h+='<div style="display:flex;gap:3px">';
       if(cities.length>1&&vHere>0)h+='<button class="btn sm" onclick="showSendGoodsPopup(\''+c.id+'\',\''+g+'\','+amt+')">📦 Senden</button>';
+      else if(!vHere&&remV>0)h+='<button class="btn sm" style="color:var(--a2);border-color:rgba(56,189,248,.3)" onclick="showSendGoodsPopup(\''+c.id+'\',\''+g+'\','+amt+')">📍 Senden (anderer Standort)</button>';
       else if(!vHere)h+='<span class="sub" style="color:var(--r)">Kein Fahrzeug</span>';
-      h+='</div>'});
+      h+='</div></div>'});
     h+='</div>'});
   el.innerHTML=h}
 
 // ═══ STANDING ORDERS TAB ═══
+// Preserve form state across re-renders
 function compStanding(el){
   let h=tabHead('standing','🔄 Daueraufträge','Automatische Lieferungen zwischen Standorten');
   const sos=G.standingOrders||[];
   const active=sos.filter(so=>so.active).length;
-  h+='<div style="display:flex;gap:4px;margin-bottom:8px"><span class="tg g">'+active+' aktiv</span><span class="tg">'+(sos.length-active)+' pausiert</span><span class="tg">'+sos.length+' gesamt</span></div>';
-
-  // Existing standing orders
-  if(sos.length){
-    sos.forEach(so=>{const fc=C(so.from),tc2=C(so.to),gd=GOODS[so.good];
-      const vids=so.vehicleIds||( so.vehicleId?[so.vehicleId]:[]);
-      const isFull=so.fillMode;
-      const paused=!so.active;const autoPaused=so.autoPaused;
-      // Find active vehicles for this standing order
-      const activeVehs=G.vehs.filter(v=>v.st==='moving'&&v.cargo?.internal&&v.cargo.good===so.good&&v.rt?.from===so.from&&v.rt?.to===so.to);
-      h+='<div class="crd" style="border-left:3px solid '+(paused?(autoPaused?'var(--go)':'var(--td)'):'var(--a)')+'">';
-      h+='<div class="rw"><span>'+(gd?.em||'')+' <b>'+(gd?.name||'')+'</b></span>';
-      h+='<div style="display:flex;gap:3px">';
-      h+='<button class="btn sm" onclick="toggleStandingOrder(\''+so.id+'\')">'+(so.active?'⏸️':'▶️')+'</button>';
-      h+='<button class="btn red sm" onclick="removeStandingOrder(\''+so.id+'\')">✕</button></div></div>';
-      h+='<div class="sub">'+(fc?.name||'?')+' → '+(tc2?.name||'?')+'</div>';
-      if(autoPaused)h+='<div class="sub" style="color:var(--go);margin-top:2px">⚠️ Auto-pausiert: Ziellager voll</div>';
-      // Active vehicles underway
-      if(activeVehs.length){h+='<div style="margin-top:3px">';
-        activeVehs.forEach(v=>{const vt=VT[v.type];const f2=C(v.rt.from),t2=C(v.rt.to);
-          if(!f2||!t2)return;const tn=tripT(f2,t2,vt.spd),pct=Math.min(v.prog/tn,1);
-          h+='<div class="sub" style="padding:2px 0">'+vt.em+' '+v.cargo.amt+'× · '+Math.floor(pct*100)+'% · '+ftime(tn-v.prog)+' verbl.</div>'});
-        h+='</div>'}
-      // Amount
-      h+='<div style="display:flex;align-items:center;gap:6px;margin-top:4px;padding-top:4px;border-top:1px solid var(--bd)">';
-      h+='<label class="veh-check" style="flex:none;padding:3px 6px;margin:0;border-color:'+(isFull?'var(--a)':'var(--bd)')+'"><input type="checkbox" '+(isFull?'checked':'')+' onchange="toggleSOFillMode(\''+so.id+'\')"/><span style="font-size:9px">Voll beladen</span></label>';
-      if(!isFull){
-        h+='<input type="number" class="sl" value="'+so.amt+'" min="1" max="999" style="width:55px;font-size:11px;padding:4px;text-align:center" onfocus="renderBlocked=true" onblur="renderBlocked=false" onchange="updateSOAmt(\''+so.id+'\',this.value)"/>';
-        h+='<span class="sub">× pro Fahrt</span>';
-      } else h+='<span class="sub" style="color:var(--a)">→ Volle Kapazität</span>';
-      h+='</div>';
-      // Multi-vehicle assignment with checkboxes
-      h+='<div style="margin-top:4px"><div class="sub" style="font-weight:600;margin-bottom:3px">Zugewiesene Fahrzeuge ('+vids.length+')</div>';
-      const idleAtFrom=G.vehs.filter(v=>v.st==='idle'&&v.loc===so.from);
-      idleAtFrom.forEach(v=>{const vt=VT[v.type];const isAssigned=vids.includes(v.id);
-        h+='<label class="veh-check" style="padding:3px 6px;margin:1px 0;border-color:'+(isAssigned?'var(--a)':'var(--bd)')+'"><input type="checkbox" '+(isAssigned?'checked':'')+' onchange="toggleSOVehicle(\''+so.id+'\',\''+v.id+'\')"/>';
-        h+='<span style="font-size:9px">'+vt.em+' '+vt.name+' · Kap: '+vehCap(v)+'</span></label>'});
-      if(!idleAtFrom.length)h+='<div class="sub" style="opacity:.5">Keine Fahrzeuge in '+(fc?.name||'?')+'</div>';
-      h+='</div></div>'});
-  } else h+='<div class="sub" style="padding:10px;text-align:center">Noch keine Daueraufträge angelegt</div>';
-
-  // New standing order form
-  h+='<div class="sec-label" style="margin-top:12px">Neuer Dauerauftrag</div>';
-  h+='<div class="crd"><div style="display:grid;grid-template-columns:1fr 1fr;gap:6px">';
-  h+='<div><div class="sub" style="font-weight:600;margin-bottom:3px">Ware</div>';
-  h+='<select class="sl" id="soGood" style="width:100%" onfocus="renderBlocked=true" onblur="renderBlocked=false"><option value="">Wählen…</option>';
-  Object.entries(GOODS).forEach(([k,g])=>{h+='<option value="'+k+'">'+g.em+' '+g.name+'</option>'});h+='</select></div>';
-  h+='<div><div class="sub" style="font-weight:600;margin-bottom:3px">Menge</div>';
-  h+='<input type="number" class="sl" id="soAmt" value="5" min="1" max="50" style="width:100%" onfocus="renderBlocked=true" onblur="renderBlocked=false"/></div>';
-  h+='<div><div class="sub" style="font-weight:600;margin-bottom:3px">Von</div>';
-  h+='<select class="sl" id="soFrom" style="width:100%" onfocus="renderBlocked=true" onblur="renderBlocked=false"><option value="">Standort…</option>';
-  cities.forEach(c=>{h+='<option value="'+c.id+'">'+c.name+'</option>'});h+='</select></div>';
-  h+='<div><div class="sub" style="font-weight:600;margin-bottom:3px">Nach</div>';
-  h+='<select class="sl" id="soTo" style="width:100%" onfocus="renderBlocked=true" onblur="renderBlocked=false"><option value="">Standort…</option>';
-  cities.forEach(c=>{h+='<option value="'+c.id+'">'+c.name+'</option>'});h+='</select></div>';
-  h+='</div><button class="btn full" style="margin-top:8px" onclick="createStandingOrder()">🔄 Dauerauftrag anlegen</button></div>';
+  h+='<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">';
+  h+='<div style="display:flex;gap:5px"><span class="tg g">'+active+' aktiv</span><span class="tg">'+(sos.length-active)+' pausiert</span></div>';
+  h+='<button class="btn" style="background:rgba(61,214,140,.1);color:var(--a);border-color:rgba(61,214,140,.3)" onclick="showNewSOPopup()">➕ Neuer Dauerauftrag</button></div>';
+  if(!sos.length)h+='<div class="sub" style="padding:16px;text-align:center;opacity:.6">Noch keine Daueraufträge — erstelle einen!</div>';
+  sos.forEach(so=>{const fc=C(so.from),tc2=C(so.to),gd=GOODS[so.good];
+    const vids=so.vehicleIds||(so.vehicleId?[so.vehicleId]:[]);
+    const paused=!so.active;const autoPaused=so.autoPaused;
+    const activeVehs=G.vehs.filter(v=>v.st==='moving'&&v.cargo?.internal&&v.cargo.good===so.good&&v.rt?.from===so.from&&v.rt?.to===so.to);
+    const idleAssigned=vids.map(vid=>G.vehs.find(v=>v.id===vid&&v.st==='idle')).filter(Boolean);
+    const stockFrom=G.stor[so.from]?.[so.good]||0;
+    const destCap=cityCap(so.to);const destUsed=Object.values(G.stor[so.to]||{}).reduce((s2,v)=>s2+v,0);
+    h+='<div class="crd" style="border-left:3px solid '+(paused?(autoPaused?'var(--go)':'var(--td)'):'var(--a)')+'">';
+    // Header with status badge
+    h+='<div class="rw"><span style="font-weight:600">'+(gd?.em||'')+' '+(gd?.name||'')+' · '+(so.fillMode?'Voll beladen':so.amt+'× pro Fahrt')+'</span>';
+    h+='<div style="display:flex;gap:3px;align-items:center">';
+    if(paused&&!autoPaused)h+='<span class="tg" style="font-size:10px;color:var(--td)">⏸ Pausiert</span>';
+    else if(autoPaused)h+='<span class="tg" style="font-size:10px;color:var(--go)">⚠️ Voll</span>';
+    else h+='<span class="tg g" style="font-size:10px">▶ Aktiv</span>';
+    h+='<button class="btn sm" onclick="toggleStandingOrder(\''+so.id+'\')" title="'+(so.active?'Pausieren':'Fortsetzen')+'">'+(so.active?'⏸️':'▶️')+'</button>';
+    h+='<button class="btn sm" onclick="showEditSOPopup(\''+so.id+'\')" title="Bearbeiten">✏️</button>';
+    h+='<button class="btn red sm" onclick="if(confirm(\'Löschen?\'))removeStandingOrder(\''+so.id+'\')">✕</button></div></div>';
+    // Route
+    h+='<div style="font-size:13px;margin-top:3px">'+(fc?.name||'?')+' → '+(tc2?.name||'?')+'</div>';
+    // Stats row
+    h+='<div style="display:flex;gap:8px;margin-top:4px;font-size:12px;color:var(--td);flex-wrap:wrap">';
+    h+='<span>📦 Quelle: '+stockFrom+'×</span>';
+    h+='<span>🏭 Ziel: '+destUsed+'/'+destCap+'</span>';
+    h+='<span>🚛 '+vids.length+' zugewiesen</span>';
+    if(activeVehs.length)h+='<span style="color:var(--go)">🔶 '+activeVehs.length+' unterwegs</span>';
+    if(idleAssigned.length)h+='<span style="color:var(--a)">🟢 '+idleAssigned.length+' bereit</span>';
+    h+='</div>';
+    // Active vehicle tracking
+    if(activeVehs.length){activeVehs.forEach(v=>{const vt=VT[v.type];const f2=C(v.rt?.from),t2=C(v.rt?.to);
+      if(!f2||!t2)return;const tn=tripT(f2,t2,vt.spd),pct=Math.min(v.prog/(tn||1),1);
+      h+='<div style="display:flex;align-items:center;gap:6px;margin-top:3px;padding:3px 6px;border-radius:4px;background:rgba(255,255,255,.02);font-size:12px">';
+      h+=vt.em+' <b>'+vehName(v)+'</b> · '+(v.cargo?.amt||0)+'×';
+      h+='<div class="pb" style="flex:1;height:4px"><div class="pf" style="width:'+pct*100+'%"></div></div>';
+      h+='<span style="color:var(--a);font-family:var(--mono)">'+Math.floor(pct*100)+'%</span> '+ftime(Math.max(0,tn-v.prog));
+      h+='</div>'})}
+    if(!vids.length)h+='<div class="sub" style="margin-top:4px;color:var(--r)">⚠️ Keine Fahrzeuge zugewiesen — <span style="cursor:pointer;color:var(--a);text-decoration:underline" onclick="showEditSOPopup(\''+so.id+'\')">Bearbeiten</span></div>';
+    h+='</div>'});
   el.innerHTML=h}
+
+function showNewSOPopup(){
+  let ex=document.getElementById('soPopup');if(ex)ex.remove();
+  const popup=document.createElement('div');popup.id='soPopup';popup.className='unlock-bg';
+  popup.style.zIndex='9999';
+  popup._state={step:1,good:'',from:'',to:'',amt:5,fillMode:false};
+  _soPopupRender(popup);
+  popup.addEventListener('click',e=>{if(e.target===popup)popup.remove()});
+  document.body.appendChild(popup);
+}
+function _soPopupRender(popup){
+  const state=popup._state;
+  let h='<div class="unlock-popup" style="width:460px;max-height:85vh;overflow-y:auto"><div class="unlock-body">';
+  h+='<div style="text-align:center;margin-bottom:12px"><span style="font-size:24px">🔄</span>';
+  h+='<div style="font-family:var(--mono);font-size:18px;font-weight:700;color:var(--a);margin-top:4px">Neuer Dauerauftrag</div></div>';
+  h+='<div style="display:flex;gap:4px;justify-content:center;margin-bottom:14px">';
+  [1,2,3].forEach(s=>{h+='<div style="width:60px;height:4px;border-radius:2px;background:'+(s<=state.step?'var(--a)':'var(--bd)')+'"></div>'});
+  h+='</div>';
+  if(state.step===1){
+    h+='<div style="font-weight:600;margin-bottom:8px;font-size:14px">① Ware auswählen</div>';
+    const goodsWithStock={};
+    cities.forEach(c=>{Object.entries(G.stor[c.id]||{}).forEach(([g,a])=>{if(a>0){if(!goodsWithStock[g])goodsWithStock[g]={total:0,cities:[]};goodsWithStock[g].total+=a;goodsWithStock[g].cities.push({name:c.name,amt:a})}})});
+    const producedGoods=new Set();
+    cities.forEach(c=>{(G.blds[c.id]||[]).forEach(b=>{const d=BLD[b.type];if(d&&d.out)Object.keys(d.out).forEach(g=>producedGoods.add(g))})});
+    const allGoods=Object.entries(GOODS).filter(([k])=>goodsWithStock[k]||producedGoods.has(k));
+    if(!allGoods.length)h+='<div class="sub" style="padding:12px;text-align:center">Keine Waren — baue zuerst Gebäude!</div>';
+    allGoods.sort((a,b)=>(goodsWithStock[b[0]]?.total||0)-(goodsWithStock[a[0]]?.total||0)).forEach(([k,g])=>{
+      const s=goodsWithStock[k];
+      h+='<div class="crd" style="padding:6px 10px;cursor:pointer" onclick="const p=document.getElementById(\'soPopup\');p._state.good=\''+k+'\';p._state.step=2;_soPopupRender(p)">';
+      h+='<div class="rw"><span>'+g.em+' <b>'+g.name+'</b></span>';
+      h+='<span style="font-family:var(--mono);color:'+(s?'var(--a)':'var(--td)')+'">'+( s?s.total+'× Lager':'produziert')+'</span></div>';
+      if(s)h+='<div class="sub">'+s.cities.map(c=>c.name+': '+c.amt+'×').join(' · ')+'</div>';
+      h+='</div>'});
+  }
+  if(state.step===2){
+    const gd=GOODS[state.good];
+    h+='<div style="font-weight:600;margin-bottom:4px;font-size:14px">② Route für '+(gd?.em||'')+' '+(gd?.name||'')+'</div>';
+    h+='<button class="btn sm" style="margin-bottom:8px" onclick="const p=document.getElementById(\'soPopup\');p._state.step=1;_soPopupRender(p)">← Zurück</button>';
+    h+='<div class="sub" style="font-weight:600;margin-bottom:4px">Von (Quelle):</div>';
+    cities.forEach(c=>{const stock=G.stor[c.id]?.[state.good]||0;const vehs=G.vehs.filter(v=>v.st==='idle'&&v.loc===c.id).length;
+      const sel=state.from===c.id;const hasProd=(G.blds[c.id]||[]).some(b=>{const d=BLD[b.type];return d&&d.out&&d.out[state.good]});
+      h+='<div class="crd" style="padding:5px 10px;cursor:pointer;'+(sel?'border-color:var(--a);background:rgba(61,214,140,.06)':'')+'" onclick="const p=document.getElementById(\'soPopup\');p._state.from=\''+c.id+'\';_soPopupRender(p)">';
+      h+='<div class="rw"><span>'+(sel?'✅ ':'')+'📍 '+c.name+'</span>';
+      h+='<span style="font-size:12px">'+(gd?.em||'')+' '+stock+'× · 🚛 '+vehs+(hasProd?' · 🏭':'')+'</span></div></div>'});
+    if(state.from){
+      h+='<div class="sub" style="font-weight:600;margin-top:10px;margin-bottom:4px">Nach (Ziel):</div>';
+      cities.filter(c=>c.id!==state.from).forEach(c=>{const stock=G.stor[c.id]?.[state.good]||0;const cap=cityCap(c.id);const used=Object.values(G.stor[c.id]||{}).reduce((s2,v)=>s2+v,0);
+        const sel=state.to===c.id;const fc=C(state.from);const dist=fc?fdist(fc,c):0;
+        h+='<div class="crd" style="padding:5px 10px;cursor:pointer;'+(sel?'border-color:var(--a);background:rgba(61,214,140,.06)':'')+'" onclick="const p=document.getElementById(\'soPopup\');p._state.to=\''+c.id+'\';p._state.step=3;_soPopupRender(p)">';
+        h+='<div class="rw"><span>'+(sel?'✅ ':'')+'📍 '+c.name+' <span class="sub">'+dist+' km</span></span>';
+        h+='<span style="font-size:12px">📦 '+used+'/'+cap+(stock?' · '+(gd?.em||'')+stock+'×':'')+'</span></div></div>'});}
+  }
+  if(state.step===3){
+    const gd=GOODS[state.good];const fc=C(state.from);const tc=C(state.to);
+    h+='<div style="font-weight:600;margin-bottom:4px;font-size:14px">③ Fahrzeuge & Bestätigen</div>';
+    h+='<button class="btn sm" style="margin-bottom:8px" onclick="const p=document.getElementById(\'soPopup\');p._state.step=2;_soPopupRender(p)">← Zurück</button>';
+    // Summary card
+    h+='<div class="crd" style="background:rgba(61,214,140,.04);border-color:rgba(61,214,140,.2)">';
+    h+='<div style="font-size:15px;font-weight:700;color:var(--a)">'+(gd?.em||'')+' '+(gd?.name||'')+'</div>';
+    h+='<div style="font-size:14px;margin-top:4px">'+(fc?.name||'?')+' → '+(tc?.name||'?')+'</div>';
+    h+='<div class="sub" style="margin-top:3px">Lager: <b>'+(G.stor[state.from]?.[state.good]||0)+'×</b></div></div>';
+    // Amount
+    h+='<div style="margin-top:10px"><div class="sub" style="font-weight:600;margin-bottom:4px">Menge pro Fahrt:</div>';
+    h+='<div style="display:flex;gap:8px;align-items:center">';
+    h+='<label class="veh-check" style="flex:none;padding:4px 8px;border-color:'+(state.fillMode?'var(--a)':'var(--bd)')+'"><input type="checkbox" id="soNewFill" '+(state.fillMode?'checked':'')+' onchange="document.getElementById(\'soPopup\')._state.fillMode=this.checked"/><span>Voll beladen</span></label>';
+    h+='<input type="number" id="soNewAmt" value="'+state.amt+'" min="1" max="50" class="auth-input" style="width:70px;text-align:center;font-size:16px" onchange="document.getElementById(\'soPopup\')._state.amt=parseInt(this.value)||5"/>';
+    h+='</div></div>';
+    // Vehicle selection
+    const vehs=G.vehs.filter(v=>v.st==='idle'&&v.loc===state.from);
+    const remVehs=G.vehs.filter(v=>v.st==='idle'&&v.loc!==state.from);
+    h+='<div style="margin-top:10px"><div class="sub" style="font-weight:600;margin-bottom:4px">🚛 Fahrzeuge zuweisen — '+(fc?.name||'?')+' ('+vehs.length+')</div>';
+    h+='<div class="sub" style="margin-bottom:6px;color:var(--td)">Zugewiesene Fahrzeuge fahren automatisch bis das Ziellager voll ist.</div>';
+    if(!vehs.length&&!remVehs.length)h+='<div class="sub" style="color:var(--r)">Keine Fahrzeuge verfügbar</div>';
+    vehs.forEach(v=>{const vt=VT[v.type];
+      h+='<label class="veh-check" style="padding:5px 8px;margin:2px 0"><input type="checkbox" class="soNewVeh" data-vid="'+v.id+'">';
+      h+='<span>'+vt.em+' <b>'+vehName(v)+'</b> · Kap: '+vehCap(v)+'</span></label>'});
+    if(remVehs.length){
+      h+='<div class="sub" style="font-weight:600;margin-top:6px;margin-bottom:3px;color:var(--a2)">📍 Andere Standorte</div>';
+      remVehs.slice(0,5).forEach(v=>{const vt=VT[v.type];const loc=C(v.loc);
+        h+='<label class="veh-check" style="padding:5px 8px;margin:2px 0;border-color:rgba(56,189,248,.2)"><input type="checkbox" class="soNewVeh" data-vid="'+v.id+'">';
+        h+='<span>'+vt.em+' <b>'+vehName(v)+'</b> · Kap: '+vehCap(v)+' · 📍 '+(loc?.name||'?')+'</span></label>'});}
+    h+='</div>';
+    h+='<button class="btn full" style="margin-top:14px;padding:10px;font-size:14px;background:var(--a);color:var(--bg);border-color:var(--a)" onclick="_soCreate()">🔄 Dauerauftrag anlegen</button>';
+  }
+  h+='<button class="btn full red" style="margin-top:8px" onclick="document.getElementById(\'soPopup\').remove()">Abbrechen</button>';
+  h+='</div></div>';
+  popup.innerHTML=h;
+}
+function _soCreate(){
+  const p=document.getElementById('soPopup');if(!p||!p._state)return;
+  const s=p._state;const fill=document.getElementById('soNewFill')?.checked;const amt=parseInt(document.getElementById('soNewAmt')?.value)||5;
+  if(!s.good||!s.from||!s.to){if(typeof toast==='function')toast('Bitte alle Felder ausfüllen','var(--r)');return}
+  // Collect selected vehicles
+  const vehChecks=document.querySelectorAll('.soNewVeh');
+  const vids=[];vehChecks.forEach(cb=>{if(cb.checked)vids.push(cb.dataset.vid)});
+  if(!G.standingOrders)G.standingOrders=[];
+  G.standingOrders.push({id:uid(),good:s.good,from:s.from,to:s.to,amt:fill?999:Math.max(1,amt),fillMode:!!fill,active:true,vehicleIds:vids});
+  addLog('🔄 Dauerauftrag: '+(GOODS[s.good]?.em||'')+' '+(C(s.from)?.name||'?')+' → '+(C(s.to)?.name||'?')+' · '+vids.length+' Fzg');
+  if(typeof toast==='function')toast('🔄 Angelegt mit '+vids.length+' Fahrzeugen','var(--a)');
+  p.remove();ua();
+}
+function showEditSOPopup(soId){
+  const so=(G.standingOrders||[]).find(x=>x.id===soId);if(!so)return;
+  let ex=document.getElementById('soEditPopup');if(ex)ex.remove();
+  const popup=document.createElement('div');popup.id='soEditPopup';popup.className='unlock-bg';popup.style.zIndex='9999';
+  const gd=GOODS[so.good];const fc=C(so.from);const vids=so.vehicleIds||(so.vehicleId?[so.vehicleId]:[]);
+  let h='<div class="unlock-popup" style="width:420px;max-height:85vh;overflow-y:auto"><div class="unlock-body">';
+  h+='<div style="font-family:var(--mono);font-size:16px;font-weight:700;color:var(--a);margin-bottom:10px">✏️ Dauerauftrag bearbeiten</div>';
+  h+='<div class="crd" style="background:rgba(61,214,140,.04);border-color:rgba(61,214,140,.2)">';
+  h+='<div style="font-size:15px;font-weight:600">'+(gd?.em||'')+' '+(gd?.name||'')+'</div>';
+  h+='<div class="sub">'+(fc?.name||'?')+' → '+(C(so.to)?.name||'?')+'</div></div>';
+  h+='<div style="margin-top:10px"><div class="sub" style="font-weight:600;margin-bottom:4px">Menge pro Fahrt:</div>';
+  h+='<div style="display:flex;gap:8px;align-items:center">';
+  h+='<label class="veh-check" style="flex:none;padding:4px 8px;border-color:'+(so.fillMode?'var(--a)':'var(--bd)')+'"><input type="checkbox" id="soEditFill" '+(so.fillMode?'checked':'')+'><span>Voll beladen</span></label>';
+  h+='<input type="number" id="soEditAmt" value="'+so.amt+'" min="1" max="50" class="auth-input" style="width:70px;text-align:center;font-size:16px"/></div></div>';
+  const idleAtFrom=G.vehs.filter(v=>v.st==='idle'&&v.loc===so.from);
+  h+='<div style="margin-top:10px"><div class="sub" style="font-weight:600;margin-bottom:4px">Fahrzeuge ('+vids.length+' zugewiesen)</div>';
+  if(!idleAtFrom.length)h+='<div class="sub" style="opacity:.6">Keine Fahrzeuge in '+(fc?.name||'?')+'</div>';
+  idleAtFrom.forEach(v=>{const vt=VT[v.type];const isA=vids.includes(v.id);
+    h+='<label class="veh-check" style="padding:4px 8px;margin:2px 0;border-color:'+(isA?'var(--a)':'var(--bd)')+'"><input type="checkbox" class="soEditVeh" data-vid="'+v.id+'" '+(isA?'checked':'')+'>';
+    h+='<span>'+vt.em+' '+vehName(v)+' · Kap: '+vehCap(v)+'</span></label>'});
+  h+='</div>';
+  h+='<button class="btn full" style="margin-top:14px;padding:10px;background:var(--a);color:var(--bg);border-color:var(--a)" onclick="_soSaveEdit(\''+soId+'\')">💾 Speichern</button>';
+  h+='<button class="btn full red" style="margin-top:6px" onclick="document.getElementById(\'soEditPopup\').remove()">Abbrechen</button>';
+  h+='</div></div>';
+  popup.innerHTML=h;
+  popup.addEventListener('click',e=>{if(e.target===popup)popup.remove()});
+  document.body.appendChild(popup);
+}
+function _soSaveEdit(soId){
+  const so=(G.standingOrders||[]).find(x=>x.id===soId);if(!so)return;
+  so.fillMode=document.getElementById('soEditFill')?.checked||false;
+  so.amt=so.fillMode?999:Math.max(1,parseInt(document.getElementById('soEditAmt')?.value)||5);
+  const vehChecks=document.querySelectorAll('.soEditVeh');
+  so.vehicleIds=[];vehChecks.forEach(cb=>{if(cb.checked)so.vehicleIds.push(cb.dataset.vid)});
+  if(typeof toast==='function')toast('💾 Gespeichert');
+  document.getElementById('soEditPopup')?.remove();ua();
+}
+
 
 // ═══ BUILDINGS (3 sub-tabs: Verwalten, Bauen, Infrastruktur) ═══
 function compBuildings(el){if(!G.sel&&cities.length)G.sel=cities[0].id;const c=G.sel?C(G.sel):null;if(!c){el.innerHTML=tabHead('buildings','🏭 Gebäude','')+'<div class="sub" style="padding:20px;text-align:center">Standort wählen</div>';return}
@@ -6052,61 +6777,52 @@ async function selectAllyBuildCity(cityName,co){
 
 // ═══ VEHICLES OVERVIEW (under Logistics) ═══
 function compVehiclesOverview(el){
+  try{
   let h=tabHead('logistics','🚛 Fahrzeugübersicht','Alle Fahrzeuge nach Status');
   const onOrder=G.vehs.filter(v=>v.st==='moving'&&v.cargo&&(v.cargo.oid||v.cargo.internal));
-  const onMarket=G.vehs.filter(v=>v.st==='moving'&&v.cargo&&(v.cargo.market||v.cargo.allianceDelivery));
+  const onMarket=G.vehs.filter(v=>v.st==='moving'&&v.cargo&&(v.cargo.market||v.cargo.allianceDelivery)&&!v.cargo.returning);
   const returning=G.vehs.filter(v=>v.st==='moving'&&(!v.cargo||v.cargo.returning));
   const idle=G.vehs.filter(v=>v.st==='idle');
-  const selCid=G.sel;
 
-  // Summary
   h+='<div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:8px">';
   h+='<span class="tg">🚛 '+G.vehs.length+' gesamt</span>';
   h+='<span class="tg g">🟢 '+idle.length+' frei</span>';
   h+='<span class="tg y">📋 '+onOrder.length+' im Auftrag</span>';
-  h+='<span class="tg" style="color:var(--go)">💰 '+onMarket.length+' Markt/Allianz</span>';
+  if(onMarket.length)h+='<span class="tg" style="color:var(--go)">💰 '+onMarket.length+' Markt/Allianz</span>';
   if(returning.length)h+='<span class="tg">🔙 '+returning.length+' Rückweg</span>';
   h+='</div>';
 
-  // On order
-  if(onOrder.length){h+='<div class="sec-label">📋 Im Auftrag · '+onOrder.length+'</div>';
-    onOrder.forEach(v=>{const vt=VT[v.type];if(!vt)return;
-      const f=Cx(v.rt?.from);const t=Cx(v.rt?.to)||(v.rt?.toLat?{lat:v.rt.toLat,lng:v.rt.toLng,name:v.rt.toName||'?'}:null);
-      if(!f||!t)return;const tn=tripT(f,t,vt.spd);const pct=Math.min(v.prog/(tn||1),1);
-      const ord=v.cargo?.oid?G.orders.find(x=>x.id===v.cargo.oid):null;
-      h+='<div class="crd" style="padding:4px 8px"><div class="rw"><span>'+vt.em+' <b>'+vehName(v)+'</b>'+(v.cargo?.good?' '+(GOODS[v.cargo.good]?.em||'')+v.cargo.amt+'×':'')+'</span>';
-      h+='<span class="eta">'+Math.floor(pct*100)+'% · '+ftime(Math.max(0,tn-v.prog))+'</span></div>';
-      h+='<div class="sub">'+f.name+' → '+t.name+(ord?' · '+fmtOrd(ord.num)+' '+fmt(ord.rew):'')+'</div>';
-      h+='<div class="pb" style="height:3px"><div class="pf" style="width:'+pct*100+'%"></div></div></div>'});}
+  function vehRow(v,extra){
+    const vt=VT[v.type];if(!vt)return'';
+    const f=Cx(v.rt?.from)||(v.rt?.fromLat?{lat:v.rt.fromLat,lng:v.rt.fromLng,name:'?'}:null);
+    const t=Cx(v.rt?.to)||(v.rt?.toLat?{lat:v.rt.toLat,lng:v.rt.toLng,name:v.rt.toName||'?'}:null);
+    const tn=(f&&t)?tripT(f,t,vt.spd):999;const pct=Math.min(v.prog/(tn||1),1);
+    let rh='<div class="crd" style="padding:5px 8px;'+(extra||'')+'"><div class="rw"><span>'+vt.em+' <b>'+vehName(v)+'</b>';
+    if(v.cargo?.good)rh+=' '+(GOODS[v.cargo.good]?.em||'')+' '+(v.cargo.amt||'')+'×';
+    rh+='</span><span class="eta">'+Math.floor(pct*100)+'% · '+ftime(Math.max(0,tn-v.prog))+'</span></div>';
+    rh+='<div class="sub">'+(f?.name||v.rt?.from||'?')+' → '+(t?.name||'?')+'</div>';
+    if(v.cargo?.oid){const ord=G.orders.find(x=>x.id===v.cargo.oid);if(ord)rh+='<div style="font-size:12px;color:var(--a)">📋 '+fmtOrd(ord.num)+' · '+fmt(ord.rew)+'</div>'}
+    rh+='<div class="pb" style="height:3px"><div class="pf" style="width:'+pct*100+'%"></div></div></div>';
+    return rh;
+  }
 
-  // Market/alliance
-  if(onMarket.length){h+='<div class="sec-label" style="color:var(--go)">💰 Markt & Allianz · '+onMarket.length+'</div>';
-    onMarket.forEach(v=>{const vt=VT[v.type];if(!vt)return;
-      const f=Cx(v.rt?.from);const t=Cx(v.rt?.to)||(v.rt?.toLat?{lat:v.rt.toLat,lng:v.rt.toLng,name:v.rt.toName||'?'}:null);
-      if(!f||!t)return;const tn=v.rt?.tripTime||tripT(f,t,vt.spd);const pct=Math.min(v.prog/(tn||1),1);
-      const isAlly=v.cargo?.allianceDelivery;const isReturn=v.cargo?.returning;
-      h+='<div class="crd" style="padding:4px 8px;border-left:3px solid '+(isAlly?'#a855f7':'var(--go)')+'"><div class="rw"><span>'+vt.em+' <b>'+vehName(v)+'</b> <span class="tg" style="font-size:9px;color:'+(isAlly?'#a855f7':'var(--go)')+'">'+(isReturn?'🔙 Rückfahrt':(isAlly?'🤝 Allianz':'💰 Markt'))+'</span></span>';
-      h+='<span class="eta">'+Math.floor(pct*100)+'%</span></div>';
-      h+='<div class="sub">'+(f.name||'?')+' → '+(t.name||'?')+'</div>';
-      h+='<div class="pb" style="height:3px"><div class="pf" style="width:'+pct*100+'%;background:'+(isAlly?'#a855f7':'var(--go)')+'"></div></div></div>'});}
+  if(onOrder.length){h+='<div class="sec-label">📋 Im Auftrag · '+onOrder.length+'</div>';onOrder.forEach(v=>{h+=vehRow(v)})}
+  if(onMarket.length){h+='<div class="sec-label" style="color:var(--go)">💰 Markt & Allianz · '+onMarket.length+'</div>';onMarket.forEach(v=>{const isA=v.cargo?.allianceDelivery;h+=vehRow(v,'border-left:3px solid '+(isA?'#a855f7':'var(--go)'))})}
+  if(returning.length){h+='<div class="sec-label">🔙 Rückweg · '+returning.length+'</div>';returning.forEach(v=>{h+=vehRow(v)})}
 
-  // Returning (no cargo)
-  if(returning.length){h+='<div class="sec-label">🔙 Auf dem Rückweg · '+returning.length+'</div>';
-    returning.forEach(v=>{const vt=VT[v.type];if(!vt)return;
-      const f=Cx(v.rt?.from);const t=Cx(v.rt?.to)||(v.rt?.toLat?{lat:v.rt.toLat,lng:v.rt.toLng,name:v.rt.toName||'?'}:null);
-      if(!f||!t)return;const tn=tripT(f,t,vt.spd);const pct=Math.min(v.prog/(tn||1),1);
-      h+='<div class="crd" style="padding:4px 8px"><div class="rw"><span>'+vt.em+' <b>'+vehName(v)+'</b> <span class="sub">→ '+(t.name||'?')+'</span></span>';
-      h+='<span class="eta">'+Math.floor(pct*100)+'% · '+ftime(Math.max(0,tn-v.prog))+'</span></div>';
-      h+='<div class="pb" style="height:3px"><div class="pf" style="width:'+pct*100+'%"></div></div></div>'});}
-
-  // Idle - grouped by city
   if(idle.length){h+='<div class="sec-label">🟢 Frei · '+idle.length+'</div>';
     const byCity={};idle.forEach(v=>{const loc=v.loc||'?';if(!byCity[loc])byCity[loc]=[];byCity[loc].push(v)});
-    Object.entries(byCity).forEach(([loc,vehs])=>{const c=C(loc);
-      h+='<div class="crd" style="padding:4px 8px"><div class="sub" style="font-weight:600;margin-bottom:2px">📍 '+(c?.name||loc)+' · '+vehs.length+' Fahrzeug'+(vehs.length>1?'e':'')+'</div>';
-      vehs.forEach(v=>{const vt=VT[v.type];h+='<div class="rw" style="font-size:11px;padding:1px 0"><span>'+vt.em+' '+vehName(v)+' · Kap: '+vehCap(v)+'</span></div>'});
+    Object.entries(byCity).forEach(([loc,vehs])=>{const c=C(loc)||Cx(loc);
+      const isOwned=cities.find(x=>x.id===loc);
+      h+='<div class="crd" style="padding:5px 8px;'+(isOwned?'':'border-left:3px solid var(--go)')+'">';
+      h+='<div class="rw"><span style="font-weight:600">📍 '+(c?.name||loc)+(isOwned?'':' ⚠️')+'</span><span class="sub">'+vehs.length+' Fzg</span></div>';
+      vehs.forEach(v=>{const vt=VT[v.type];if(!vt)return;
+        h+='<div style="display:flex;justify-content:space-between;padding:2px 0;font-size:12px"><span>'+vt.em+' '+vehName(v)+' · Kap: '+vehCap(v)+'</span>';
+        if(!isOwned)h+='<button class="btn sm" style="font-size:10px" onclick="quickRecall(\''+v.id+'\')">🔙 Rückruf</button>';
+        h+='</div>'});
       h+='</div>'});}
   el.innerHTML=h;
+  }catch(e){el.innerHTML='<div style="padding:20px;color:var(--r)">⚠️ Fehler: '+e.message+'</div>';console.error('compVehiclesOverview error:',e)}
 }
 
 // ═══ TOAST FEEDBACK ═══
@@ -6321,6 +7037,7 @@ async function adminDeleteUser(userKey){
 function launchGame(sc){
   document.getElementById('startScreen').style.display='none';
   document.getElementById('gameScreen').style.display='block';
+  document.getElementById('topBar').style.display='flex';
   try{initMap()}catch(e){console.error('initMap error:',e)}
   try{cities.forEach(c=>addCityMap(c))}catch(e){console.error('addCityMap error:',e)}
   gameStarted=true;
@@ -6332,6 +7049,7 @@ function launchGame(sc){
   if(G)try{Object.keys(G.blds).forEach(ubmk)}catch(e){}
   updCnt();
   if(!tickIv)tickIv=setInterval(tick,1000);
+  if(typeof checkTutorial==='function')checkTutorial();
   setInterval(save,30000);
   setInterval(saveCache,120000); // Save cache every 2min
 }
