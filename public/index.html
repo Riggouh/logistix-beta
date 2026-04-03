@@ -1507,9 +1507,20 @@ function newGame(city){
   if(currentUser==='test')G.money=10000000;
 }
 
+let _lastLbSync=0;
 async function save(){
   if(!G||!currentUser)return;
   try{await storeSet('lx_save_'+currentUser,JSON.stringify({...G,_t:Date.now()}))}catch(e){}
+  // Leaderboard-Score alle 5 Min automatisch aktualisieren
+  const now=Date.now();
+  if(now-_lastLbSync>300000){
+    _lastLbSync=now;
+    try{
+      const cv=typeof companyValue==='function'?companyValue():0;
+      const lvl=typeof playerLvl==='function'?playerLvl():1;
+      await window.storage.set('lb:'+currentUser,JSON.stringify({name:currentUser,lvl,dels:G.dels||0,value:cv,cities:cities.length,ally:G.alliance||''}),true);
+    }catch(e){}
+  }
 }
 
 async function load(){
