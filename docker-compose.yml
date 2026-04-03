@@ -1,0 +1,12 @@
+services:
+  logistix:
+    build: .
+    container_name: logistix
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    volumes:
+      - logistix-data:/app/data
+
+volumes:
+  logistix-data:
