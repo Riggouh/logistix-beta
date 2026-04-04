@@ -554,9 +554,9 @@ body{font-family:'Barlow',sans-serif;background:var(--bg);color:var(--t);overflo
       <button class="auth-tab" onclick="showAuth('register')">Registrieren</button>
     </div>
     <div id="authLogin">
-      <input type="text" class="auth-input" id="loginUser" placeholder="Benutzername" autocomplete="off" onkeydown="if(event.key==='Enter')document.getElementById('loginPass').focus()"/>
-      <div style="position:relative"><input type="password" class="auth-input" id="loginPass" placeholder="Passwort" onkeydown="if(event.key==='Enter')doLogin()"/><button class="pw-toggle" onclick="togglePassVis('loginPass')">👁️</button></div>
-      <button class="btn full" style="margin-top:8px;padding:10px" onclick="doLogin()">Anmelden</button>
+      <input type="text" class="auth-input" id="loginUser" placeholder="Benutzername" autocomplete="off"/>
+      <div style="position:relative"><input type="password" class="auth-input" id="loginPass" placeholder="Passwort"/><button class="pw-toggle" onclick="togglePassVis('loginPass')">👁️</button></div>
+      <button class="btn full" style="margin-top:8px;padding:10px" id="loginBtn" onclick="doLogin()">Anmelden</button>
       <div style="margin-top:10px;text-align:center"><button class="auth-link" onclick="showAuth('reset')">Passwort vergessen?</button></div>
     </div>
     <div id="authRegister" style="display:none">
@@ -837,23 +837,23 @@ function gIco(key,fallback,size){
 }
 
 const VT={
-  kleintransporter:{name:"3,5t Transporter",em:"🚐",cat:"land",spd:90,cap:4,price:6000,mt:30,lvl:1},
-  lieferwagen:{name:"Lieferwagen 5t",em:"🚙",cat:"land",spd:85,cap:8,price:12000,mt:50,lvl:2},
-  lkw75:{name:"7,5t LKW",em:"🚛",cat:"land",spd:80,cap:12,price:18000,mt:70,lvl:3},
-  kuehlwagen:{name:"Kühltransporter",em:"🧊",cat:"land",spd:78,cap:15,price:28000,mt:100,lvl:4},
-  sattelzug:{name:"Sattelzug 40t",em:"🚚",cat:"land",spd:75,cap:35,price:45000,mt:150,lvl:5},
-  tankwagen:{name:"Tankwagen",em:"🛢️",cat:"land",spd:70,cap:45,price:60000,mt:180,lvl:6},
-  gueterzug:{name:"Güterzug",em:"🚆",cat:"rail",spd:120,cap:60,price:120000,mt:400,lvl:7},
-  kuestenfrachter:{name:"Küstenfrachter",em:"🚢",cat:"sea",spd:25,cap:150,price:200000,mt:800,lvl:8},
-  propeller:{name:"Propellermaschine",em:"🛩️",cat:"air",spd:450,cap:8,price:300000,mt:1200,lvl:8},
-  frachtjet:{name:"Frachtjet",em:"✈️",cat:"air",spd:850,cap:25,price:1500000,mt:4000,lvl:9},
-  containerschiff:{name:"Containerschiff",em:"🛳️",cat:"sea",spd:18,cap:800,price:800000,mt:2500,lvl:10},
-  schnellzug:{name:"ICE-Güterzug",em:"🚄",cat:"rail",spd:200,cap:40,price:350000,mt:600,lvl:11},
-  doppelstock:{name:"Doppelstock-LKW",em:"🚛",cat:"land",spd:72,cap:55,price:180000,mt:300,lvl:12},
-  schwertransporter:{name:"Schwertransporter",em:"🚛",cat:"land",spd:60,cap:80,price:250000,mt:500,lvl:13},
-  superfrachter:{name:"Superfrachter",em:"🛳️",cat:"sea",spd:22,cap:2000,price:3000000,mt:6000,lvl:14},
-  cargojet:{name:"Cargo-Großraumjet",em:"🛫",cat:"air",spd:900,cap:60,price:5000000,mt:8000,lvl:14},
-  megatransporter:{name:"Megatransporter",em:"🚀",cat:"land",spd:65,cap:120,price:8000000,mt:10000,lvl:15},
+  kleintransporter:{name:"3,5t Transporter",em:"🚐",cat:"land",spd:90,cap:12,price:6000,mt:30,lvl:1},
+  lieferwagen:{name:"Lieferwagen 5t",em:"🚙",cat:"land",spd:85,cap:20,price:12000,mt:50,lvl:2},
+  lkw75:{name:"7,5t LKW",em:"🚛",cat:"land",spd:80,cap:35,price:18000,mt:70,lvl:3},
+  kuehlwagen:{name:"Kühltransporter",em:"🧊",cat:"land",spd:78,cap:40,price:28000,mt:100,lvl:4},
+  sattelzug:{name:"Sattelzug 40t",em:"🚚",cat:"land",spd:75,cap:80,price:45000,mt:150,lvl:5},
+  tankwagen:{name:"Tankwagen",em:"🛢️",cat:"land",spd:70,cap:100,price:60000,mt:180,lvl:6},
+  gueterzug:{name:"Güterzug",em:"🚆",cat:"rail",spd:120,cap:200,price:120000,mt:400,lvl:7},
+  kuestenfrachter:{name:"Küstenfrachter",em:"🚢",cat:"sea",spd:25,cap:500,price:200000,mt:800,lvl:8},
+  propeller:{name:"Propellermaschine",em:"🛩️",cat:"air",spd:450,cap:15,price:300000,mt:1200,lvl:8},
+  frachtjet:{name:"Frachtjet",em:"✈️",cat:"air",spd:850,cap:50,price:1500000,mt:4000,lvl:9},
+  containerschiff:{name:"Containerschiff",em:"🛳️",cat:"sea",spd:18,cap:2000,price:800000,mt:2500,lvl:10},
+  schnellzug:{name:"ICE-Güterzug",em:"🚄",cat:"rail",spd:200,cap:120,price:350000,mt:600,lvl:11},
+  doppelstock:{name:"Doppelstock-LKW",em:"🚛",cat:"land",spd:72,cap:150,price:180000,mt:300,lvl:12},
+  schwertransporter:{name:"Schwertransporter",em:"🚛",cat:"land",spd:60,cap:250,price:250000,mt:500,lvl:13},
+  superfrachter:{name:"Superfrachter",em:"🛳️",cat:"sea",spd:22,cap:5000,price:3000000,mt:6000,lvl:14},
+  cargojet:{name:"Cargo-Großraumjet",em:"🛫",cat:"air",spd:900,cap:120,price:5000000,mt:8000,lvl:14},
+  megatransporter:{name:"Megatransporter",em:"🚀",cat:"land",spd:65,cap:400,price:8000000,mt:10000,lvl:15},
 };
 const VEH_CATS={land:"🚛 Landfahrzeuge",rail:"🚆 Schienenverkehr",sea:"🚢 Seefahrt",air:"✈️ Luftfracht"};
 const WAGON_UPGRADE={name:"Güterwagon",em:"🚃",max:5,baseCost:25000,capPerLevel:30};
@@ -1017,11 +1017,11 @@ const GOODS={
 };
 
 const ANIMALS={
-  huehner:{name:"Hühner",em:"🐔",price:1200,produces:[{good:"eier",rate:2},{good:"huehnchen",rate:1}],lvl:1},
-  bienen:{name:"Bienen",em:"🐝",price:1000,produces:[{good:"honig",rate:2}],lvl:1},
-  schweine:{name:"Schweine",em:"🐷",price:2500,produces:[{good:"schweinefleisch",rate:1}],lvl:2},
-  schafe:{name:"Schafe",em:"🐑",price:2000,produces:[{good:"wolle",rate:2}],lvl:2},
-  kuehe:{name:"Kühe",em:"🐄",price:4000,produces:[{good:"milch",rate:2},{good:"rindfleisch",rate:1}],lvl:4},
+  huehner:{name:"Hühner",em:"🐔",price:1200,produces:[{good:"eier",rate:4},{good:"huehnchen",rate:2}],lvl:1},
+  bienen:{name:"Bienen",em:"🐝",price:1000,produces:[{good:"honig",rate:3}],lvl:1},
+  schweine:{name:"Schweine",em:"🐷",price:2500,produces:[{good:"schweinefleisch",rate:2}],lvl:2},
+  schafe:{name:"Schafe",em:"🐑",price:2000,produces:[{good:"wolle",rate:3}],lvl:2},
+  kuehe:{name:"Kühe",em:"🐄",price:4000,produces:[{good:"milch",rate:3},{good:"rindfleisch",rate:1}],lvl:4},
 };
 
 const FRUITS={
@@ -1134,13 +1134,13 @@ const RECIPES={
 // ═══ BUILDINGS with level requirements and optional region lock ═══
 const BLD={
   // Storage buildings
-  lagerhalle:{name:"Lagerhalle",em:"📦",price:10000,tp:"s",desc:"Stadtlager +300, upgradbar",localCap:0,lvl:1,storCap:300},
-  grosse_lagerhalle:{name:"Große Lagerhalle",em:"🏭",price:35000,tp:"s",desc:"Stadtlager +800, upgradbar bis +4000",localCap:0,lvl:4,storCap:800},
+  lagerhalle:{name:"Lagerhalle",em:"📦",price:10000,tp:"s",desc:"Stadtlager +500, upgradbar",localCap:0,lvl:1,storCap:500},
+  grosse_lagerhalle:{name:"Große Lagerhalle",em:"🏭",price:35000,tp:"s",desc:"Stadtlager +1500, upgradbar bis +6000",localCap:0,lvl:4,storCap:1500},
   // LVL 1 – Basics
-  bauernhof:{name:"Bauernhof",em:"🌾",price:8000,tp:"farm",prod:"getreide",rate:2,inp:null,inpN:0,desc:"Getreide + Tiere",localCap:60,baseTick:50,lvl:1},
-  forstwirtschaft:{name:"Forstwirtschaft",em:"🌲",price:6000,tp:"p",prod:"holz",rate:2,inp:null,inpN:0,desc:"Holz",localCap:60,baseTick:45,lvl:1},
+  bauernhof:{name:"Bauernhof",em:"🌾",price:8000,tp:"farm",prod:"getreide",rate:4,inp:null,inpN:0,desc:"Getreide + Tiere",localCap:100,baseTick:45,lvl:1},
+  forstwirtschaft:{name:"Forstwirtschaft",em:"🌲",price:6000,tp:"p",prod:"holz",rate:3,inp:null,inpN:0,desc:"Holz",localCap:100,baseTick:40,lvl:1},
   // LVL 2 – Fruits, basic processing
-  obstplantage:{name:"Obstplantage",em:"🍎",price:10000,tp:"orchard",prod:null,rate:2,inp:null,inpN:0,desc:"Obst (wählbar)",localCap:50,baseTick:30,lvl:2},
+  obstplantage:{name:"Obstplantage",em:"🍎",price:10000,tp:"orchard",prod:null,rate:3,inp:null,inpN:0,desc:"Obst (wählbar)",localCap:80,baseTick:30,lvl:2},
   muehle:{name:"Mühle",em:"🌾",price:14000,tp:"recipe",recipes:'muehle',desc:"Getreide → Mehl",localCap:60,baseTick:65,lvl:2},
   saftpresse:{name:"Saftpresse",em:"🧃",price:13000,tp:"recipe",recipes:'saftpresse',desc:"Obst → Saft/Marmelade",localCap:50,baseTick:60,lvl:3},
   // LVL 3 – Advanced processing
@@ -1247,7 +1247,7 @@ function canBuildInCity(bldKey,cid){
 const TF=2700;const routeCache={};
 
 const INFRA={
-  lager_upgrade:{name:"Lagererweiterung",em:"📦",price:8000,desc:"Stadtlager +200 (einmalig)",req:null,effect:"+200 Lagerkapazität",storCap:200,stack:false},
+  lager_upgrade:{name:"Lagererweiterung",em:"📦",price:8000,desc:"Stadtlager +400 (einmalig)",req:null,effect:"+400 Lagerkapazität",storCap:400,stack:false},
   depot:{name:"Fahrzeug-Depot",em:"🏢",price:15000,desc:"Fahrzeugstellplätze (Basis 3, upgradbar)",req:null,effect:"Stellplätze für Fahrzeuge",depotCap:3,stack:false},
   bahnhof:{name:"Bahnhof",em:"🚉",price:35000,desc:"Ermöglicht Züge",req:null,effect:"Züge nutzbar"},
   flughafen:{name:"Flughafen",em:"✈️",price:200000,desc:"Ermöglicht Flüge",req:'airport',effect:"Flugzeuge nutzbar"},
@@ -1359,7 +1359,7 @@ function genExpressOrder(){
   const targets=cities.filter(c=>c.id!==fromC.id);if(!targets.length)return;
   const toC=targets[Math.floor(Math.random()*targets.length)];
   const dist=hav(fromC.lat,fromC.lng,toC.lat,toC.lng);
-  const sendAmt=Math.min(amt,Math.max(3,Math.floor(amt*0.4)));
+  const sendAmt=Math.min(amt,Math.max(5,Math.floor(amt*0.5)));
   const toReg=getRegion((toC.co||'').toUpperCase());
   const mktPrice=typeof marketPrice==='function'?marketPrice(good,toReg):(BASE_PRICES[good]||100);
   if(!mktPrice||isNaN(mktPrice))return null;
@@ -1377,7 +1377,7 @@ function genExpressOrder(){
 
 // City storage capacity: base 100 + infra storage + building storage (with upgrades)
 function cityCap(cid){
-  let cap=100;
+  let cap=200;
   const inf=G.infra&&G.infra[cid]||[];
   inf.forEach(i=>{const d=INFRA[i.type];if(d&&d.storCap)cap+=d.storCap});
   const bs=G.blds&&G.blds[cid]||[];
@@ -1434,17 +1434,24 @@ function companyValue(){
     if(b.ups)Object.entries(b.ups).forEach(([track,lvl])=>{for(let i=0;i<lvl;i++)val+=Math.floor(upCost(track,i)*0.4)})}));
   // Infrastructure (60% of build price)
   if(G.infra)Object.values(G.infra).forEach(arr=>(arr||[]).forEach(i=>{const d=INFRA[i.type];if(d)val+=Math.floor(d.price*0.6)}));
-  // Stored goods (at market price if available, else base price)
+  // Stored goods (10% of market price — raw materials, not finished products)
   Object.values(G.stor||{}).forEach(s=>Object.entries(s||{}).forEach(([g,a])=>{
     if(!GOODS[g]||typeof a!=='number'||isNaN(a))return;
     const price=typeof marketPrice==='function'?marketPrice(g):GOODS[g].bp;
-    val+=Math.floor(a*(price||GOODS[g].bp||0));
+    val+=Math.floor(a*(price||GOODS[g].bp||0)*0.1);
   }));
   return isNaN(val)?0:Math.round(val);
 }
 
 // Track supply for market pricing
 function trackSupply(good,amt){if(!G||!G.supplyTrack)return;G.supplyTrack[good]=(G.supplyTrack[good]||0)+amt}
+
+// ═══ FINANCIAL TRACKING ═══
+function finLog(type,amount,desc){
+  if(!G)return;if(!G.finance)G.finance=[];
+  G.finance.push({t:G.tick,ts:Date.now(),type,amount,desc});
+  if(G.finance.length>500)G.finance.shift();
+}
 // ══════════════════════════════════════════
 // AUTH + GAME STATE
 // ══════════════════════════════════════════
@@ -1645,7 +1652,7 @@ async function doResetStep2(){
 
 function doLogout(){
   save();
-  try{storeSet('lx_session','')}catch(e){}
+  try{sessionStorage.setItem('lx_session','')}catch(e){}
   currentUser=null;G=null;gameStarted=false;cities=[];
   if(tickIv){clearInterval(tickIv);tickIv=null}
   document.getElementById('loginScreen').style.display='flex';
@@ -1687,7 +1694,7 @@ function openSettings(){
 async function afterLogin(userData){
   document.getElementById('loginScreen').style.display='none';
   // Persist session
-  try{await storeSet('lx_session',currentUser)}catch(e){}
+  try{sessionStorage.setItem('lx_session',currentUser)}catch(e){}
   // Try loading existing save
   const loaded=await load();
   if(loaded&&G&&cities.length>0){
@@ -1825,8 +1832,8 @@ function genOrd(){
   if(match){tId=match.id;tName=match.name;tLat=match.lat;tLng=match.lng;tCo=match.co;tUnlocked=true}
   else{tId='db_'+td[0].toLowerCase().replace(/[^a-z0-9]/g,'');tName=td[0];tLat=td[3];tLng=td[4];tCo=td[1];tUnlocked=false}
   const g=GOODS[pick.good];if(!g)return null;
-  const maxAmt=Math.min(pick.amt,[6,10,15,20,28,35,40,50,60,80][Math.min(lvl-1,9)]);
-  const amt=Math.max(2,Math.floor(Math.random()*maxAmt)+2);
+  const maxAmt=Math.min(pick.amt,[15,25,40,55,75,100,150,200,300,500][Math.min(lvl-1,9)]);
+  const amt=Math.max(3,Math.floor(Math.random()*maxAmt)+3);
   const d=hav(f.lat,f.lng,tLat,tLng);
   const toReg=getRegion((tCo||'').toUpperCase());
   const mktPrice=typeof marketPrice==='function'?marketPrice(pick.good,toReg):(g.bp||100);
@@ -2146,7 +2153,7 @@ function buyV(type){
   const vAtDepot=G.vehs.filter(v=>(v.depot||v.loc)===loc).length;
   const cap=depotCap(loc);
   if(vAtDepot>=cap){addLog('❌ Depot voll! ('+vAtDepot+'/'+cap+') – Depot ausbauen');return}
-  G.money-=d.price;const v={id:uid(),type,st:'idle',loc,depot:loc,cargo:null,rt:null,prog:0,queue:[],km:0,lastMaintKm:0};
+  G.money-=d.price;finLog("expense",-d.price,"Fahrzeug: "+d.name);const v={id:uid(),type,st:'idle',loc,depot:loc,cargo:null,rt:null,prog:0,queue:[],km:0,lastMaintKm:0};
   if(type==='gueterzug')v.wagons=0;
   G.vehs.push(v);addLog(d.em+' '+vehName(v)+' gekauft in '+(C(loc)?.name||''));ua();
 }
@@ -2340,7 +2347,7 @@ function upgradeWagon(vid){
   G.money-=cost;v.wagons=lvl+1;
   addLog('🚃 +1 Wagon → Kapazität: '+vehCap(v));ua();
 }
-function bld(cid,type){if(!G)return;const d=BLD[type];if(!d||G.money<d.price)return;if(!canBuildInCity(type,cid)){addLog('❌ Kann hier nicht gebaut werden');return}const c=C(cid);if(!c)return;const ex=G.blds[cid]||[];if(ex.length>=mxB(c.pop))return;G.money-=d.price;if(!G.blds[cid])G.blds[cid]=[];
+function bld(cid,type){if(!G)return;const d=BLD[type];if(!d||G.money<d.price)return;if(!canBuildInCity(type,cid)){addLog('❌ Kann hier nicht gebaut werden');return}const c=C(cid);if(!c)return;const ex=G.blds[cid]||[];if(ex.length>=mxB(c.pop))return;G.money-=d.price;finLog('expense',-d.price,'Gebäude: '+d.name);if(!G.blds[cid])G.blds[cid]=[];
   const b={type,id:uid(),ups:{},localStor:{},overflow:'city'};
   if(type==='bauernhof')b.animals={};
   if(type==='obstplantage')b.fruits={};
@@ -2524,7 +2531,7 @@ function cancelO(oid){if(!G)return;const o=G.orders.find(x=>x.id===oid);if(!o)re
   // Higher penalty the later in delivery timer
   const delivAge=o.accTick?(G.tick-o.accTick):0;const pctUsed=o.deliverTl?Math.min(delivAge/o.deliverTl,1):0;
   const penRate=0.2+pctUsed*0.3; // 20% early → 50% late
-  const penalty=Math.floor((o.origRew||o.rew)*penRate);G.money-=penalty;G.orders=G.orders.filter(x=>x.id!==oid);addLog('❌ Storniert (−'+fmt(penalty)+')');ua()}
+  const penalty=Math.floor((o.origRew||o.rew)*penRate);G.money-=penalty;finLog("penalty",-penalty,"Storno");G.orders=G.orders.filter(x=>x.id!==oid);addLog('❌ Storniert (−'+fmt(penalty)+')');ua()}
 
 function shAsgn(oid){if(!G)return;const o=G.orders.find(x=>x.id===oid);if(!o)return;const fc=C(o.from),tc=C(o.to);if(!fc||!tc)return;const avl=G.vehs.filter(v=>v.st==='idle'&&v.loc===o.from);document.getElementById('mT').textContent=fc.name+' → '+tc.name;let h='<div class="crd"><div class="rw"><span>'+GOODS[o.good].em+' '+o.amt+'× '+GOODS[o.good].name+'</span><span style="color:var(--a);font-family:Chakra Petch;font-weight:600">'+fmt(o.rew)+'</span></div><div class="sub">'+fdist(fc,tc)+' km</div></div>';if(!avl.length)h+='<div style="color:var(--r);font-size:12px;padding:10px;text-align:center">⚠️ Kein Fahrzeug in '+fc.name+'!<br><span style="color:var(--td);font-size:10px">Sende eines im Fuhrpark-Tab.</span></div>';else avl.forEach(v=>{const vt=VT[v.type],ok=vehCap(v)>=o.amt;h+='<div class="crd'+(ok?' active':'')+'" style="cursor:'+(ok?'pointer':'default')+';'+(ok?'':'opacity:.4')+'" '+(ok?'onclick="asgn(\''+v.id+'\',\''+oid+'\')"':'')+'><div class="rw"><span>'+vt.em+' '+vt.name+'</span><span class="sub">Kap: '+vehCap(v)+' · ⏱'+ftime(tripT(fc,tc,vt.spd))+'</span></div></div>'});document.getElementById('mB').innerHTML=h;document.getElementById('mBg').style.display='flex'}
 function closeMdl(){document.getElementById('mBg').style.display='none'}
@@ -2819,7 +2826,7 @@ async function saveTerritoryMarket(d){_allyCache.market=d;try{await window.stora
 function RA(){if(typeof renderAlliance==='function')renderAlliance()}
 
 // Actions
-async function createAlliance(name,tag){if(!G||!currentUser)return;if(G.alliance){addLog('❌ Bereits in Allianz');return}if(!name||name.length<3){addLog('❌ Name min. 3');return}if(!tag||tag.length<2||tag.length>4){addLog('❌ Tag 2-4');return}const cost=300000;if(G.money<cost){addLog('❌ '+fmt(cost)+' nötig (150.000€ Startkapital)');return}G.money-=cost;const id=uid();const a={id,name:sanitize(name),tag:sanitize(tag).toUpperCase(),level:1,leader:currentUser,members:[{user:currentUser,role:'leader',joined:Date.now()}],treasury:250000,storage:{},buildings:[],territories:[],orders:[],created:Date.now()};await saveAlliance(a);G.alliance=id;addLog('🤝 ['+tag.toUpperCase()+'] '+name+' gegründet!');if(typeof toast==='function')toast('🤝 Allianz gegründet! 250.000€ Startkapital','#a855f7');ua();RA()}
+async function createAlliance(name,tag){if(!G||!currentUser)return;if(G.alliance){toast('❌ Du bist bereits in einer Allianz','var(--r)');return}if(!name||name.length<3){toast('❌ Allianz-Name mindestens 3 Zeichen','var(--r)');return}if(!tag||tag.length<2||tag.length>4){toast('❌ Tag muss 2-4 Zeichen lang sein','var(--r)');return}const cost=300000;if(G.money<cost){toast('❌ Nicht genug Geld! '+fmt(cost)+' benötigt (du hast '+fmt(G.money)+')','var(--r)');return}G.money-=cost;finLog('expense',-cost,'Allianz: '+name);const id=uid();const a={id,name:sanitize(name),tag:sanitize(tag).toUpperCase(),level:1,leader:currentUser,members:[{user:currentUser,role:'leader',joined:Date.now()}],treasury:250000,storage:{},buildings:[],territories:[],orders:[],created:Date.now()};await saveAlliance(a);G.alliance=id;addLog('🤝 ['+tag.toUpperCase()+'] '+name+' gegründet!');toast('🤝 Allianz gegründet! 250.000€ Startkapital','#a855f7');ua();RA()}
 async function joinAlliance(id){
   if(!G||!currentUser||G.alliance)return;
   const a=await getAlliance(id);if(!a)return;
@@ -3075,7 +3082,7 @@ function tickCore(){
       }
       // After 150% delivery time: auto-cancel with penalty
       if(delivAge>=o.deliverTl*1.5){
-        const pen=Math.round((o.origRew||0)*0.4)||0;if(pen>0)G.money-=pen;
+        const pen=Math.round((o.origRew||0)*0.4)||0;if(pen>0){G.money-=pen;finLog("penalty",-pen,"Auftrag verfallen")}
         addLog('❌ Auftrag '+fmtOrd(o.num)+' abgelaufen! -'+fmt(pen)+' Strafe');markCompDirty();
         o._expired=true;
       }
@@ -3104,6 +3111,17 @@ function tickCore(){
   }
   // Clean expired events
   G.events=G.events.filter(e=>e.endTick>G.tick);
+
+  // ── Enforce storage caps (fix any overflow) ──
+  if(G.tick%60===0){
+    cities.forEach(c=>{const s=G.stor[c.id];if(!s)return;
+      const cap=cityCap(c.id);const used=Object.values(s).reduce((t,v)=>t+v,0);
+      if(used>cap){let excess=used-cap;
+        const keys=Object.keys(s).sort((a,b)=>s[b]-s[a]);
+        for(const g of keys){if(excess<=0)break;const rm=Math.min(s[g],excess);s[g]-=rm;excess-=rm;if(s[g]<=0)delete s[g]}
+      }
+    });
+  }
 
   // ── Orders + Express ──
   if(G.tick%60===0){
@@ -3293,7 +3311,7 @@ function tickCore(){
             if(o.delivered>=o.amt){
               // Order complete!
               const payRew=typeof o.rew==='number'&&!isNaN(o.rew)?o.rew:0;
-              G.money+=payRew;G.earned+=payRew;G.dels++;trackSupply(o.good,o.amt);
+              G.money+=payRew;G.earned+=payRew;G.dels++;finLog("income",payRew,"Auftrag "+(GOODS[o.good]?.name||""));trackSupply(o.good,o.amt);
               if(!G.history)G.history=[];
               G.history.push({good:o.good,amt:o.amt,rew:o.rew,from:o.from,to:o.to,tick:G.tick,ts:Date.now(),express:o.type==='express',toName:o.toName||''});
               if(G.history.length>200)G.history.shift();
@@ -3323,7 +3341,7 @@ function tickCore(){
           if(!v.cargo.returning){
             // First leg done: complete sale, start return
             const profit=v.cargo.revenue||0;
-            const profit2=typeof profit==='number'&&!isNaN(profit)?profit:0;G.money+=profit2;G.earned+=profit2;G.dels++;trackSupply(v.cargo.good,v.cargo.amt);
+            const profit2=typeof profit==='number'&&!isNaN(profit)?profit:0;G.money+=profit2;G.earned+=profit2;G.dels++;finLog("income",profit2,"Marktverkauf");trackSupply(v.cargo.good,v.cargo.amt);
             if(!G.history)G.history=[];
             G.history.push({good:v.cargo.good,amt:v.cargo.amt,rew:profit,from:v.rt.from,to:'market_'+v.cargo.destName,tick:G.tick,ts:Date.now()});
             addLog('💰 Marktverkauf: +'+fmt(profit)+' ('+v.cargo.destName+')');
@@ -3339,16 +3357,22 @@ function tickCore(){
           }
         } else if(v.cargo&&v.cargo.internal){
           if(!G.stor[v.rt.to])G.stor[v.rt.to]={};
-          G.stor[v.rt.to][v.cargo.good]=(G.stor[v.rt.to][v.cargo.good]||0)+v.cargo.amt;
-          addLog('📦 '+v.cargo.amt+'× '+(GOODS[v.cargo.good]?.em||'')+' → '+t.name);markCompDirty();
+          const dCap=cityCap(v.rt.to);const dUsed=Object.values(G.stor[v.rt.to]).reduce((s2,x)=>s2+x,0);
+          const canStore=Math.max(0,dCap-dUsed);
+          const stored=Math.min(v.cargo.amt,canStore);
+          if(stored>0)G.stor[v.rt.to][v.cargo.good]=(G.stor[v.rt.to][v.cargo.good]||0)+stored;
+          if(stored<v.cargo.amt)addLog('⚠️ Lager voll in '+t.name+' — '+(v.cargo.amt-stored)+'× überschuss verloren');
+          addLog('📦 '+stored+'× '+(GOODS[v.cargo.good]?.em||'')+' → '+t.name);markCompDirty();
         }
         v.st='idle';v.loc=v.rt.to||v.rt.from;
+        const _arrFrom=v.rt.from;const _arrTo=v.rt.to;
         // Track kilometers
         if(typeof v.km!=='number')v.km=0;
         v.km+=Math.round(hav(f.lat,f.lng,t.lat,t.lng));
         // Market/alliance trips return to origin
-        if(v.cargo&&(v.cargo.market||v.cargo.allianceDelivery)){v.loc=v.rt.to||v.rt.from||v.loc}
-        v.cargo=null;
+        if(v.cargo&&(v.cargo.market||v.cargo.allianceDelivery)){v.loc=_arrTo||_arrFrom||v.loc}
+        const _arrCargo=v.cargo;
+        v.cargo=null;v.rt=null;v.prog=0; // Clear immediately!
         // Handle pending transfer (remote vehicle arrived at origin)
         if(v.pendingTransfer&&v.st==='idle'){
           const pt=v.pendingTransfer;const s=G.stor[v.loc];
@@ -3523,20 +3547,44 @@ function tick(){
   if(!gameStarted||!G)return;
   try{tickCore()}catch(e){console.error('TICK ERROR:',e)}
   tc++;
-  if(tc%2===0){try{uhud()}catch(e){}}
-  // Dashboard: re-render every 2s. Terminal: only when dirty or every 10s
-  if(tc%2===0&&!renderBlocked){
+  // HUD update every second
+  try{uhud()}catch(e){}
+  // Terminal: live-update timers/progress every second. Full rebuild ONLY when dirty.
+  if(!renderBlocked){
     try{
       if(computerOpen){
         updateLiveElements();
-        if(_compDirty||tc%10===0){_compDirty=false;renComp()}
-      } else {ren()}
+        if(_compDirty){_compDirty=false;renComp()}
+      } else {
+        if(tc%5===0)ren();
+      }
     }catch(e){}
   }
   if(tc%3===0){try{uvmk()}catch(e){}}
   if(tc%5===0)try{uvmk()}catch(e){}
   if(tc%2===0){try{if(typeof tutorialTick==='function')tutorialTick()}catch(e){}}
   if(tc%30===0)try{markDirty()}catch(e){}
+  // Check for admin-triggered reload every 30s
+  if(tc%30===0&&currentUser)checkAdminReload();
+}
+
+async function checkAdminReload(){
+  try{
+    const sig=await storeGet('lx_reload_'+currentUser);
+    if(sig){
+      await storeDel('lx_reload_'+currentUser);
+      // Reload save from storage
+      const raw=await storeGet('lx_save_'+currentUser);
+      if(raw){
+        const d=JSON.parse(raw);
+        // Only apply money/earned changes, keep everything else live
+        if(typeof d.money==='number'&&!isNaN(d.money))G.money=d.money;
+        if(typeof d.earned==='number'&&!isNaN(d.earned))G.earned=d.earned;
+        uhud();markCompDirty();
+        addLog('🔧 Admin-Änderung übernommen');
+      }
+    }
+  }catch(e){}
 }
 // ══════════════════════════════════════════
 // MAP (Leaflet + OSRM Road Routing)
@@ -3790,7 +3838,7 @@ function showUnlockPopup(c,cost,idx){
 
   // Confirm
   document.getElementById('unlockConfirmBtn').onclick=()=>{
-    G.money-=cost;
+    G.money-=cost;finLog('expense',-cost,'Stadt: '+c.name);
     const city={...c};
     city.id=(c.id||c.name.toLowerCase().replace(/[^a-z0-9]/g,''))+'_'+uid().substr(1,4);
     delete city._nom;delete city._s;
@@ -4227,6 +4275,31 @@ function dashFinance(){
   const profit=(G.earned||0)-spent;
   h+='<div style="margin-top:6px;padding:6px;border-radius:8px;background:rgba('+(profit>=0?'61,214,140':'248,113,113')+',.06);border:1px solid rgba('+(profit>=0?'61,214,140':'248,113,113')+',.15)">';
   h+='<div class="rw"><span style="font-weight:600">Netto-Ergebnis</span><span style="font-family:var(--mono);font-weight:700;color:'+(profit>=0?'var(--a)':'var(--r)')+'">'+fmt(profit)+'</span></div></div>';
+  h+='</div>';
+  // Financial history
+  h+='<div class="dash-card" style="grid-column:span 2"><div class="dash-card-title">📋 Finanzverlauf</div>';
+  const fin=G.finance||[];
+  if(!fin.length)h+='<div class="sub" style="padding:8px;text-align:center">Noch keine Transaktionen aufgezeichnet</div>';
+  else{
+    // Summary: last hour income vs expenses
+    const oneHourAgo=G.tick-3600;
+    const recent=fin.filter(f=>f.t>oneHourAgo);
+    const rIncome=recent.filter(f=>f.amount>0).reduce((s,f)=>s+f.amount,0);
+    const rExpense=recent.filter(f=>f.amount<0).reduce((s,f)=>s+f.amount,0);
+    h+='<div style="display:flex;gap:8px;margin-bottom:6px">';
+    h+='<span class="tg g">▲ '+fmt(rIncome)+' /h</span>';
+    h+='<span class="tg" style="color:var(--r)">▼ '+fmt(rExpense)+' /h</span>';
+    h+='<span class="tg" style="color:'+(rIncome+rExpense>=0?'var(--a)':'var(--r)')+'">Δ '+fmt(rIncome+rExpense)+' /h</span>';
+    h+='</div>';
+    // Transaction list
+    fin.slice(-20).reverse().forEach(f=>{
+      const isInc=f.amount>0;const d=new Date(f.ts);
+      const ts=d.toLocaleString('de-DE',{hour:'2-digit',minute:'2-digit'});
+      const typeEm={income:'💰',expense:'🛒',penalty:'⚠️',quest:'🎯',refund:'🔙'}[f.type]||'📌';
+      h+='<div style="display:flex;justify-content:space-between;align-items:center;padding:3px 0;border-bottom:1px solid var(--bd);font-size:12px">';
+      h+='<span><span style="color:var(--td);margin-right:4px">'+ts+'</span>'+typeEm+' '+f.desc+'</span>';
+      h+='<span style="font-family:var(--mono);font-weight:600;color:'+(isInc?'var(--a)':'var(--r)')+'">'+(isInc?'+':'')+fmt(f.amount)+'</span></div>'});
+  }
   h+='</div></div>';return h;
 }
 
@@ -4490,56 +4563,81 @@ function updateSelInfo(oid,needed){
 }
 
 
-// ═══ LIVE UPDATE: Update progress bars & timers without full rebuild ═══
+// ═══ LIVE UPDATE: Update timers & progress bars every second WITHOUT rebuilding DOM ═══
 function updateLiveElements(){
-  // Update progress bars for moving vehicles
-  document.querySelectorAll('[data-live-vid]').forEach(el=>{
-    const vid=el.dataset.liveVid;const v=G.vehs.find(x=>x.id===vid);if(!v||v.st!=='moving'||!v.rt)return;
+  if(!G)return;
+  // 1. Vehicle progress bars [data-vprog="vid"] and ETAs [data-veta="vid"]
+  document.querySelectorAll('[data-vprog]').forEach(bar=>{
+    const v=G.vehs.find(x=>x.id===bar.dataset.vprog);if(!v||v.st!=='moving'||!v.rt)return;
     const vt=VT[v.type];if(!vt)return;
     const f=C(v.rt.from)||Cx(v.rt.from);const t=C(v.rt.to)||Cx(v.rt.to)||(v.rt.toLat?{lat:v.rt.toLat,lng:v.rt.toLng}:null);
     if(!f||!t)return;
-    const tn=v.rt.tripTime||tripT(f,t,vt.spd);const pct=Math.min(v.prog/(tn||1),1);
-    const bar=el.querySelector('.pf');if(bar)bar.style.width=pct*100+'%';
-    const pctEl=el.querySelector('[data-live-pct]');if(pctEl)pctEl.textContent=Math.floor(pct*100)+'%';
-    const etaEl=el.querySelector('[data-live-eta]');if(etaEl)etaEl.textContent=ftime(Math.max(0,tn-v.prog));
+    const tn=tripT(f,t,vt.spd);const pct=Math.min(v.prog/(tn||1),1);
+    bar.style.width=pct*100+'%';
   });
-  // Update order timers
-  document.querySelectorAll('[data-live-oid]').forEach(el=>{
-    const oid=el.dataset.liveOid;const o=G.orders.find(x=>x.id===oid);if(!o)return;
+  document.querySelectorAll('[data-veta]').forEach(el=>{
+    const v=G.vehs.find(x=>x.id===el.dataset.veta);if(!v||v.st!=='moving'||!v.rt)return;
+    const vt=VT[v.type];if(!vt)return;
+    const f=C(v.rt.from)||Cx(v.rt.from);const t=C(v.rt.to)||Cx(v.rt.to)||(v.rt.toLat?{lat:v.rt.toLat,lng:v.rt.toLng}:null);
+    if(!f||!t)return;
+    const tn=tripT(f,t,vt.spd);const pct=Math.min(v.prog/(tn||1),1);
+    el.textContent=Math.floor(pct*100)+'% · '+ftime(Math.max(0,tn-v.prog));
+  });
+  // 2. Accepted order delivery timers [data-dtimer="oid"]
+  document.querySelectorAll('[data-dtimer]').forEach(el=>{
+    const o=G.orders.find(x=>x.id===el.dataset.dtimer);if(!o||!o.acc)return;
+    const delivAge=G.tick-(o.accTick||o.born||0);const dTl=o.deliverTl||o.tl||600;
+    const dRemain=Math.max(0,dTl-delivAge);const dDecay=delivAge>dTl*0.8;const dUrgent=dRemain<120;
+    el.textContent='📦 '+ftime(dRemain)+(dDecay?' ⚠️':'');
+    el.style.color=dUrgent?'var(--r)':dDecay?'var(--go)':'var(--td)';
+    el.style.fontWeight=dUrgent?'700':'';
+  });
+  // 3. Open order accept timers [data-atimer="oid"]
+  document.querySelectorAll('[data-atimer]').forEach(el=>{
+    const o=G.orders.find(x=>x.id===el.dataset.atimer);if(!o||o.acc)return;
     const rem=Math.max(0,o.tl-(G.tick-o.born));
-    const timerEl=el.querySelector('[data-live-timer]');
-    if(timerEl){timerEl.textContent='⏱ '+ftime(rem);timerEl.style.color=rem<120?'var(--r)':rem<300?'var(--go)':'var(--td)'}
+    el.textContent='⏱ '+ftime(rem);
+    el.style.color=rem<120?'var(--r)':rem<300?'var(--go)':'';
   });
-  // Update bottom status bar
+  // 4. Order progress bars [data-oprog="oid"]
+  document.querySelectorAll('[data-oprog]').forEach(bar=>{
+    const o=G.orders.find(x=>x.id===bar.dataset.oprog);if(!o)return;
+    const f=Cx(o.from),t=Cx(o.to);if(!f||!t)return;
+    const vehs=G.vehs.filter(x=>x.cargo?.oid===o.id&&x.st==='moving');
+    const delivered=o.delivered||0;const pctDel=delivered/o.amt;
+    let transitPct=0;vehs.forEach(v=>{const vt2=VT[v.type];if(!vt2)return;const tn2=tripT(f,t,vt2.spd);transitPct+=(v.cargo?.amt||0)/o.amt*Math.min(v.prog/(tn2||1),1)});
+    bar.style.width=Math.min((pctDel+transitPct)*100,100)+'%';
+  });
+  // 5. Status bar
   try{
     const m=fmt(G.money);
-    document.getElementById('cMoney').textContent=m;
-    document.getElementById('cVeh').textContent=G.vehs.length;
-    document.getElementById('cCities').textContent=cities.length;
-    document.getElementById('cDel').textContent=G.dels;
-    const cm=document.getElementById('compMoney');if(cm)cm.textContent='💰 '+m;
+    const el1=document.getElementById('cMoney');if(el1)el1.textContent=m;
+    const el2=document.getElementById('cVeh');if(el2)el2.textContent=G.vehs.length;
+    const el3=document.getElementById('cCities');if(el3)el3.textContent=cities.length;
+    const el4=document.getElementById('cDel');if(el4)el4.textContent=G.dels;
+    const el5=document.getElementById('compMoney');if(el5)el5.textContent='💰 '+m;
   }catch(e){}
 }
 // ═══ TAB TUTORIALS & TIPS ═══
 const TAB_TIPS={
-  missions:{title:'🎯 Missionen',tutorial:'Missionen geben dir Ziele und Belohnungen. Tutorial-Missionen führen dich durch die Grundlagen. Tägliche und wöchentliche Aufgaben erneuern sich automatisch und zeigen Fortschrittsbalken.',
-    tips:['Klicke "Einlösen" sobald eine Mission grün leuchtet','Tägliche Aufgaben: 3 neue alle 24h · Wöchentliche: 3 neue pro Woche','Level-Missionen schalten sich mit steigendem Level frei','📖 Mehr im LogistiX-Wiki (Hamburger-Menü)']},
-  dealer:{title:'🛒 Händler',tutorial:'Kaufe und verkaufe Fahrzeuge. Jedes Fahrzeug wird einem Depot zugewiesen. Unter "Verkaufen" im Explorer kannst du Fahrzeuge verwalten und rückrufen.',
-    tips:['Fahrzeuge bleiben fest an ihr Depot gebunden','Depot-Kapazität begrenzt die Anzahl — Depot ausbauen unter Fuhrpark','Züge brauchen Bahnhof, Schiffe Hafen, Flugzeuge Flughafen an BEIDEN Enden','Verkauf nur möglich wenn das Fahrzeug im Heimat-Depot steht','📖 Alle Fahrzeugtypen im Wiki']},
-  fleet:{title:'🚛 Fuhrpark',tutorial:'Übersicht aller Fahrzeuge pro Standort. Unter "Wartung" im Explorer siehst du den Zustand aller Fahrzeuge und kannst Wartungen durchführen oder Rückrufe planen.',
-    tips:['Wartung ist km-basiert: LKW alle 10.000 km, Züge 25.000, Schiffe 50.000, Flugzeuge 15.000','Depot ausbauen: +2 Stellplätze pro Upgrade (max 5×)','🔙 "An Depot" schickt idle Fahrzeuge zurück','Zustandsbalken: 🟢>60% 🟡>30% 🔴<30%','📖 Details im Wiki']},
-  logistics:{title:'📋 Logistik',tutorial:'Aufträge, Routen, Transfers und Daueraufträge — alles an einem Ort. Aufträge gehen an Städte im Umkreis (auch nicht freigeschaltete). Preis pro Stück, Transportkosten und Nettogewinn werden angezeigt.',
-    tips:['Aufträge zahlen 1,3-3× Marktpreis — immer mehr als Marktverkauf','⚡ Express-Aufträge zahlen 2× aber mit Zeitlimit','Fahrzeuge kehren nach Lieferung an nicht-freigeschaltete Orte automatisch zurück','🤖 Auto-Manager ab Level 5: akzeptiert und verschickt automatisch','📖 Wirtschaftssystem im Wiki']},
-  inventory:{title:'📦 Lager',tutorial:'Warenbestand pro Standort. Verkaufe am Markt (💰) oder versende Waren (📦) an andere Standorte. Marktverkauf erfordert ein Fahrzeug das die Ware zum Marktplatz fährt.',
-    tips:['Preis/St. zeigt den aktuellen regionalen Marktpreis','💰 Verkaufen öffnet ein Popup mit Mengenauswahl und Preiskalkulation','Das Fahrzeug fährt sichtbar zum Markt und kehrt automatisch zurück','Jede Stadt hat 100 Basis-Lagerplätze, erweiterbar per Infrastruktur','📖 Lagersystem im Wiki']},
-  market:{title:'📊 Markt',tutorial:'Regionale Marktpreise für alle Waren. Preise schwanken basierend auf Region und Events. Unter "Verkaufen" siehst du Zielstädte und Transportkosten.',
-    tips:['▲▼ Trend-Pfeile zeigen Preisentwicklung der letzten 10 Minuten','Klicke auf eine Ware für Detail-Ansicht mit Preisverlauf-Chart','Events beeinflussen Preise: Boom +30%, Rezession -15%','Logistikzentrum-Infrastruktur gibt +15% auf Marktpreise','📖 Preissystem im Wiki']},
-  build:{title:'🏗️ Bauen',tutorial:'Baue Produktionsgebäude, Lagerhallen und regionale Farmen. Verfügbarkeit hängt von Level, Region und Stadtgröße ab.',
-    tips:['Rohstoff-Gebäude (Farmen, Minen) produzieren ohne Input','Fabriken brauchen Rohstoffe als Input — Rezept wählen!','Regionale Gebäude nur in passenden Regionen baubar','Stadtgröße bestimmt maximale Gebäudeanzahl','📖 Gebäudeliste im Wiki']},
-  buildings:{title:'🏭 Gebäude verwalten',tutorial:'Upgrades, Rezeptauswahl und Überlauf-Steuerung. Gebäudekapazität speichert Produktion direkt. Überlauf ins Stadtlager oder Produktion stoppen.',
-    tips:['5 Upgrade-Tracks: Output, Speed, Effizienz, Lager, Rezepte','Überlauf: "Stadt" = ins Stadtlager, "Stop" = Produktion pausiert','Alle 25-35 Sekunden wird produziert','📖 Upgrade-System im Wiki']},
-  infra:{title:'🏢 Infrastruktur',tutorial:'Depot, Bahnhof, Hafen, Flughafen, Logistikzentrum, Tankstelle und Lager. Verkehrsinfrastruktur wird an BEIDEN Endpunkten benötigt!',
-    tips:['Depot: Basis 3 Stellplätze, 5× upgradbar (+2 pro Level)','Bahnhof/Hafen/Flughafen an BEIDEN Städten nötig','Logistikzentrum: +15% Marktpreise','Tankstelle: +10% Fahrzeuggeschwindigkeit','📖 Infrastruktur im Wiki']},
+  missions:{title:'🎯 Missionen',tutorial:'Missionen geben dir Ziele und Belohnungen. Tutorial-Missionen führen dich durch die Grundlagen. Tägliche und wöchentliche Aufgaben erneuern sich automatisch.',
+    tips:['Klicke "Einlösen" sobald eine Mission grün leuchtet','Tägliche Aufgaben: 3 neue alle 24h · Wöchentliche: 3 neue pro Woche','Level-Missionen schalten sich mit steigendem Level frei','Tutorial jederzeit wiederholbar über ☰ Menü']},
+  dealer:{title:'🛒 Händler',tutorial:'Kaufe Fahrzeuge für deine Flotte. Kapazitäten reichen von 12 (3,5t Transporter) bis 5.000 (Superfrachter). Jedes Fahrzeug wird einem Depot zugewiesen.',
+    tips:['3,5t Transporter: 12 Einheiten · Sattelzug: 80 · Güterzug: 200','Züge brauchen Bahnhof, Schiffe Hafen, Flugzeuge Flughafen','Depot-Kapazität begrenzt Stellplätze — Depot ausbauen im Fuhrpark','Verkauf nur möglich wenn das Fahrzeug im Depot steht']},
+  fleet:{title:'🚛 Fuhrpark',tutorial:'Alle Fahrzeuge pro Standort. Fahrzeuge auf Aufträgen können jederzeit zurückgerufen werden. Wartung verhindert Geschwindigkeitsverlust.',
+    tips:['🔙 Zurückrufen: Fahrzeug bricht ab und fährt ins Depot','Wartung km-basiert: LKW 10.000 km, Züge 25.000, Schiffe 50.000','Depot ausbauen: +2 Stellplätze pro Upgrade','Zustandsbalken: 🟢>60% 🟡>30% 🔴<30% — ab 80% langsamer']},
+  logistics:{title:'📋 Logistik',tutorial:'Zwei Timer pro Auftrag: Annahme-Timer (5-20 min) + Liefer-Timer (1-4h). Express zahlt mehr, hat aber kürzere Deadlines. Routenplaner für Folgeaufträge.',
+    tips:['⏱ Annahme-Timer: Auftrag verfällt wenn nicht rechtzeitig angenommen','📦 Liefer-Timer: startet bei Annahme, nach 80% sinkt die Belohnung','⚡ Express: 150-200% Marktpreis, kurze Deadlines','📍 Fernfahrzeuge: Fahrzeuge von anderen Standorten zuweisbar','🔄 Routenplaner: Folgeaufträge für fahrende Fahrzeuge planen','Stornierung: 20% Strafe (früh) bis 50% (spät)']},
+  inventory:{title:'📦 Lager',tutorial:'Warenbestand pro Standort. Basis-Kapazität 200 Einheiten, erweiterbar. Verkaufe am Markt oder versende an andere Standorte.',
+    tips:['Basis: 200 Lagerplätze pro Stadt','Lagerhalle: +500 · Große Lagerhalle: +1.500','💰 Marktverkauf: Fahrzeug fährt zum Markt und kehrt zurück','📦 Versenden: Waren zwischen eigenen Städten transportieren']},
+  market:{title:'📊 Markt',tutorial:'Regionale Marktpreise für alle Waren. Preise schwanken basierend auf Angebot, Region und Events.',
+    tips:['▲▼ Trend zeigt Preisentwicklung der letzten 10 Minuten','Events: Boom +30%, Rezession -15%, Handelsabkommen','Logistikzentrum: +15% auf Marktpreise','Aufträge zahlen mehr als Marktverkauf (50-200%)']},
+  build:{title:'🏗️ Bauen',tutorial:'Produktionsgebäude produzieren automatisch. Bauernhof: 4×/Zyklus, Forstwirtschaft: 3×/Zyklus. Verfügbarkeit hängt von Level und Region ab.',
+    tips:['Rohstoff-Gebäude produzieren ohne Input (Farmen, Minen)','Fabriken brauchen Rohstoffe — Rezept auswählen!','Regionale Gebäude nur in passenden Regionen','Produktion alle 30-45 Sekunden']},
+  buildings:{title:'🏭 Gebäude verwalten',tutorial:'Upgrades, Rezeptauswahl und Lager-Steuerung. Gebäudekapazität 80-100 Einheiten. Überlauf ins Stadtlager oder Produktion stoppen.',
+    tips:['5 Upgrade-Tracks: Output, Speed, Effizienz, Lager, Rezepte','Überlauf: "Stadt" = ins Stadtlager, "Stop" = pausiert','Produktionsrate: Bauernhof 4×, Forstwirtschaft 3× pro Zyklus']},
+  infra:{title:'🏢 Infrastruktur',tutorial:'Depot, Bahnhof, Hafen, Flughafen, Logistikzentrum, Tankstelle und Lager. Verkehrsinfrastruktur an BEIDEN Endpunkten nötig!',
+    tips:['Depot: 3 Basis-Stellplätze, 5× upgradbar (+2 pro Level)','Bahnhof/Hafen/Flughafen an BEIDEN Städten nötig','Logistikzentrum: +15% Marktpreise','Lagererweiterung: +400 Lagerkapazität']},
   alliance:{title:'🤝 Allianz',tutorial:'Gründe oder tritt einer Allianz bei. Gemeinsam könnt ihr Spezialwaren produzieren, Gebiete beanspruchen und auf der Börse handeln.',
     tips:['Gründungskosten: 25.000€ · Allianzkasse ist getrennt vom Spielerkonto','Rohstoffe müssen von Spielern geliefert werden — keine Eigenproduktion','Gebiete kosten 10× ihre Grundgebühr und bringen passive Einnahmen','Gebietsbörse: Gebiete zwischen Allianzen handeln','Level-Ups schalten mehr Mitglieder und Gebäudeslots frei','📖 Details im Wiki']},
   standing:{title:'🔄 Daueraufträge',tutorial:'Automatische Warentransporte zwischen deinen Standorten. Alle 60 Sekunden wird geprüft ob Ware + Fahrzeug bereit sind.',
@@ -4601,7 +4699,8 @@ function showTutorial(step){
   let existing=document.getElementById('tutWidget');if(existing)existing.remove();
   if(!G||_tutStep>=TUT_STEPS.length){if(G){G.tutDone=true;try{save()}catch(e){}}return}
   const s=TUT_STEPS[_tutStep];
-  if(s.check&&s.check()){_tutStep++;if(G)G.tutStep=_tutStep;showTutorial();return}
+  const isReplay=G.tutDone; // Already completed → all steps are clickthrough
+  if(!isReplay&&s.check&&s.check()){_tutStep++;if(G)G.tutStep=_tutStep;showTutorial();return}
 
   const w=document.createElement('div');w.id='tutWidget';
   if(_tutOpen){
@@ -4624,8 +4723,9 @@ function showTutorial(step){
     for(let i=0;i<TUT_STEPS.length;i++){h+='<div style="width:8px;height:8px;border-radius:50%;background:'+(i===_tutStep?'var(--a)':i<_tutStep?'rgba(61,214,140,.4)':'var(--bd)')+'"></div>'}
     h+='</div>';
     // Button
-    if(s.instant){
+    if(s.instant||isReplay){
       h+='<button class="btn full" style="background:var(--a);color:var(--bg);border-color:var(--a);font-size:13px;padding:8px" onclick="'+(s.action||'')+';_tutStep++;if(G)G.tutStep=_tutStep;showTutorial()">'+s.btn+'</button>';
+      if(isReplay)h+='<div style="text-align:center;margin-top:4px;font-size:11px;color:var(--go)">🔄 Wiederholen — klicke durch</div>';
     } else {
       h+='<button class="btn full" style="background:var(--a);color:var(--bg);border-color:var(--a);font-size:13px;padding:8px" onclick="'+(s.action||'')+'">'+s.btn+'</button>';
       h+='<div style="text-align:center;margin-top:6px;font-size:11px;color:var(--td)">Erledige die Aufgabe — nächster Schritt erscheint automatisch!</div>';
@@ -5134,8 +5234,8 @@ function compFleet(el){
       const isMarket=v.cargo?.market;const isAlly=v.cargo?.allianceDelivery;
       const tripLabel=isMarket?(v.cargo.returning?'🔙 Rückfahrt':'💰 Marktfahrt'):isAlly?(v.cargo.returning?'🔙 Rückfahrt':'🤝 Allianzlieferung'):'';
       h+='<div class="crd fleet-exp" style="padding:5px 8px;cursor:pointer;'+(isMarket?'border-left:3px solid var(--go)':isAlly?'border-left:3px solid #a855f7':'')+'" onclick="this.classList.toggle(\'open\')">';
-      h+='<div class="rw"><span>'+vt.em+' <b>'+vehName(v)+'</b> → '+t.name+(tripLabel?' <span class="tg" style="font-size:10px;'+(isAlly?'color:#a855f7':'color:var(--go)')+'">'+tripLabel+'</span>':'')+'</span><span class="eta">'+Math.floor(pct*100)+'% · '+ftime(Math.max(0,tn-v.prog))+'</span></div>';
-      h+='<div class="pb" style="margin:2px 0"><div class="pf" style="width:'+pct*100+'%;background:'+(isAlly?'#a855f7':isMarket?'var(--go)':'var(--a)')+'"></div></div>';
+      h+='<div class="rw"><span>'+vt.em+' <b>'+vehName(v)+'</b> → '+t.name+(tripLabel?' <span class="tg" style="font-size:10px;'+(isAlly?'color:#a855f7':'color:var(--go)')+'">'+tripLabel+'</span>':'')+'</span><span class="eta" data-veta="'+v.id+'">'+Math.floor(pct*100)+'% · '+ftime(Math.max(0,tn-v.prog))+'</span></div>';
+      h+='<div class="pb" style="margin:2px 0"><div class="pf" data-vprog="'+v.id+'" style="width:'+pct*100+'%;background:'+(isAlly?'#a855f7':isMarket?'var(--go)':'var(--a)')+'"></div></div>';
       h+='<div class="fleet-details"><div class="sub">'+vt.name+' · Kap: '+vehCap(v)+' · 🛣️ '+km.toLocaleString('de-DE')+' km</div>';
       if(cargo!=='leer')h+='<div class="sub">Ladung: '+cargo+'</div>';
       if(ord)h+='<div style="font-size:12px;color:var(--a);font-weight:600">📋 Auftrag '+fmtOrd(ord.num)+' · '+(GOODS[ord.good]?.em||'')+(GOODS[ord.good]?.name||'')+' · '+fmt(ord.rew)+'</div>';
@@ -5345,8 +5445,8 @@ function compOrders(el){
       const delivAge=G.tick-(o.accTick||o.born||0);const dTl=o.deliverTl||o.tl||600;
       const dRemain=Math.max(0,dTl-delivAge);const dDecay=delivAge>dTl*0.8;const dUrgent=dRemain<120;
       h+='<div class="rw"><span class="sub">'+f.name+' → '+t.name+' · '+fdist(f,t)+' km</span>';
-      h+='<span style="font-family:var(--mono);font-size:11px;'+(dUrgent?'color:var(--r);font-weight:700':dDecay?'color:var(--go)':'color:var(--td)')+'">📦 '+ftime(dRemain)+(dDecay?' ⚠️':'')+'</span></div>';
-      h+='<div class="pb" style="margin:4px 0;height:6px"><div class="pf" style="width:'+totalPct+'%"></div></div>';
+      h+='<span data-dtimer="'+o.id+'" style="font-family:var(--mono);font-size:11px;'+(dUrgent?'color:var(--r);font-weight:700':dDecay?'color:var(--go)':'color:var(--td)')+'">📦 '+ftime(dRemain)+(dDecay?' ⚠️':'')+'</span></div>';
+      h+='<div class="pb" style="margin:4px 0;height:6px"><div class="pf" data-oprog="'+o.id+'" style="width:'+totalPct+'%"></div></div>';
       // Recalculate actual shipped = what vehicles are carrying + delivered
       const actualShipped=delivered+actualInTransit;
       if(o.shipped!==actualShipped){o.shipped=actualShipped} // Fix desync
@@ -5409,7 +5509,7 @@ function compOrders(el){
       h+='<div class="rw"><span style="font-weight:600">'+(isE?'⚡ ':'')+(GOODS[o.good]?.em||'')+' '+o.amt+'× '+(GOODS[o.good]?.name||'')+'</span>';
       h+='<span style="color:var(--a);font-family:var(--mono);font-weight:700">'+fmt(o.rew)+'</span></div>';
       h+='<div class="rw"><span class="sub">'+f.name+' → '+t.name+(o.toUnlocked===false?' 🔓':'')+' · '+fdist(f,t)+' km</span>';
-      h+='<span class="sub" style="font-family:var(--mono);'+(tl<120?'color:var(--r)':'')+'">⏱ '+ftime(tl)+'</span></div>';
+      h+='<span data-atimer="'+o.id+'" class="sub" style="font-family:var(--mono);'+(tl<120?'color:var(--r)':'')+'">⏱ '+ftime(tl)+'</span></div>';
       h+='<div style="display:flex;gap:8px;margin-top:3px;font-size:12px;color:var(--td)">';
       h+='<span>'+fmt(ppu)+'/St.</span><span style="color:'+(prem>=0?'var(--a)':'var(--r)')+'">'+(prem>=0?'+':'')+prem+'%</span><span>📦 '+inS+'/'+o.amt+'</span>';
       if(avlL.length)h+='<span>🚛 '+avlL.length+'</span>';
@@ -7084,6 +7184,10 @@ async function renderAdmin(){
     h+='<button class="btn sm" onclick="adminFillStorage()">Auffüllen</button></div></div>';
     h+='<div class="crd"><div class="rw"><span>🗑️ Caches leeren</span>';
     h+='<button class="btn red sm" onclick="adminClearCaches()">Leeren</button></div></div>';
+    h+='<div class="crd"><div class="rw"><span>🔄 Alle Spielstände reparieren</span>';
+    h+='<button class="btn sm" onclick="adminRepairAll()">NaN fixen + Werte neu berechnen</button></div></div>';
+    h+='<div class="crd"><div class="rw"><span>🔁 Alle Spieler neu laden erzwingen</span>';
+    h+='<button class="btn red sm" onclick="adminForceReloginAll()">Reload erzwingen</button></div></div>';
     h+='</div></div>';
   }
 
@@ -7202,9 +7306,21 @@ function adminAddMoney(){
 }
 async function adminGivePlayerMoney(userKey){
   const amt=parseInt(document.getElementById('adminPlayerMoney')?.value)||0;if(!amt)return;
-  if(userKey===currentUser&&G){G.money+=amt;uhud();save()}
-  else{
-    try{const raw=await storeGet('lx_save_'+userKey);if(raw){const d=JSON.parse(raw);d.money=(d.money||0)+amt;await storeSet('lx_save_'+userKey,JSON.stringify(d))}}catch(e){}
+  if(userKey===currentUser&&G){
+    G.money+=amt;uhud();save();
+  } else {
+    // For other players: modify their save + set reload flag
+    try{
+      const raw=await storeGet('lx_save_'+userKey);
+      if(raw){
+        const d=JSON.parse(raw);
+        d.money=(d.money||0)+amt;
+        d._adminModified=Date.now(); // Signal that save was externally modified
+        await storeSet('lx_save_'+userKey,JSON.stringify(d));
+      }
+    }catch(e){}
+    // Also set a reload signal for that user
+    try{await storeSet('lx_reload_'+userKey,Date.now().toString())}catch(e){}
   }
   adminLog('admin','💰 +'+fmt(amt)+' an '+userKey);
   if(typeof toast==='function')toast('💰 +'+fmt(amt)+' an '+userKey);
@@ -7236,6 +7352,7 @@ async function adminRecallVehFor(userKey,vid){
       v.postDelivery=null;v.followUpOrder=null;v.pendingTransfer=null;v.recallToDepot=false;
       (d.standingOrders||[]).forEach(so=>{if(so.vehicleIds)so.vehicleIds=so.vehicleIds.filter(x=>x!==vid)});
       await storeSet('lx_save_'+userKey,JSON.stringify(d));
+      await storeSet('lx_reload_'+userKey,Date.now().toString());
       adminLog('admin','🔙 Fahrzeug '+vid.substr(0,8)+' ('+userKey+') → '+depotName);
       if(typeof toast==='function')toast('🔙 Fahrzeug von '+userKey+' → '+depotName);
     }catch(e){adminLog('admin','❌ Fehler: '+e.message)}
@@ -7301,7 +7418,8 @@ async function adminRecallAllVehs(userKey){
       d.orders=(d.orders||[]).filter(o=>!o.acc);
       (d.standingOrders||[]).forEach(so=>{so.active=false});
       await storeSet('lx_save_'+userKey,JSON.stringify(d));
-      adminLog('admin','🔙 '+count+' Fahrzeuge zurückgesetzt ('+userKey+') — wird beim nächsten Login aktiv');
+      await storeSet('lx_reload_'+userKey,Date.now().toString());
+      adminLog('admin','🔙 '+count+' Fahrzeuge zurückgesetzt ('+userKey+')');
       if(typeof toast==='function')toast('🔙 '+count+' Fzg von '+userKey+' zurückgesetzt (nächster Login)');
     }catch(e){adminLog('admin','❌ Fehler: '+e.message)}
   }
@@ -7465,6 +7583,54 @@ function drawAdminChart(stats){
     ctx.fillStyle='rgba(255,255,255,.5)';ctx.font='9px Chakra Petch';ctx.textAlign='left';
     ctx.fillText(m.name,lx+15,pad.t+7);lx+=ctx.measureText(m.name).width+25});
 }
+
+async function adminRepairAll(){
+  const users=await getUsers();
+  const keys=Object.keys(users);
+  let totalFixes=0;
+  for(const k of keys){
+    try{
+      const raw=await storeGet('lx_save_'+k);if(!raw)continue;
+      const d=JSON.parse(raw);let fixes=0;
+      if(typeof d.money!=='number'||isNaN(d.money)){d.money=50000;fixes++}
+      if(typeof d.earned!=='number'||isNaN(d.earned)){d.earned=(d.history||[]).reduce((s,h)=>s+(h.rew||0),0);fixes++}
+      if(typeof d.dels!=='number'||isNaN(d.dels)){d.dels=(d.history||[]).length;fixes++}
+      const pre=(d.orders||[]).length;
+      d.orders=(d.orders||[]).filter(o=>o&&typeof o.rew==='number'&&!isNaN(o.rew)&&o.from&&o.good);
+      fixes+=(pre-d.orders.length);
+      (d.vehs||[]).forEach(v=>{if(v.st==='moving'&&!v.rt){v.st='idle';v.loc=v.depot||v.loc;fixes++}});
+      Object.keys(d.stor||{}).forEach(cid=>{Object.keys(d.stor[cid]||{}).forEach(g=>{
+        if(typeof d.stor[cid][g]!=='number'||isNaN(d.stor[cid][g])){d.stor[cid][g]=0;fixes++}
+      })});
+      if(fixes>0||true){
+        await storeSet('lx_save_'+k,JSON.stringify(d));
+        totalFixes+=fixes;
+      }
+      // Signal reload
+      await storeSet('lx_reload_'+k,Date.now().toString());
+    }catch(e){}
+  }
+  // Also repair current live session
+  if(G){
+    if(isNaN(G.money))G.money=50000;
+    if(isNaN(G.earned))G.earned=(G.history||[]).reduce((s,h)=>s+(h.rew||0),0);
+    uhud();save();
+  }
+  adminLog('admin','🔄 '+keys.length+' Spielstände repariert ('+totalFixes+' Fixes)');
+  if(typeof toast==='function')toast('🔄 '+keys.length+' Spielstände repariert');
+  renderAdmin();
+}
+
+async function adminForceReloginAll(){
+  if(!confirm('Alle aktiven Sitzungen werden zum Neuladen gezwungen. Fortfahren?'))return;
+  const users=await getUsers();
+  for(const k of Object.keys(users)){
+    try{await storeSet('lx_reload_'+k,Date.now().toString())}catch(e){}
+  }
+  adminLog('admin','🔁 Reload für alle '+Object.keys(users).length+' Spieler erzwungen');
+  if(typeof toast==='function')toast('🔁 Reload für alle Spieler erzwungen');
+  renderAdmin();
+}
 // ══════════════════════════════════════════
 // INIT
 // ══════════════════════════════════════════
@@ -7493,9 +7659,9 @@ function launchGame(sc){
   await loadCache();
   await loadAdminLog();
   await ensureTestAccount();
-  // Auto-login from saved session
+  // Auto-login from tab session (per-tab, no cross-user interference)
   try{
-    const session=await storeGet('lx_session');
+    const session=sessionStorage.getItem('lx_session');
     if(session){
       const users=await getUsers();
       if(users[session]){
@@ -7508,6 +7674,12 @@ function launchGame(sc){
   }catch(e){}
   document.getElementById('loginUser').disabled=false;
   window.addEventListener('beforeunload',()=>{save();saveCache()});
+  // Enter key handling for login & register
+  document.getElementById('loginUser').addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();document.getElementById('loginPass').focus()}});
+  document.getElementById('loginPass').addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();doLogin()}});
+  const regFields=[['regUser','regEmail'],['regEmail','regPass'],['regPass','regPass2']];
+  regFields.forEach(([from,to])=>{const el=document.getElementById(from);if(el)el.addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();document.getElementById(to)?.focus()}})});
+  const regP2=document.getElementById('regPass2');if(regP2)regP2.addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();doRegister()}});
   setTimeout(()=>{const el=document.getElementById('loginUser');if(el)el.focus()},300);
   // Populate region info cards on start screen
   const rc=document.getElementById('regionCards');
