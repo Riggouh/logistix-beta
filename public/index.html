@@ -21,13 +21,22 @@ body{font-family:'Barlow',sans-serif;background:var(--bg);color:var(--t);overflo
 .top-right{display:flex;align-items:center;gap:6px}
 .logo{font-family:var(--mono);font-weight:700;font-size:20px;color:var(--a);letter-spacing:3px;text-shadow:0 0 14px var(--gw)}.logo b{color:var(--a2)}
 .top-stats{display:flex;align-items:center;gap:8px}
-.top-stat{padding:3px 8px;border-radius:10px;display:flex;align-items:center;gap:5px;font-family:var(--mono);font-size:12px;color:var(--td);padding:4px 10px;border-radius:12px;background:rgba(255,255,255,.03);border:1px solid var(--bd)}
+.top-stat{padding:3px 8px;border-radius:10px;display:flex;align-items:center;gap:5px;font-family:var(--mono);font-size:12px;color:var(--td);padding:4px 10px;border-radius:12px;background:rgba(255,255,255,.03);border:1px solid var(--bd);transition:.2s}
+.top-stat.lvl-badge{background:linear-gradient(135deg,rgba(251,191,36,.12),rgba(251,191,36,.04));border-color:rgba(251,191,36,.3);color:var(--go);font-weight:700;cursor:default}
 .top-stat-lbl{font-size:8px;text-transform:uppercase;letter-spacing:.5px}
-.top-stat-val{font-size:14px;font-weight:700;color:var(--a)}.top-stat-val.sec{color:var(--a2)}
+.top-stat-val{font-size:14px;font-weight:700;color:#34d399}
 .top-btn{padding:7px 14px;border-radius:8px;border:1px solid var(--bd);background:rgba(255,255,255,.04);color:var(--td);font-family:var(--mono);font-size:13px;font-weight:600;cursor:pointer;transition:.15s}
 .top-btn:hover{border-color:var(--a);color:var(--t)}
 .top-btn.glow{color:var(--a);border-color:rgba(61,214,140,.3);background:rgba(61,214,140,.06)}
 .top-btn.glow:hover{background:rgba(61,214,140,.12);box-shadow:0 0 20px var(--gw)}
+
+/* Level badge */
+.lvl-badge{display:flex;align-items:center;gap:6px;padding:3px 10px 3px 6px;border-radius:10px;cursor:pointer;transition:.2s;font-family:var(--mono);border:1px solid var(--bd)}
+.lvl-badge:hover{transform:scale(1.05);filter:brightness(1.2)}
+.lvl-num{display:flex;align-items:center;justify-content:center;width:26px;height:26px;border-radius:7px;font-size:14px;font-weight:800;color:#fff;text-shadow:0 1px 3px rgba(0,0,0,.4)}
+.lvl-info{display:flex;flex-direction:column;line-height:1.1}
+.lvl-title{font-size:9px;text-transform:uppercase;letter-spacing:.8px;opacity:.7}
+.lvl-name{font-size:11px;font-weight:700}
 
 /* ═══ HAMBURGER ═══ */
 .hamburger-wrap{position:relative;pointer-events:auto}
@@ -397,6 +406,8 @@ body{font-family:'Barlow',sans-serif;background:var(--bg);color:var(--t);overflo
   .logo{font-size:13px;letter-spacing:1px}
   .top-stat{display:none}
   .top-stat:first-child{display:flex}
+  .lvl-badge{display:flex!important}
+  .lvl-info{display:none}
   .top-btn{padding:4px 6px;font-size:10px}
   #dashPanel{top:44px}
   #map{top:44px!important}
@@ -494,6 +505,12 @@ body{font-family:'Barlow',sans-serif;background:var(--bg);color:var(--t);overflo
   .top-stat-val{font-size:12px}
   .top-stat-lbl{display:none}
   .top-stat:nth-child(n+4){display:none}
+
+  /* Level badge compact on mobile */
+  .lvl-badge{padding:2px 6px 2px 4px}
+  .lvl-num{width:22px;height:22px;font-size:12px;border-radius:6px}
+  .lvl-info .lvl-title{display:none}
+  .lvl-info .lvl-name{font-size:10px}
   .top-btn{padding:5px 8px;font-size:11px}
   .top-right{gap:3px}
   .top-left{gap:8px}
@@ -603,9 +620,9 @@ body{font-family:'Barlow',sans-serif;background:var(--bg);color:var(--t);overflo
     <div class="top-left">
       <div class="logo">LOGISTI<b>X</b></div>
       <div class="top-stats">
-        <div class="top-stat"><span id="hLvl">🌱 1</span></div>
-        <div class="top-stat"><span class="top-stat-lbl">Konto</span><span class="top-stat-val" id="hMoney">0 €</span></div>
-        <div class="top-stat"><span class="top-stat-lbl">Wert</span><span class="top-stat-val sec" id="hVal">0 €</span></div>
+        <div class="lvl-badge" id="hLvlWrap" onclick="if(typeof showProfile==='function')showProfile()" title="Profil öffnen"><span id="hLvl"></span></div>
+        <div class="top-stat"><span class="top-stat-lbl">Konto</span><span class="top-stat-val" id="hMoney" style="color:#34d399">0 €</span></div>
+        <div class="top-stat" style="border-color:rgba(168,85,247,.2);background:rgba(168,85,247,.04)"><span class="top-stat-lbl">Wert</span><span class="top-stat-val" id="hVal" style="color:#c084fc">0 €</span></div>
         <div class="top-stat"><span>🚛</span><span id="hVeh">0</span></div>
         <div class="top-stat"><span>🏙️</span><span id="hCit">0</span></div>
         <div class="top-stat"><span>✅</span><span id="hDel">0</span></div>
@@ -897,7 +914,7 @@ function canLevelUp(){
 }
 function doLevelUp(){
   const r=canLevelUp();if(!r||r.blocked)return;
-  G.money-=r.next.cost;G.level=r.next.lvl;
+  G.money-=r.next.cost;finLog('expense',-r.next.cost,'Level-Up: '+r.next.name);G.level=r.next.lvl;
   addLog('⭐ Level '+r.next.lvl+': '+r.next.em+' '+r.next.name+'!');
   markDirty();ua();
 }
@@ -1130,73 +1147,73 @@ const BLD={
   lagerhalle:{name:"Lagerhalle",em:"📦",price:10000,tp:"s",desc:"Stadtlager +500, upgradbar",localCap:0,lvl:1,storCap:500},
   grosse_lagerhalle:{name:"Große Lagerhalle",em:"🏭",price:35000,tp:"s",desc:"Stadtlager +1500, upgradbar bis +6000",localCap:0,lvl:4,storCap:1500},
   // LVL 1 – Basics
-  bauernhof:{name:"Bauernhof",em:"🌾",price:8000,tp:"farm",prod:"getreide",rate:4,inp:null,inpN:0,desc:"Getreide + Tiere",localCap:100,baseTick:45,lvl:1},
-  forstwirtschaft:{name:"Forstwirtschaft",em:"🌲",price:6000,tp:"p",prod:"holz",rate:3,inp:null,inpN:0,desc:"Holz",localCap:100,baseTick:40,lvl:1},
+  bauernhof:{name:"Bauernhof",em:"🌾",price:8000,tp:"farm",prod:"getreide",rate:4,inp:null,inpN:0,desc:"Getreide + Tiere",localCap:250,baseTick:45,lvl:1},
+  forstwirtschaft:{name:"Forstwirtschaft",em:"🌲",price:6000,tp:"p",prod:"holz",rate:3,inp:null,inpN:0,desc:"Holz",localCap:250,baseTick:40,lvl:1},
   // LVL 2 – Fruits, basic processing
-  obstplantage:{name:"Obstplantage",em:"🍎",price:10000,tp:"orchard",prod:null,rate:3,inp:null,inpN:0,desc:"Obst (wählbar)",localCap:80,baseTick:30,lvl:2},
-  muehle:{name:"Mühle",em:"🌾",price:14000,tp:"recipe",recipes:'muehle',desc:"Getreide → Mehl",localCap:60,baseTick:65,lvl:2},
-  saftpresse:{name:"Saftpresse",em:"🧃",price:13000,tp:"recipe",recipes:'saftpresse',desc:"Obst → Saft/Marmelade",localCap:50,baseTick:60,lvl:3},
+  obstplantage:{name:"Obstplantage",em:"🍎",price:10000,tp:"orchard",prod:null,rate:3,inp:null,inpN:0,desc:"Obst (wählbar)",localCap:200,baseTick:30,lvl:2},
+  muehle:{name:"Mühle",em:"🌾",price:14000,tp:"recipe",recipes:'muehle',desc:"Getreide → Mehl",localCap:150,baseTick:65,lvl:2},
+  saftpresse:{name:"Saftpresse",em:"🧃",price:13000,tp:"recipe",recipes:'saftpresse',desc:"Obst → Saft/Marmelade",localCap:120,baseTick:60,lvl:3},
   // LVL 3 – Advanced processing
-  molkerei:{name:"Molkerei",em:"🧀",price:22000,tp:"recipe",recipes:'molkerei',desc:"Milch → Käse/Butter",localCap:50,baseTick:80,lvl:4},
-  baeckerei:{name:"Bäckerei",em:"🥖",price:24000,tp:"recipe",recipes:'baeckerei',desc:"Mehl+Eier → Backwaren",localCap:50,baseTick:90,lvl:4},
-  schreinerei:{name:"Schreinerei",em:"🪑",price:18000,tp:"p",prod:"moebel",rate:1,inp:"holz",inpN:6,desc:"Holz → Möbel",localCap:50,baseTick:90,lvl:4},
+  molkerei:{name:"Molkerei",em:"🧀",price:22000,tp:"recipe",recipes:'molkerei',desc:"Milch → Käse/Butter",localCap:120,baseTick:80,lvl:4},
+  baeckerei:{name:"Bäckerei",em:"🥖",price:24000,tp:"recipe",recipes:'baeckerei',desc:"Mehl+Eier → Backwaren",localCap:120,baseTick:90,lvl:4},
+  schreinerei:{name:"Schreinerei",em:"🪑",price:18000,tp:"p",prod:"moebel",rate:1,inp:"holz",inpN:6,desc:"Holz → Möbel",localCap:120,baseTick:90,lvl:4},
   // LVL 4 – Industry, regional, meat
-  mine:{name:"Erzmine",em:"⛏️",price:22000,tp:"p",prod:"erz",rate:1,inp:null,inpN:0,desc:"Erz",localCap:50,baseTick:60,lvl:5},
-  metzgerei:{name:"Metzgerei",em:"🥩",price:28000,tp:"recipe",recipes:'metzgerei',desc:"Fleisch → Wurstwaren",localCap:50,baseTick:100,lvl:5},
-  pastafabrik:{name:"Pastafabrik",em:"🍝",price:30000,tp:"recipe",recipes:'pastafabrik',desc:"Mehl+Eier → Nudeln",localCap:50,baseTick:95,lvl:5},
-  schneiderei:{name:"Schneiderei",em:"🧵",price:30000,tp:"p",prod:"textilien",rate:1,inp:"baumwolle",inpN:5,desc:"Baumwolle → Textilien",localCap:50,baseTick:100,lvl:6},
+  mine:{name:"Erzmine",em:"⛏️",price:22000,tp:"p",prod:"erz",rate:1,inp:null,inpN:0,desc:"Erz",localCap:120,baseTick:60,lvl:5},
+  metzgerei:{name:"Metzgerei",em:"🥩",price:28000,tp:"recipe",recipes:'metzgerei',desc:"Fleisch → Wurstwaren",localCap:120,baseTick:100,lvl:5},
+  pastafabrik:{name:"Pastafabrik",em:"🍝",price:30000,tp:"recipe",recipes:'pastafabrik',desc:"Mehl+Eier → Nudeln",localCap:120,baseTick:95,lvl:5},
+  schneiderei:{name:"Schneiderei",em:"🧵",price:30000,tp:"p",prod:"textilien",rate:1,inp:"baumwolle",inpN:5,desc:"Baumwolle → Textilien",localCap:120,baseTick:100,lvl:6},
   // Regional LVL 4
-  baumwollfarm:{name:"Baumwollfarm",em:"🌿",price:16000,tp:"p",prod:"baumwolle",rate:2,inp:null,inpN:0,desc:"Baumwolle",localCap:60,baseTick:50,lvl:6,region:['afrika','asien']},
-  kaffeeplantage:{name:"Kaffeeplantage",em:"☕",price:20000,tp:"p",prod:"kaffee",rate:2,inp:null,inpN:0,desc:"Kaffee",localCap:50,baseTick:55,lvl:6,region:['suedamerika','afrika']},
-  kakaoplantage:{name:"Kakaoplantage",em:"🍫",price:22000,tp:"p",prod:"kakao",rate:2,inp:null,inpN:0,desc:"Kakao",localCap:50,baseTick:55,lvl:6,region:['suedamerika','afrika']},
-  zuckerrohrfarm:{name:"Zuckerrohrfarm",em:"🎋",price:14000,tp:"p",prod:"zuckerrohr",rate:2,inp:null,inpN:0,desc:"Zuckerrohr",localCap:60,baseTick:50,lvl:6,region:['suedamerika','asien']},
-  reisfarm:{name:"Reisfarm",em:"🍚",price:10000,tp:"p",prod:"reis",rate:2,inp:null,inpN:0,desc:"Reis",localCap:60,baseTick:50,lvl:6,region:['asien','afrika']},
-  teeplantage:{name:"Teeplantage",em:"🍵",price:18000,tp:"p",prod:"tee",rate:2,inp:null,inpN:0,desc:"Tee",localCap:40,baseTick:35,lvl:6,region:['asien','afrika']},
-  kautschukplantage:{name:"Kautschukplantage",em:"🌳",price:24000,tp:"p",prod:"kautschuk",rate:2,inp:null,inpN:0,desc:"Kautschuk",localCap:40,baseTick:45,lvl:6,region:['suedamerika','asien']},
-  maisfarm:{name:"Maisfarm",em:"🌽",price:9000,tp:"p",prod:"mais",rate:2,inp:null,inpN:0,desc:"Mais",localCap:60,baseTick:50,lvl:6,region:['nordamerika','suedamerika']},
-  fischerei:{name:"Fischerei",em:"🐟",price:15000,tp:"p",prod:"fisch",rate:3,inp:null,inpN:0,desc:"Fisch",localCap:40,baseTick:30,lvl:6,region:['ozeanien','nordamerika','europa']},
-  kohlegrube:{name:"Kohlegrube",em:"⚫",price:20000,tp:"p",prod:"kohle",rate:2,inp:null,inpN:0,desc:"Kohle",localCap:40,baseTick:40,lvl:6,region:['ozeanien','europa','nordamerika']},
+  baumwollfarm:{name:"Baumwollfarm",em:"🌿",price:16000,tp:"p",prod:"baumwolle",rate:2,inp:null,inpN:0,desc:"Baumwolle",localCap:150,baseTick:50,lvl:6,region:['afrika','asien']},
+  kaffeeplantage:{name:"Kaffeeplantage",em:"☕",price:20000,tp:"p",prod:"kaffee",rate:2,inp:null,inpN:0,desc:"Kaffee",localCap:120,baseTick:55,lvl:6,region:['suedamerika','afrika']},
+  kakaoplantage:{name:"Kakaoplantage",em:"🍫",price:22000,tp:"p",prod:"kakao",rate:2,inp:null,inpN:0,desc:"Kakao",localCap:120,baseTick:55,lvl:6,region:['suedamerika','afrika']},
+  zuckerrohrfarm:{name:"Zuckerrohrfarm",em:"🎋",price:14000,tp:"p",prod:"zuckerrohr",rate:2,inp:null,inpN:0,desc:"Zuckerrohr",localCap:150,baseTick:50,lvl:6,region:['suedamerika','asien']},
+  reisfarm:{name:"Reisfarm",em:"🍚",price:10000,tp:"p",prod:"reis",rate:2,inp:null,inpN:0,desc:"Reis",localCap:150,baseTick:50,lvl:6,region:['asien','afrika']},
+  teeplantage:{name:"Teeplantage",em:"🍵",price:18000,tp:"p",prod:"tee",rate:2,inp:null,inpN:0,desc:"Tee",localCap:100,baseTick:35,lvl:6,region:['asien','afrika']},
+  kautschukplantage:{name:"Kautschukplantage",em:"🌳",price:24000,tp:"p",prod:"kautschuk",rate:2,inp:null,inpN:0,desc:"Kautschuk",localCap:100,baseTick:45,lvl:6,region:['suedamerika','asien']},
+  maisfarm:{name:"Maisfarm",em:"🌽",price:9000,tp:"p",prod:"mais",rate:2,inp:null,inpN:0,desc:"Mais",localCap:150,baseTick:50,lvl:6,region:['nordamerika','suedamerika']},
+  fischerei:{name:"Fischerei",em:"🐟",price:15000,tp:"p",prod:"fisch",rate:3,inp:null,inpN:0,desc:"Fisch",localCap:100,baseTick:30,lvl:6,region:['ozeanien','nordamerika','europa']},
+  kohlegrube:{name:"Kohlegrube",em:"⚫",price:20000,tp:"p",prod:"kohle",rate:2,inp:null,inpN:0,desc:"Kohle",localCap:100,baseTick:40,lvl:6,region:['ozeanien','europa','nordamerika']},
   // LVL 5 – Heavy industry
-  oelquelle:{name:"Ölförderanlage",em:"🛢️",price:40000,tp:"p",prod:"oel",rate:1,inp:null,inpN:0,desc:"Öl",localCap:40,baseTick:75,lvl:8},
-  stahlwerk:{name:"Stahlwerk",em:"🔨",price:48000,tp:"p",prod:"stahl",rate:1,inp:"erz",inpN:5,desc:"Erz → Stahl",localCap:40,baseTick:110,lvl:8},
-  weinkellerei:{name:"Weinkellerei",em:"🍷",price:42000,tp:"recipe",recipes:'weinkellerei',desc:"Trauben → Wein",localCap:40,baseTick:90,lvl:6},
-  zuckerfabrik:{name:"Zuckerfabrik",em:"🍬",price:20000,tp:"recipe",recipes:'zuckerfabrik',desc:"Zuckerrohr → Zucker",localCap:40,baseTick:45,lvl:7},
-  roesterei:{name:"Rösterei",em:"☕",price:35000,tp:"recipe",recipes:'roesterei',desc:"Kaffee → Röstkaffee",localCap:40,baseTick:60,lvl:7},
-  gummifabrik:{name:"Gummifabrik",em:"🔴",price:38000,tp:"recipe",recipes:'gummifabrik',desc:"Kautschuk → Gummi",localCap:40,baseTick:70,lvl:7},
+  oelquelle:{name:"Ölförderanlage",em:"🛢️",price:40000,tp:"p",prod:"oel",rate:1,inp:null,inpN:0,desc:"Öl",localCap:100,baseTick:75,lvl:8},
+  stahlwerk:{name:"Stahlwerk",em:"🔨",price:48000,tp:"p",prod:"stahl",rate:1,inp:"erz",inpN:5,desc:"Erz → Stahl",localCap:100,baseTick:110,lvl:8},
+  weinkellerei:{name:"Weinkellerei",em:"🍷",price:42000,tp:"recipe",recipes:'weinkellerei',desc:"Trauben → Wein",localCap:100,baseTick:90,lvl:6},
+  zuckerfabrik:{name:"Zuckerfabrik",em:"🍬",price:20000,tp:"recipe",recipes:'zuckerfabrik',desc:"Zuckerrohr → Zucker",localCap:100,baseTick:45,lvl:7},
+  roesterei:{name:"Rösterei",em:"☕",price:35000,tp:"recipe",recipes:'roesterei',desc:"Kaffee → Röstkaffee",localCap:100,baseTick:60,lvl:7},
+  gummifabrik:{name:"Gummifabrik",em:"🔴",price:38000,tp:"recipe",recipes:'gummifabrik',desc:"Kautschuk → Gummi",localCap:100,baseTick:70,lvl:7},
   // LVL 6 – Luxury & High-tech
-  pizzeria:{name:"Pizzeria",em:"🍕",price:45000,tp:"recipe",recipes:'pizzeria',desc:"Mehl+Käse → Pizza",localCap:40,baseTick:100,lvl:9},
-  elektronikfabrik:{name:"Elektronikfabrik",em:"💻",price:90000,tp:"p",prod:"elektronik",rate:1,inp:"stahl",inpN:4,desc:"Stahl → Elektronik",localCap:40,baseTick:150,lvl:9},
-  schokoladenfabrik:{name:"Schokoladenfabrik",em:"🍫",price:55000,tp:"recipe",recipes:'schokoladenfabrik',desc:"Kakao+Zucker → Schokolade",localCap:40,baseTick:85,lvl:9},
+  pizzeria:{name:"Pizzeria",em:"🍕",price:45000,tp:"recipe",recipes:'pizzeria',desc:"Mehl+Käse → Pizza",localCap:100,baseTick:100,lvl:9},
+  elektronikfabrik:{name:"Elektronikfabrik",em:"💻",price:90000,tp:"p",prod:"elektronik",rate:1,inp:"stahl",inpN:4,desc:"Stahl → Elektronik",localCap:100,baseTick:150,lvl:9},
+  schokoladenfabrik:{name:"Schokoladenfabrik",em:"🍫",price:55000,tp:"recipe",recipes:'schokoladenfabrik',desc:"Kakao+Zucker → Schokolade",localCap:100,baseTick:85,lvl:9},
   // LVL 7 – Konservierung
-  konservenfabrik:{name:"Konservenfabrik",em:"🥫",price:32000,tp:"recipe",recipes:'konservenfabrik',desc:"Fisch/Fleisch → Konserven/TK",localCap:40,baseTick:80,lvl:7},
+  konservenfabrik:{name:"Konservenfabrik",em:"🥫",price:32000,tp:"recipe",recipes:'konservenfabrik',desc:"Fisch/Fleisch → Konserven/TK",localCap:100,baseTick:80,lvl:7},
   // LVL 8 – Chemie
-  seifenfabrik:{name:"Seifenfabrik",em:"🧴",price:45000,tp:"recipe",recipes:'seifenfabrik',desc:"Öl+Honig → Seife",localCap:40,baseTick:90,lvl:8},
+  seifenfabrik:{name:"Seifenfabrik",em:"🧴",price:45000,tp:"recipe",recipes:'seifenfabrik',desc:"Öl+Honig → Seife",localCap:100,baseTick:90,lvl:8},
   // LVL 9 – Luxus
-  parfuemerie:{name:"Parfümerie",em:"🌸",price:70000,tp:"recipe",recipes:'parfuemerie',desc:"Obst+Seife → Parfüm/Kosmetik",localCap:40,baseTick:110,lvl:9},
+  parfuemerie:{name:"Parfümerie",em:"🌸",price:70000,tp:"recipe",recipes:'parfuemerie',desc:"Obst+Seife → Parfüm/Kosmetik",localCap:100,baseTick:110,lvl:9},
   // LVL 10 – High-End
-  pharmafabrik:{name:"Pharmafabrik",em:"💊",price:120000,tp:"recipe",recipes:'pharmafabrik',desc:"Kohle+Honig → Medikamente",localCap:40,baseTick:130,lvl:10},
-  destillerie:{name:"Destillerie",em:"🥃",price:80000,tp:"recipe",recipes:'destillerie',desc:"Trauben+Zucker → Spirituosen",localCap:40,baseTick:100,lvl:10},
+  pharmafabrik:{name:"Pharmafabrik",em:"💊",price:120000,tp:"recipe",recipes:'pharmafabrik',desc:"Kohle+Honig → Medikamente",localCap:100,baseTick:130,lvl:10},
+  destillerie:{name:"Destillerie",em:"🥃",price:80000,tp:"recipe",recipes:'destillerie',desc:"Trauben+Zucker → Spirituosen",localCap:100,baseTick:100,lvl:10},
   // LVL 11 – Brauerei, Glas, Keramik
-  brauerei:{name:"Brauerei",em:"🍺",price:55000,tp:"recipe",recipes:'brauerei',desc:"Getreide+Honig → Bier",localCap:50,baseTick:80,lvl:11},
-  glasfabrik:{name:"Glasfabrik",em:"🪟",price:60000,tp:"recipe",recipes:'glasfabrik',desc:"Kohle+Erz → Glas",localCap:40,baseTick:90,lvl:11},
-  keramikwerk:{name:"Keramikwerk",em:"🏺",price:50000,tp:"recipe",recipes:'keramikwerk',desc:"Kohle → Keramik",localCap:40,baseTick:85,lvl:11},
-  konditerei:{name:"Konditerei",em:"🎂",price:65000,tp:"recipe",recipes:'konditerei',desc:"Mehl+Zucker → Torte",localCap:40,baseTick:95,lvl:11},
+  brauerei:{name:"Brauerei",em:"🍺",price:55000,tp:"recipe",recipes:'brauerei',desc:"Getreide+Honig → Bier",localCap:120,baseTick:80,lvl:11},
+  glasfabrik:{name:"Glasfabrik",em:"🪟",price:60000,tp:"recipe",recipes:'glasfabrik',desc:"Kohle+Erz → Glas",localCap:100,baseTick:90,lvl:11},
+  keramikwerk:{name:"Keramikwerk",em:"🏺",price:50000,tp:"recipe",recipes:'keramikwerk',desc:"Kohle → Keramik",localCap:100,baseTick:85,lvl:11},
+  konditerei:{name:"Konditerei",em:"🎂",price:65000,tp:"recipe",recipes:'konditerei',desc:"Mehl+Zucker → Torte",localCap:100,baseTick:95,lvl:11},
   // LVL 12 – Luxus
-  edelsteinmine:{name:"Edelsteinmine",em:"💎",price:100000,tp:"p",prod:"edelsteine",rate:1,inp:null,inpN:0,desc:"Edelsteine",localCap:30,baseTick:100,lvl:12},
-  juwelier:{name:"Juwelier",em:"💍",price:130000,tp:"recipe",recipes:'juwelier',desc:"Edelsteine+Stahl → Schmuck",localCap:30,baseTick:120,lvl:12},
-  uhrmacher:{name:"Uhrmacher",em:"⌚",price:140000,tp:"recipe",recipes:'uhrmacher',desc:"Stahl+Glas → Uhren",localCap:30,baseTick:130,lvl:12},
-  seidenfarm:{name:"Seidenfarm",em:"🧣",price:45000,tp:"p",prod:"seide",rate:1,inp:null,inpN:0,desc:"Seide",localCap:30,baseTick:70,lvl:12,region:['asien']},
+  edelsteinmine:{name:"Edelsteinmine",em:"💎",price:100000,tp:"p",prod:"edelsteine",rate:1,inp:null,inpN:0,desc:"Edelsteine",localCap:80,baseTick:100,lvl:12},
+  juwelier:{name:"Juwelier",em:"💍",price:130000,tp:"recipe",recipes:'juwelier',desc:"Edelsteine+Stahl → Schmuck",localCap:80,baseTick:120,lvl:12},
+  uhrmacher:{name:"Uhrmacher",em:"⌚",price:140000,tp:"recipe",recipes:'uhrmacher',desc:"Stahl+Glas → Uhren",localCap:80,baseTick:130,lvl:12},
+  seidenfarm:{name:"Seidenfarm",em:"🧣",price:45000,tp:"p",prod:"seide",rate:1,inp:null,inpN:0,desc:"Seide",localCap:80,baseTick:70,lvl:12,region:['asien']},
   // LVL 13 – Industrie 4.0
-  kunststofffabrik:{name:"Kunststofffabrik",em:"🧪",price:70000,tp:"recipe",recipes:'kunststofffabrik',desc:"Öl → Kunststoff",localCap:40,baseTick:80,lvl:13},
-  reifenwerk:{name:"Reifenwerk",em:"⚫",price:85000,tp:"recipe",recipes:'reifenwerk',desc:"Gummi+Stahl → Reifen",localCap:40,baseTick:90,lvl:13},
-  automobilwerk:{name:"Automobilwerk",em:"🚗",price:200000,tp:"recipe",recipes:'automobilwerk',desc:"Stahl+Reifen → Automobile",localCap:30,baseTick:150,lvl:13},
-  chipfabrik:{name:"Chipfabrik",em:"🔬",price:180000,tp:"recipe",recipes:'chipfabrik',desc:"Elektronik+Glas → Mikrochips",localCap:30,baseTick:140,lvl:13},
+  kunststofffabrik:{name:"Kunststofffabrik",em:"🧪",price:70000,tp:"recipe",recipes:'kunststofffabrik',desc:"Öl → Kunststoff",localCap:100,baseTick:80,lvl:13},
+  reifenwerk:{name:"Reifenwerk",em:"⚫",price:85000,tp:"recipe",recipes:'reifenwerk',desc:"Gummi+Stahl → Reifen",localCap:100,baseTick:90,lvl:13},
+  automobilwerk:{name:"Automobilwerk",em:"🚗",price:200000,tp:"recipe",recipes:'automobilwerk',desc:"Stahl+Reifen → Automobile",localCap:80,baseTick:150,lvl:13},
+  chipfabrik:{name:"Chipfabrik",em:"🔬",price:180000,tp:"recipe",recipes:'chipfabrik',desc:"Elektronik+Glas → Mikrochips",localCap:80,baseTick:140,lvl:13},
   // LVL 14 – Hightech
-  raumfahrtzulieferer:{name:"Raumfahrtzulieferer",em:"🛰️",price:350000,tp:"recipe",recipes:'raumfahrt',desc:"Chips+Stahl → Satellitenteile",localCap:20,baseTick:180,lvl:14},
-  biotechlabor:{name:"Biotech-Labor",em:"🧬",price:300000,tp:"recipe",recipes:'biotechlabor',desc:"Medikamente+Elektronik → Biotech",localCap:20,baseTick:160,lvl:14},
+  raumfahrtzulieferer:{name:"Raumfahrtzulieferer",em:"🛰️",price:350000,tp:"recipe",recipes:'raumfahrt',desc:"Chips+Stahl → Satellitenteile",localCap:50,baseTick:180,lvl:14},
+  biotechlabor:{name:"Biotech-Labor",em:"🧬",price:300000,tp:"recipe",recipes:'biotechlabor',desc:"Medikamente+Elektronik → Biotech",localCap:50,baseTick:160,lvl:14},
   // LVL 15 – Endgame
-  luxusautofabrik:{name:"Luxusautofabrik",em:"🏎️",price:500000,tp:"recipe",recipes:'luxusautofabrik',desc:"Autos+Elektronik → Luxusautos",localCap:20,baseTick:200,lvl:15},
-  supercomputerfabrik:{name:"Supercomputerfabrik",em:"🖥️",price:450000,tp:"recipe",recipes:'supercomputerfabrik',desc:"Chips+Stahl → Supercomputer",localCap:20,baseTick:190,lvl:15},
+  luxusautofabrik:{name:"Luxusautofabrik",em:"🏎️",price:500000,tp:"recipe",recipes:'luxusautofabrik',desc:"Autos+Elektronik → Luxusautos",localCap:50,baseTick:200,lvl:15},
+  supercomputerfabrik:{name:"Supercomputerfabrik",em:"🖥️",price:450000,tp:"recipe",recipes:'supercomputerfabrik',desc:"Chips+Stahl → Supercomputer",localCap:50,baseTick:190,lvl:15},
 };
 
 const UPGRADES={
@@ -1267,7 +1284,7 @@ function depotUpgradeCost(cid){
 function upgradeDepot(cid){
   if(!G)return;const inf=G.infra[cid]||[];const dep=inf.find(i=>i.type==='depot');
   if(!dep)return;const cost=depotUpgradeCost(cid);if(!cost||G.money<cost)return;
-  G.money-=cost;dep.depotLvl=(dep.depotLvl||0)+1;
+  G.money-=cost;finLog('expense',-cost,'Depot-Upgrade');dep.depotLvl=(dep.depotLvl||0)+1;
   addLog('🏢 Depot upgraded → '+(3+(dep.depotLvl)*2)+' Stellplätze');ua();
 }
 
@@ -2078,7 +2095,7 @@ function claimTutorial(qid){
   if(!G||!G.quests)return;
   if(G.quests.tutorial[qid]!=='done')return;
   const q=TUTORIAL.find(x=>x.id===qid);if(!q)return;
-  G.money+=q.reward;G.quests.tutorial[qid]='claimed';
+  G.money+=q.reward;finLog('quest',q.reward,'Tutorial: '+q.name);G.quests.tutorial[qid]='claimed';
   addLog('🎁 Tutorial: +'+fmt(q.reward)+' ('+q.name+')');ua();
 }
 
@@ -2086,21 +2103,21 @@ function claimLevelMission(qid){
   if(!G||!G.quests||!G.quests.levelMissions)return;
   if(G.quests.levelMissions[qid]!=='done')return;
   const q=LEVEL_MISSIONS.find(x=>x.id===qid);if(!q)return;
-  G.money+=q.reward;G.quests.levelMissions[qid]='claimed';
+  G.money+=q.reward;finLog('quest',q.reward,'Level-Mission: '+q.name);G.quests.levelMissions[qid]='claimed';
   addLog('🎁 Level-Mission: +'+fmt(q.reward)+' ('+q.name+')');ua();
 }
 
 function claimDaily(idx){
   if(!G||!G.quests||!G.quests.dailies)return;
   const q=G.quests.dailies[idx];if(!q||!q.done||q.claimed)return;
-  G.money+=q.reward;q.claimed=true;
+  G.money+=q.reward;finLog('quest',q.reward,'Mission: '+(q.title||''));q.claimed=true;
   addLog('🎁 Tagesbelohnung: +'+fmt(q.reward)+' ('+q.name+')');ua();
 }
 
 function claimWeekly(idx){
   if(!G||!G.quests||!G.quests.weeklies)return;
   const q=G.quests.weeklies[idx];if(!q||!q.done||q.claimed)return;
-  G.money+=q.reward;q.claimed=true;
+  G.money+=q.reward;finLog('quest',q.reward,'Mission: '+(q.title||''));q.claimed=true;
   addLog('🎁 Wochenbelohnung: +'+fmt(q.reward)+' ('+q.name+')');ua();
 }
 
@@ -2261,7 +2278,7 @@ function doMaintenance(vid){
   if(!G)return;const v=G.vehs.find(x=>x.id===vid);if(!v||v.st!=='idle')return;
   const cost=maintCost(v);
   if(G.money<cost){addLog('❌ Nicht genug Geld für Wartung ('+fmt(cost)+')');return}
-  G.money-=cost;v.lastMaintKm=v.km||0;v.needsMaint=false;
+  G.money-=cost;finLog('expense',-cost,'Wartung: '+vehName(v));v.lastMaintKm=v.km||0;v.needsMaint=false;
   addLog('🔧 Wartung: '+vehName(v)+' · -'+fmt(cost));ua();
 }
 
@@ -2334,7 +2351,7 @@ function sellVehicle(vid){
   const home=v.depot||v.loc;
   if(v.depot&&v.loc!==v.depot){addLog('❌ Nur im Heimat-Depot verkaufbar. Zurückrufen nach '+(C(v.depot)?.name||'Depot')+'!');return}
   const vt=VT[v.type];if(!vt)return;const refund=Math.floor(vt.price*0.4);
-  G.vehs=G.vehs.filter(x=>x.id!==vid);G.money+=refund;
+  G.vehs=G.vehs.filter(x=>x.id!==vid);G.money+=refund;finLog('refund',refund,'Fzg verkauft: '+vt.name);
   addLog(vt.em+' '+vt.name+' verkauft → +'+fmt(refund));ua();
 }
 
@@ -2343,7 +2360,7 @@ function upgradeWagon(vid){
   const lvl=v.wagons||0;if(lvl>=WAGON_UPGRADE.max)return;
   const cost=WAGON_UPGRADE.baseCost*(lvl+1);
   if(G.money<cost){addLog('❌ '+fmt(cost)+' nötig');return}
-  G.money-=cost;v.wagons=lvl+1;
+  G.money-=cost;finLog('expense',-cost,'Waggon-Upgrade');v.wagons=lvl+1;
   addLog('🚃 +1 Wagon → Kapazität: '+vehCap(v));ua();
 }
 function bld(cid,type){if(!G)return;const d=BLD[type];if(!d||G.money<d.price)return;if(!canBuildInCity(type,cid)){addLog('❌ Kann hier nicht gebaut werden');return}const c=C(cid);if(!c)return;const ex=G.blds[cid]||[];if(ex.length>=mxB(c.pop))return;G.money-=d.price;finLog('expense',-d.price,'Gebäude: '+d.name);if(!G.blds[cid])G.blds[cid]=[];
@@ -2353,6 +2370,9 @@ function bld(cid,type){if(!G)return;const d=BLD[type];if(!d||G.money<d.price)ret
   if(d.tp==='recipe'){const pool=RECIPES[d.recipes];if(pool&&pool.length)b.activeRecipes=pool.map(r=>r.id)}
   G.blds[cid].push(b);addLog('🏗️ '+d.em+' '+d.name+' in '+c.name);ubmk(cid);udots();ua()}
 
+const MAX_ANIMALS_PER_TYPE=10;
+const MAX_ANIMALS_TOTAL=30;
+
 function buyAnimal(cid,bid,animalKey){
   if(!G)return;const bs=G.blds[cid];if(!bs)return;
   const b=bs.find(x=>x.id===bid);if(!b||b.type!=='bauernhof')return;
@@ -2360,15 +2380,22 @@ function buyAnimal(cid,bid,animalKey){
   if(a.lvl&&a.lvl>playerLvl()){addLog('❌ Benötigt Level '+a.lvl);return}
   if(G.money<a.price){addLog('❌ '+fmt(a.price)+' nötig');return}
   if(!b.animals)b.animals={};
-  b.animals[animalKey]=(b.animals[animalKey]||0)+1;
-  G.money-=a.price;addLog(a.em+' +1 '+a.name);ua();
+  const cur=b.animals[animalKey]||0;
+  const totalAnimals=Object.values(b.animals).reduce((s,v)=>s+v,0);
+  if(cur>=MAX_ANIMALS_PER_TYPE){toast('❌ Max. '+MAX_ANIMALS_PER_TYPE+' '+a.name+' pro Bauernhof','var(--r)');return}
+  if(totalAnimals>=MAX_ANIMALS_TOTAL){toast('❌ Max. '+MAX_ANIMALS_TOTAL+' Tiere pro Bauernhof','var(--r)');return}
+  b.animals[animalKey]=cur+1;
+  G.money-=a.price;finLog('expense',-a.price,'Tier: '+a.name);
+  const newTotal=totalAnimals+1;
+  const grainPct=Math.round((1-newTotal/MAX_ANIMALS_TOTAL)*100);
+  addLog(a.em+' +1 '+a.name+' (Getreide: '+grainPct+'%)');ua();
 }
 function sellAnimal(cid,bid,animalKey){
   if(!G)return;const bs=G.blds[cid];if(!bs)return;
   const b=bs.find(x=>x.id===bid);if(!b||!b.animals||!b.animals[animalKey]||b.animals[animalKey]<=0)return;
   const a=ANIMALS[animalKey];if(!a)return;
   b.animals[animalKey]--;if(b.animals[animalKey]<=0)delete b.animals[animalKey];
-  const refund=Math.floor(a.price*0.4);G.money+=refund;
+  const refund=Math.floor(a.price*0.4);G.money+=refund;finLog('refund',refund,'Tier verkauft');
   addLog(a.em+' −1 '+a.name+' → +'+fmt(refund));ua();
 }
 
@@ -2380,14 +2407,14 @@ function buyFruit(cid,bid,fruitKey){
   if(G.money<f.price){addLog('❌ '+fmt(f.price)+' nötig');return}
   if(!b.fruits)b.fruits={};
   b.fruits[fruitKey]=(b.fruits[fruitKey]||0)+1;
-  G.money-=f.price;addLog(f.em+' +1 '+f.name);ua();
+  G.money-=f.price;finLog('expense',-f.price,'Farm: '+f.name);addLog(f.em+' +1 '+f.name);ua();
 }
 function sellFruit(cid,bid,fruitKey){
   if(!G)return;const bs=G.blds[cid];if(!bs)return;
   const b=bs.find(x=>x.id===bid);if(!b||!b.fruits||!b.fruits[fruitKey]||b.fruits[fruitKey]<=0)return;
   const f=FRUITS[fruitKey];if(!f)return;
   b.fruits[fruitKey]--;if(b.fruits[fruitKey]<=0)delete b.fruits[fruitKey];
-  const refund=Math.floor(f.price*0.4);G.money+=refund;
+  const refund=Math.floor(f.price*0.4);G.money+=refund;finLog('refund',refund,'Farm verkauft');
   addLog(f.em+' −1 '+f.name+' → +'+fmt(refund));ua();
 }
 
@@ -2401,12 +2428,15 @@ function toggleRecipe(cid,bid,recipeId){
   ua();
 }
 
-function toggleOverflow(cid,bid){
+function setOverflow(cid,bid,mode){
   if(!G)return;const bs=G.blds[cid];if(!bs)return;
   const b=bs.find(x=>x.id===bid);if(!b)return;
-  b.overflow=b.overflow==='city'?'stop':'city';
-  addLog(b.overflow==='city'?'📦 Überlauf → Stadtlager':'⛔ Produktion stoppt bei vollem Gebäudekapazität');ua();
+  b.overflow=mode;
+  const d=BLD[b.type];
+  addLog(mode==='city'?'📦 '+d.name+': Überlauf → Stadtlager':'⛔ '+d.name+': Produktion stoppt bei vollem Lager');ua();
 }
+
+function toggleOverflow(cid,bid){setOverflow(cid,bid,G.blds[cid]?.find(x=>x.id===bid)?.overflow==='city'?'stop':'city')}
 
 function collectLocalStor(cid,bid){
   if(!G)return;const bs=G.blds[cid];if(!bs)return;
@@ -2422,7 +2452,7 @@ function demolishBld(cid,bid){
   const b=bs[idx];const d=BLD[b.type];if(!d)return;
   const refund=Math.floor(d.price*0.3);
   bs.splice(idx,1);
-  G.money+=refund;
+  G.money+=refund;finLog('refund',refund,'Gebäude verkauft');
   addLog('🔨 '+d.em+' '+d.name+' abgerissen → +'+fmt(refund));
   ubmk(cid);udots();ua();
 }
@@ -2454,7 +2484,7 @@ function buildInfra(cid,type){
   if(!G.infra[cid])G.infra[cid]=[];
   // Non-stackable: check not already built
   if(!d.stack&&G.infra[cid].find(x=>x.type===type)){addLog('❌ Bereits vorhanden!');return}
-  G.money-=d.price;
+  G.money-=d.price;finLog('expense',-d.price,'Infra: '+d.name);
   G.infra[cid].push({type,id:uid()});
   addLog('🏗️ '+d.em+' '+d.name+' in '+c.name+(d.storCap?' (+'+d.storCap+' Lager)':''));ua();
 }
@@ -2469,7 +2499,7 @@ function upgBld(cid,bid,track){
   if(lvl>=upDef.max)return;
   const cost=upCost(track,lvl);
   if(G.money<cost){addLog('❌ '+fmt(cost)+' nötig');return}
-  G.money-=cost;b.ups[track]=lvl+1;
+  G.money-=cost;finLog('expense',-cost,'Gebäude-Upgrade');b.ups[track]=lvl+1;
   addLog('⬆️ '+upDef.em+' '+upDef.name+' → Lvl '+(lvl+1));ua();
 }
 
@@ -2649,7 +2679,7 @@ function sellCity(cid){
   (G.infra&&G.infra[cid]||[]).forEach(i=>{const d=INFRA[i.type];if(d)refund+=Math.floor(d.price*0.3)});
   // Sell stored goods at 50% base price
   Object.entries(G.stor[cid]||{}).forEach(([g,a])=>{if(GOODS[g])refund+=Math.floor(a*GOODS[g].bp*0.5)});
-  G.money+=refund;
+  G.money+=refund;finLog('refund',refund,'Standort aufgegeben');
   delete G.blds[cid];delete G.stor[cid];if(G.infra)delete G.infra[cid];
   // Remove from cities
   const idx=cities.findIndex(x=>x.id===cid);if(idx>=0)cities.splice(idx,1);
@@ -2994,7 +3024,7 @@ async function fulfillAllianceRequest(reqId,cid,amt){
   stor[req.good]-=maxAmt;if(stor[req.good]<=0)delete stor[req.good];
   // Pay player
   const payment=maxAmt*req.ppu;
-  G.money+=payment;G.earned+=payment;
+  G.money+=payment;G.earned+=payment;finLog('income',payment,'Allianz-Handel');
   // Update request
   req.filled+=maxAmt;
   if(req.filled>=req.amt){
@@ -3138,12 +3168,48 @@ function tickCore(){
     }
   }
 
-  // ── Auto-Manager: auto-accept orders if enabled (Level 5+) ──
-  if(G.autoManager&&playerLvl()>=5&&G.tick%10===0){
-    G.orders.filter(o=>!o.acc&&o.type!=='express').forEach(o=>{
-      const avl=G.vehs.filter(v=>v.st==='idle'&&v.loc===o.from&&canVehTravel(v,o.to));
+  // ── Auto-Manager: auto-assign idle vehicles to accepted orders (Level 5+) ──
+  if(G.autoManager&&playerLvl()>=5&&G.tick%5===0){
+    const accOrders=G.orders.filter(o=>o.acc&&(o.amt-(o.delivered||0))>0);
+    accOrders.forEach(o=>{
+      const vehs=G.vehs.filter(x=>x.cargo?.oid===o.id&&x.st==='moving');
+      const inTransit=vehs.reduce((s,v)=>s+(v.cargo?.amt||0),0);
+      const remaining=o.amt-(o.delivered||0)-inTransit;
+      if(remaining<=0)return;
       const inS=G.stor[o.from]?.[o.good]||0;
-      if(inS>=o.amt&&avl.length){o.acc=true;o.accTick=G.tick;autoAssign(o.id)}
+      // 1. Local vehicles at origin with stock
+      if(inS>0){
+        const avl=G.vehs.filter(v=>v.st==='idle'&&v.loc===o.from&&canVehTravel(v,o.to)&&!v.followUpOrder&&!v.pendingTransfer);
+        let loaded=0;
+        for(const v of avl){
+          if(loaded>=remaining)break;
+          const canLoad=Math.min(remaining-loaded,G.stor[o.from]?.[o.good]||0,vehCap(v));
+          if(canLoad<=0)break;
+          G.stor[o.from][o.good]-=canLoad;if(G.stor[o.from][o.good]<=0)delete G.stor[o.from][o.good];
+          if(!o.shipped)o.shipped=0;o.shipped+=canLoad;loaded+=canLoad;
+          v.st='moving';v.rt={from:o.from,to:o.to,toLat:o.toLat,toLng:o.toLng,toName:o.toName};
+          v.cargo={oid:o.id,good:o.good,amt:canLoad};v.prog=0;
+          if(typeof ensureRoute==='function')ensureRoute(v);
+          addLog('🤖 '+vehName(v)+': '+canLoad+'× '+(GOODS[o.good]?.em||'')+' → '+(Cx(o.to)?.name||'?'));
+          markCompDirty();
+        }
+      }
+      // 2. Remote vehicles: send to origin for pickup (if no local vehicles handled it)
+      const stillRemaining=o.amt-(o.delivered||0)-G.vehs.filter(x=>x.cargo?.oid===o.id&&x.st==='moving').reduce((s,v)=>s+(v.cargo?.amt||0),0);
+      if(stillRemaining>0&&inS>0){
+        const remV=G.vehs.filter(v=>v.st==='idle'&&v.loc!==o.from&&canVehTravel(v,o.from)&&!v.followUpOrder&&!v.pendingTransfer);
+        let sent=0;let capSent=0;
+        for(const v of remV){
+          if(capSent>=stillRemaining)break;
+          v.st='moving';v.rt={from:v.loc,to:o.from};v.prog=0;
+          v.followUpOrder=o.id;
+          if(typeof ensureRoute==='function')ensureRoute(v);
+          capSent+=vehCap(v);sent++;
+          addLog('🤖 '+vehName(v)+' → '+(C(o.from)?.name||'?')+' (Anfahrt für Auftrag)');
+          markCompDirty();
+          if(sent>=3)break; // Max 3 remote per tick to avoid spam
+        }
+      }
     });
   }
 
@@ -3160,6 +3226,30 @@ function tickCore(){
       let cc=cityCap(cid);
       
       const cityUsed=()=>{let t=0;for(const k in stor)t+=stor[k];return t};
+
+      // Helper: check + take inputs from building localStors first, then city storage
+      const availInput=(good)=>{
+        let total=0;
+        for(let i=0;i<bs.length;i++){const ob=bs[i];if(ob.localStor&&ob.localStor[good])total+=ob.localStor[good]}
+        total+=(stor[good]||0);
+        return total;
+      };
+      const takeInput=(good,amt)=>{
+        let remaining=amt;
+        // 1. Take from building localStors first
+        for(let i=0;i<bs.length&&remaining>0;i++){
+          const ob=bs[i];if(!ob.localStor||!ob.localStor[good])continue;
+          const take=Math.min(ob.localStor[good],remaining);
+          ob.localStor[good]-=take;remaining-=take;
+          if(ob.localStor[good]<=0)delete ob.localStor[good];
+        }
+        // 2. Then from city storage
+        if(remaining>0&&stor[good]){
+          const take=Math.min(stor[good],remaining);
+          stor[good]-=take;remaining-=take;
+          if(stor[good]<=0)delete stor[good];
+        }
+      };
 
       for(let bi=0;bi<bs.length;bi++){
         const b=bs[bi];
@@ -3200,10 +3290,13 @@ function tickCore(){
 
         if(!canProduce())continue;
 
-        // ── Farm: getreide + animals ──
+        // ── Farm: getreide + animals (more animals = less grain) ──
         if(d.tp==='farm'){
           const outMult=bUp(b,'prod_out')+1;
-          store(d.prod, d.rate*outMult);
+          const totalAnimals=b.animals?Object.values(b.animals).reduce((s,v)=>s+v,0):0;
+          const grainFactor=Math.max(0,1-totalAnimals/15); // 0 animals=100%, 15=0%
+          const grainAmt=Math.round(d.rate*outMult*grainFactor);
+          if(grainAmt>0)store(d.prod, grainAmt);
           if(b.animals){
             for(const aKey in b.animals){
               const cnt=b.animals[aKey];
@@ -3247,12 +3340,12 @@ function tickCore(){
             if(!canProduce())break;
             // Scale input needs by split (each recipe uses proportional resources)
             const need1=Math.max(1,Math.ceil(recipe.in1N*eff/split));
-            const has1=(stor[recipe.in1]||0)>=need1;
+            const has1=availInput(recipe.in1)>=need1;
             const need2=recipe.in2?Math.max(1,Math.ceil(recipe.in2N*eff/split)):0;
-            const has2=!recipe.in2||(stor[recipe.in2]||0)>=need2;
+            const has2=!recipe.in2||availInput(recipe.in2)>=need2;
             if(has1&&has2){
-              stor[recipe.in1]-=need1;if(stor[recipe.in1]<=0)delete stor[recipe.in1];
-              if(recipe.in2){stor[recipe.in2]-=need2;if(stor[recipe.in2]<=0)delete stor[recipe.in2]}
+              takeInput(recipe.in1,need1);
+              if(recipe.in2)takeInput(recipe.in2,need2);
               const outAmt=Math.max(1,Math.round(recipe.outR*outMult/split));
               store(recipe.out, outAmt);
             }
@@ -3265,9 +3358,9 @@ function tickCore(){
           const effM=[1,.8,.65,.5];const eff=effM[bUp(b,'fac_eff')]||1;
           const need=Math.max(1,Math.ceil(d.inpN*eff));
           const need2=d.inp2?Math.max(1,Math.ceil(d.inpN2*eff)):0;
-          if((stor[d.inp]||0)>=need&&(!d.inp2||(stor[d.inp2]||0)>=need2)){
-            stor[d.inp]-=need;if(stor[d.inp]<=0)delete stor[d.inp];
-            if(d.inp2){stor[d.inp2]-=need2;if(stor[d.inp2]<=0)delete stor[d.inp2]}
+          if(availInput(d.inp)>=need&&(!d.inp2||availInput(d.inp2)>=need2)){
+            takeInput(d.inp,need);
+            if(d.inp2)takeInput(d.inp2,need2);
             store(d.prod, d.rate*(bUp(b,'fac_out')+1));
           }
         } else {
@@ -3465,7 +3558,7 @@ function tickCore(){
   // Maintenance (every 10min)
   if(G.tick%600===0){
     const c=G.vehs.reduce((s,v)=>s+(VT[v.type]?.mt||0),0);
-    if(c>0){G.money-=c;addLog('🔧 Wartung: '+fmt(c))}
+    if(c>0){G.money-=c;finLog('running',-c,'Laufende Wartung');addLog('🔧 Wartung: '+fmt(c))}
   }
 
   // Quests
@@ -3629,7 +3722,7 @@ function initMap(){
 // ── OSRM Route Fetching ──
 async function fetchRoute(fLat,fLng,tLat,tLng){
   const key=fLat.toFixed(3)+','+fLng.toFixed(3)+'>'+tLat.toFixed(3)+','+tLng.toFixed(3);
-  if(routeCache[key])return routeCache[key];
+  if(routeCache[key]&&routeCache[key].length>2)return routeCache[key];
   try{
     const url='https://router.project-osrm.org/route/v1/driving/'+fLng+','+fLat+';'+tLng+','+tLat+'?overview=full&geometries=geojson';
     const r=await fetch(url);if(!r.ok)throw 0;
@@ -3639,13 +3732,16 @@ async function fetchRoute(fLat,fLng,tLat,tLng){
       routeCache[key]=coords;return coords;
     }
   }catch(e){}
-  const fb=[[fLat,fLng],[tLat,tLng]];routeCache[key]=fb;return fb;
+  if(!routeCache[key])routeCache[key]=[[fLat,fLng],[tLat,tLng]];
+  return routeCache[key];
 }
 
 function ensureRoute(v){
   if(!v.rt)return;const f=C(v.rt.from)||Cx(v.rt.from),t=C(v.rt.to)||Cx(v.rt.to)||(v.rt.toLat?{lat:v.rt.toLat,lng:v.rt.toLng,name:v.rt.toName||'?'}:null);if(!f||!t)return;
   const key=f.lat.toFixed(3)+','+f.lng.toFixed(3)+'>'+t.lat.toFixed(3)+','+t.lng.toFixed(3);
-  if(!routeCache[key])fetchRoute(f.lat,f.lng,t.lat,t.lng);
+  const cached=routeCache[key];
+  // Fetch if no cache, or if cache is just a 2-point fallback (retry for real route)
+  if(!cached||(cached.length<=2&&Math.random()<0.05))fetchRoute(f.lat,f.lng,t.lat,t.lng);
 }
 
 function interpRoute(coords,pct){
@@ -3693,12 +3789,14 @@ function uvmk(){
       const rk=f.lat.toFixed(3)+','+f.lng.toFixed(3)+'>'+t.lat.toFixed(3)+','+t.lng.toFixed(3);
       const cached=routeCache[rk];
       if(cached&&cached.length>2){
-        rLn[v.id]=L.polyline(cached,{color:'#3dd68c',weight:3,opacity:.5}).addTo(MP);
+        // Real road route: solid line, vehicle follows route
+        rLn[v.id]=L.polyline(cached,{color:'#3dd68c',weight:2.5,opacity:.4}).addTo(MP);
         const pos=interpRoute(cached,pct);
         if(pos){vMk[v.id]=L.marker(pos,{icon:L.divIcon({className:'',iconSize:[24,24],iconAnchor:[12,12],html:'<div class="vi" style="font-size:20px">'+vt.em+'</div>'}),interactive:true}).addTo(MP);
         vMk[v.id].bindTooltip(tip,{direction:'top',offset:[0,-10]});}
       } else {
-        rLn[v.id]=L.polyline([[f.lat,f.lng],[t.lat,t.lng]],{color:'#3dd68c',weight:2.5,opacity:.35,dashArray:'8,6'}).addTo(MP);
+        // Waiting for route: thin dashed line, straight interpolation
+        rLn[v.id]=L.polyline([[f.lat,f.lng],[t.lat,t.lng]],{color:'#3dd68c',weight:1.5,opacity:.2,dashArray:'6,8'}).addTo(MP);
         const lat=f.lat+(t.lat-f.lat)*pct,lng=f.lng+(t.lng-f.lng)*pct;
         vMk[v.id]=L.marker([lat,lng],{icon:L.divIcon({className:'',iconSize:[24,24],iconAnchor:[12,12],html:'<div class="vi" style="font-size:20px">'+vt.em+'</div>'}),interactive:true}).addTo(MP);
         vMk[v.id].bindTooltip(tip,{direction:'top',offset:[0,-10]});
@@ -4034,8 +4132,8 @@ function dashHQ(){
   const lvl=playerLvl();const li=LEVELS[lvl-1];const cv=companyValue();
   // Financials
   h+='<div class="dash-card"><div class="dash-card-title">'+li.em+' Level '+lvl+' · '+li.name+'</div>';
-  h+='<div class="dash-big">'+fmt(cv)+'</div><div class="dash-sub">Unternehmenswert</div>';
-  h+='<div class="dash-big sec" style="font-size:16px;margin-top:4px">'+fmt(G.money)+'</div><div class="dash-sub">Kontostand</div>';
+  h+='<div class="dash-big" style="color:#c084fc">'+fmt(cv)+'</div><div class="dash-sub">Unternehmenswert</div>';
+  h+='<div class="dash-big" style="font-size:16px;margin-top:4px;color:'+(G.money>=0?'#34d399':'var(--r)')+'">'+fmt(G.money)+'</div><div class="dash-sub">Kontostand</div>';
   h+='<div style="margin-top:4px;font-size:12px;color:var(--td)">💰 '+fmt(G.earned)+' verdient · 📦 '+(G.dels||0)+' Lieferungen</div>';
   // Level requirements
   if(lvl<LEVELS.length){
@@ -4050,10 +4148,17 @@ function dashHQ(){
       {label:'Standorte',cur:cities.length,need:next.cities,em:'🏙️'},
       {label:'Kosten',cur:G.money,need:next.cost,em:'🪙',fmt:true},
     ];
-    reqs.forEach(rq=>{const pct=Math.min(rq.cur/Math.max(rq.need,1),1);const done=rq.cur>=rq.need;
-      h+='<div style="margin:3px 0"><div style="display:flex;justify-content:space-between;font-size:11px;color:'+(done?'var(--a)':'var(--td)')+'">';
+    reqs.forEach(rq=>{const pct=Math.min(Math.max(rq.cur/Math.max(rq.need,1),0),1);const done=rq.cur>=rq.need;
+      const isDebt=rq.label==='Kosten'&&rq.cur<0;
+      const debtPct=isDebt?Math.min(Math.abs(rq.cur)/Math.max(rq.need,1),1):0;
+      h+='<div style="margin:3px 0"><div style="display:flex;justify-content:space-between;font-size:11px;color:'+(isDebt?'var(--r)':done?'var(--a)':'var(--td)')+'">';
       h+='<span>'+rq.em+' '+rq.label+'</span><span>'+(rq.fmt?fmt(rq.cur)+'/'+fmt(rq.need):rq.cur+'/'+rq.need)+(done?' ✅':'')+'</span></div>';
-      h+='<div class="pb" style="height:3px;margin-top:1px"><div class="pf" style="width:'+pct*100+'%;background:'+(done?'var(--a)':'var(--go)')+'"></div></div></div>'});
+      if(isDebt){
+        h+='<div class="pb" style="height:3px;margin-top:1px;direction:rtl"><div class="pf" style="width:'+debtPct*100+'%;background:var(--r)"></div></div>';
+      } else {
+        h+='<div class="pb" style="height:3px;margin-top:1px"><div class="pf" style="width:'+pct*100+'%;background:'+(done?'var(--a)':'var(--go)')+'"></div></div>';
+      }
+      h+='</div>'});
     h+='<div class="sub" style="margin-top:3px">🆕 '+next.desc+'</div>';
     if(lu&&!lu.blocked)h+='<button class="btn sm" style="margin-top:4px;background:var(--a);color:var(--bg);border-color:var(--a)" onclick="doLevelUp()">⬆️ Level Up! (-'+fmt(next.cost)+')</button>';
     h+='</div>';}
@@ -4260,11 +4365,23 @@ function dashLogistics(){
 // ═══ FINANCE DASHBOARD ═══
 function dashFinance(){
   let h='<div class="dash-grid">';
-  h+='<div class="dash-card"><div class="dash-card-title">💰 Finanzen</div>';
-  h+='<div class="dash-big">'+fmt(G.money)+'</div><div class="dash-sub">Kontostand</div>';
-  h+='<div style="margin-top:6px"><div class="sub">Gesamtumsatz: <b style="color:var(--a)">'+fmt(G.earned||0)+'</b></div>';
-  h+='<div class="sub">Unternehmenswert: <b>'+fmt(companyValue())+'</b></div></div></div>';
-  // Revenue breakdown by good
+  const fin=G.finance||[];
+  const oneHourAgo=G.tick-3600;
+  const recent=fin.filter(f=>f.t>oneHourAgo);
+  const rIncome=recent.filter(f=>f.amount>0).reduce((s,f)=>s+f.amount,0);
+  const rExpense=recent.filter(f=>f.amount<0).reduce((s,f)=>s+f.amount,0);
+
+  // Summary card
+  h+='<div class="dash-card"><div class="dash-card-title">💰 Kontostand</div>';
+  h+='<div class="dash-big" style="color:'+(G.money>=0?'#34d399':'var(--r)')+'">'+fmt(G.money)+'</div>';
+  h+='<div class="dash-sub">Unternehmenswert: <b style="color:#c084fc">'+fmt(companyValue())+'</b></div>';
+  h+='<div style="margin-top:6px;display:flex;gap:6px;flex-wrap:wrap">';
+  h+='<span class="tg g">▲ '+fmt(rIncome)+' /h</span>';
+  h+='<span class="tg r">▼ '+fmt(rExpense)+' /h</span>';
+  h+='<span class="tg" style="color:'+(rIncome+rExpense>=0?'var(--a)':'var(--r)')+'">Δ '+fmt(rIncome+rExpense)+' /h</span>';
+  h+='</div></div>';
+
+  // Revenue by good
   h+='<div class="dash-card"><div class="dash-card-title">📊 Umsatz nach Ware</div>';
   const gS={};(G.history||[]).forEach(x=>{if(!gS[x.good])gS[x.good]=0;gS[x.good]+=x.rew});
   const sorted=Object.entries(gS).sort((a,b)=>b[1]-a[1]);
@@ -4272,43 +4389,45 @@ function dashFinance(){
   sorted.slice(0,8).forEach(([g,rev])=>{const gd=GOODS[g];const pct=Math.round(rev/(G.earned||1)*100);
     h+='<div style="padding:2px 0;font-size:12px;border-bottom:1px solid var(--bd)"><div class="rw"><span>'+(gd?.em||'')+' '+(gd?.name||g)+'</span><span style="font-family:var(--mono);color:var(--a)">'+fmt(rev)+' ('+pct+'%)</span></div></div>'});
   h+='</div>';
+
   // Cost analysis
   h+='<div class="dash-card" style="grid-column:span 2"><div class="dash-card-title">📉 Kostenanalyse</div>';
   const bldCost=Object.values(G.blds).flat().reduce((s,b)=>{const d=BLD[b.type];return s+(d?d.price:0)},0);
   const infraCost=Object.values(G.infra||{}).flat().reduce((s,i)=>s+(i.cost||0),0);
   const vehCost2=G.vehs.reduce((s,v)=>{const vt=VT[v.type];return s+(vt?vt.price:0)},0);
-  const spent=bldCost+infraCost+vehCost2;
-  h+='<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px">';
-  [['🏭',fmt(bldCost),'Gebäude'],['🏢',fmt(infraCost),'Infrastruktur'],['🚛',fmt(vehCost2),'Fahrzeuge']].forEach(([em,val,lbl])=>{
-    h+='<div class="crd" style="text-align:center;padding:6px"><div style="font-size:14px;font-family:var(--mono)">'+val+'</div><div class="dash-sub">'+em+' '+lbl+'</div></div>'});
+  const runCost=fin.filter(f=>f.type==='running').reduce((s,f)=>s+Math.abs(f.amount),0);
+  const penCost=fin.filter(f=>f.type==='penalty').reduce((s,f)=>s+Math.abs(f.amount),0);
+  h+='<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(80px,1fr));gap:6px">';
+  [['🏭',fmt(bldCost),'Gebäude'],['🏢',fmt(infraCost),'Infrastruktur'],['🚛',fmt(vehCost2),'Fahrzeuge'],['🔧',fmt(runCost),'Laufend'],['⚠️',fmt(penCost),'Strafen']].forEach(([em,val,lbl])=>{
+    h+='<div class="crd" style="text-align:center;padding:6px"><div style="font-size:13px;font-family:var(--mono)">'+val+'</div><div class="dash-sub">'+em+' '+lbl+'</div></div>'});
   h+='</div>';
+  const spent=bldCost+infraCost+vehCost2+runCost+penCost;
   const profit=(G.earned||0)-spent;
   h+='<div style="margin-top:6px;padding:6px;border-radius:8px;background:rgba('+(profit>=0?'61,214,140':'248,113,113')+',.06);border:1px solid rgba('+(profit>=0?'61,214,140':'248,113,113')+',.15)">';
   h+='<div class="rw"><span style="font-weight:600">Netto-Ergebnis</span><span style="font-family:var(--mono);font-weight:700;color:'+(profit>=0?'var(--a)':'var(--r)')+'">'+fmt(profit)+'</span></div></div>';
   h+='</div>';
-  // Financial history
+
+  // Financial log with filter tabs
+  if(!G._finTab)G._finTab='all';
   h+='<div class="dash-card" style="grid-column:span 2"><div class="dash-card-title">📋 Finanzverlauf</div>';
-  const fin=G.finance||[];
-  if(!fin.length)h+='<div class="sub" style="padding:8px;text-align:center">Noch keine Transaktionen aufgezeichnet</div>';
+  h+='<div style="display:flex;gap:4px;margin-bottom:6px;flex-wrap:wrap">';
+  const finTabs=[['all','Alle'],['income','💰 Einnahmen'],['expense','🛒 Ausgaben'],['running','🔧 Laufend'],['penalty','⚠️ Strafen'],['quest','🎯 Missionen'],['admin','👑 Admin']];
+  finTabs.forEach(([id,lbl])=>{
+    const isSel=G._finTab===id;
+    h+='<button class="tg'+(isSel?' g':'')+'" style="cursor:pointer;'+(isSel?'font-weight:700':'')+'" onclick="G._finTab=\''+id+'\';renComp()">'+lbl+'</button>'});
+  h+='</div>';
+  if(!fin.length)h+='<div class="sub" style="padding:8px;text-align:center">Noch keine Transaktionen</div>';
   else{
-    // Summary: last hour income vs expenses
-    const oneHourAgo=G.tick-3600;
-    const recent=fin.filter(f=>f.t>oneHourAgo);
-    const rIncome=recent.filter(f=>f.amount>0).reduce((s,f)=>s+f.amount,0);
-    const rExpense=recent.filter(f=>f.amount<0).reduce((s,f)=>s+f.amount,0);
-    h+='<div style="display:flex;gap:8px;margin-bottom:6px">';
-    h+='<span class="tg g">▲ '+fmt(rIncome)+' /h</span>';
-    h+='<span class="tg" style="color:var(--r)">▼ '+fmt(rExpense)+' /h</span>';
-    h+='<span class="tg" style="color:'+(rIncome+rExpense>=0?'var(--a)':'var(--r)')+'">Δ '+fmt(rIncome+rExpense)+' /h</span>';
-    h+='</div>';
-    // Transaction list
-    fin.slice(-20).reverse().forEach(f=>{
+    const filtered=G._finTab==='all'?fin:fin.filter(f=>f.type===G._finTab);
+    const show=filtered.slice(-30).reverse();
+    if(!show.length)h+='<div class="sub" style="padding:8px;text-align:center">Keine Einträge in dieser Kategorie</div>';
+    show.forEach(f=>{
       const isInc=f.amount>0;const d=new Date(f.ts);
       const ts=d.toLocaleString('de-DE',{hour:'2-digit',minute:'2-digit'});
-      const typeEm={income:'💰',expense:'🛒',penalty:'⚠️',quest:'🎯',refund:'🔙'}[f.type]||'📌';
-      h+='<div style="display:flex;justify-content:space-between;align-items:center;padding:3px 0;border-bottom:1px solid var(--bd);font-size:12px">';
-      h+='<span><span style="color:var(--td);margin-right:4px">'+ts+'</span>'+typeEm+' '+f.desc+'</span>';
-      h+='<span style="font-family:var(--mono);font-weight:600;color:'+(isInc?'var(--a)':'var(--r)')+'">'+(isInc?'+':'')+fmt(f.amount)+'</span></div>'});
+      const typeEm={income:'💰',expense:'🛒',penalty:'⚠️',quest:'🎯',refund:'🔙',running:'🔧',admin:'👑'}[f.type]||'📌';
+      h+='<div style="display:flex;justify-content:space-between;align-items:center;padding:4px 0;border-bottom:1px solid var(--bd);font-size:12px">';
+      h+='<span style="flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap"><span style="color:var(--td);margin-right:4px">'+ts+'</span>'+typeEm+' '+f.desc+'</span>';
+      h+='<span style="font-family:var(--mono);font-weight:600;color:'+(isInc?'var(--a)':'var(--r)')+'flex-shrink:0;margin-left:6px">'+(isInc?'+':'')+fmt(f.amount)+'</span></div>'});
   }
   h+='</div></div>';return h;
 }
@@ -4541,8 +4660,13 @@ function updCnt(){try{document.getElementById('hCit').textContent=cities.length}
 
 function uhud(){if(!G)return;const m=fmt(G.money),cv=fmt(companyValue());
   const lvl=playerLvl();const li=LEVELS[lvl-1];
-  try{document.getElementById('hLvl').innerHTML=li.em+' <b>'+lvl+'</b>';
-  document.getElementById('hMoney').textContent=m;document.getElementById('hVal').textContent=cv;
+  const lvlClr=['#22c55e','#4ade80','#34d399','#2dd4bf','#38bdf8','#818cf8','#a78bfa','#c084fc','#f59e0b','#eab308','#f97316','#ef4444','#e11d48','#9333ea','#ffd700'][Math.min(lvl-1,14)];
+  try{
+    document.getElementById('hLvl').innerHTML='<div class="lvl-num" style="background:'+lvlClr+(lvl>=10?';box-shadow:0 0 8px '+lvlClr+'80':'')+'">'+lvl+'</div><div class="lvl-info"><span class="lvl-title" style="color:'+lvlClr+'">Level</span><span class="lvl-name" style="color:'+lvlClr+'">'+li.name+'</span></div>';
+    const wrap=document.getElementById('hLvlWrap');if(wrap){wrap.style.borderColor=lvlClr+'40';wrap.style.background=lvlClr+'0a'}
+  }catch(e){}
+  try{const hm=document.getElementById('hMoney');if(hm){hm.textContent=m;hm.style.color=G.money>=0?'#34d399':'#f87171'}
+  document.getElementById('hVal').textContent=cv;
   document.getElementById('hVeh').textContent=G.vehs.length;document.getElementById('hCit').textContent=cities.length;document.getElementById('hDel').textContent=G.dels}catch(e){}
   try{document.getElementById('cMoney').textContent=m;document.getElementById('cVeh').textContent=G.vehs.length;
   document.getElementById('cCities').textContent=cities.length;document.getElementById('cDel').textContent=G.dels}catch(e){}
@@ -4628,13 +4752,27 @@ function updateLiveElements(){
     const el5=document.getElementById('compMoney');if(el5)el5.textContent='💰 '+m;
   }catch(e){}
 }
-function updateRemoteCap(oid,needed){
+function updateRemoteCap(oid){
   const el=document.getElementById('remoteCap_'+oid);if(!el)return;
+  const total=parseInt(el.dataset.total)||0;
+  const delivered=parseInt(el.dataset.delivered)||0;
+  const transit=parseInt(el.dataset.transit)||0;
+  const approach=parseInt(el.dataset.approach)||0;
+  // Count selected
   const checks=document.querySelectorAll('.rc-v:checked');
-  if(!checks.length){el.innerHTML='<span class="sub">Fahrzeuge wählen...</span>';return}
-  let cap=0,cnt=0;checks.forEach(cb=>{cap+=parseInt(cb.dataset.cap)||0;cnt++});
-  const ok=cap>=needed;
-  el.innerHTML='<span style="color:'+(ok?'var(--a)':'var(--go)')+'">'+cnt+' Fzg · Kapazität: <b>'+cap+'/'+needed+'</b>'+(ok?' ✅':' ⚠️')+'</span>';
+  let selCap=0,selCnt=0;
+  checks.forEach(cb=>{selCap+=parseInt(cb.dataset.cap)||0;selCnt++});
+  // Update selection line
+  const selLine=document.getElementById('remoteSelLine_'+oid);
+  if(selLine)selLine.innerHTML='<span>☑️ Jetzt gewählt ('+selCnt+' Fzg)</span><span>~'+selCap+'</span>';
+  // Update gap line
+  const covered=delivered+transit+approach+selCap;
+  const gap=Math.max(0,total-covered);
+  const gapLine=document.getElementById('remoteGapLine_'+oid);
+  if(gapLine){
+    gapLine.style.color=gap<=0?'var(--a)':'var(--r)';
+    gapLine.innerHTML='<span>'+(gap<=0?'✅ Abgedeckt':'⚠️ Noch offen')+'</span><span>'+(gap<=0?'0':''+gap)+'/'+total+'</span>';
+  }
 }
 // ═══ TAB TUTORIALS & TIPS ═══
 const TAB_TIPS={
@@ -4644,8 +4782,8 @@ const TAB_TIPS={
     tips:['3,5t Transporter: 12 Einheiten · Sattelzug: 80 · Güterzug: 200','Züge brauchen Bahnhof, Schiffe Hafen, Flugzeuge Flughafen','Depot-Kapazität begrenzt Stellplätze — Depot ausbauen im Fuhrpark','Verkauf nur möglich wenn das Fahrzeug im Depot steht']},
   fleet:{title:'🚛 Fuhrpark',tutorial:'Alle Fahrzeuge pro Standort. Fahrzeuge auf Aufträgen können jederzeit zurückgerufen werden. Wartung verhindert Geschwindigkeitsverlust.',
     tips:['🔙 Zurückrufen: Fahrzeug bricht ab und fährt ins Depot','Wartung km-basiert: LKW 10.000 km, Züge 25.000, Schiffe 50.000','Depot ausbauen: +2 Stellplätze pro Upgrade','Zustandsbalken: 🟢>60% 🟡>30% 🔴<30% — ab 80% langsamer']},
-  logistics:{title:'📋 Logistik',tutorial:'Zwei Timer pro Auftrag: Annahme-Timer (5-20 min) + Liefer-Timer (1-4h). Express zahlt mehr, hat aber kürzere Deadlines. Routenplaner für Folgeaufträge.',
-    tips:['⏱ Annahme-Timer: Auftrag verfällt wenn nicht rechtzeitig angenommen','📦 Liefer-Timer: startet bei Annahme, nach 80% sinkt die Belohnung','⚡ Express: 150-200% Marktpreis, kurze Deadlines','📍 Fernfahrzeuge: Fahrzeuge von anderen Standorten zuweisbar','🔄 Routenplaner: Folgeaufträge für fahrende Fahrzeuge planen','Stornierung: 20% Strafe (früh) bis 50% (spät)']},
+  logistics:{title:'📋 Logistik',tutorial:'Zwei Timer pro Auftrag: Annahme-Timer (30-60 min) + Liefer-Timer (2-6h). Express zahlt mehr, hat aber kürzere Deadlines. Routenplaner für Folgeaufträge.',
+    tips:['⏱ Annahme-Timer: Auftrag verfällt wenn nicht rechtzeitig angenommen','📦 Liefer-Timer: startet bei Annahme, nach 80% sinkt die Belohnung','⚡ Express: 150-200% Marktpreis, kurze Deadlines','📍 Fernfahrzeuge: Fahrzeuge von anderen Standorten zuweisbar','🔄 Routenplaner: Folgeaufträge für fahrende Fahrzeuge planen','🤖 Auto-Manager (Lv5): weist freie Fahrzeuge zu — Aufträge manuell annehmen!','Stornierung: 20% Strafe (früh) bis 50% (spät)']},
   inventory:{title:'📦 Lager',tutorial:'Warenbestand pro Standort. Basis-Kapazität 200 Einheiten, erweiterbar. Verkaufe am Markt oder versende an andere Standorte.',
     tips:['Basis: 200 Lagerplätze pro Stadt','Lagerhalle: +500 · Große Lagerhalle: +1.500','💰 Marktverkauf: Fahrzeug fährt zum Markt und kehrt zurück','📦 Versenden: Waren zwischen eigenen Städten transportieren']},
   market:{title:'📊 Markt',tutorial:'Regionale Marktpreise für alle Waren. Preise schwanken basierend auf Angebot, Region und Events.',
@@ -4860,8 +4998,12 @@ function renComp(){
       pre+='</div>';}
     if(['logistics','inventory'].includes(compTab)){
       const canAuto=playerLvl()>=5;
-      if(canAuto)pre+='<div style="display:flex;justify-content:flex-end;margin-bottom:4px"><button class="btn sm" onclick="toggleAutoManager()" style="'+(G.autoManager?'background:rgba(61,214,140,.15);color:var(--a);border-color:var(--a)':'')+'">'+(G.autoManager?'🤖 Manager AN':'🤖 Auto')+'</button></div>';
-      else pre+='<div style="display:flex;justify-content:flex-end;margin-bottom:4px"><span class="tg" style="opacity:.4">🤖 Auto-Manager ab Level 5</span></div>';}
+      if(canAuto){
+        const on=G.autoManager;
+        pre+='<div style="display:flex;justify-content:flex-end;align-items:center;gap:8px;margin-bottom:4px">';
+        if(on)pre+='<span class="sub" style="color:var(--a)">🤖 Weist Fahrzeuge automatisch zu</span>';
+        pre+='<button class="btn sm" onclick="toggleAutoManager()" style="'+(on?'background:rgba(61,214,140,.2);color:var(--a);border-color:var(--a)':'background:rgba(248,113,113,.08);color:var(--r);border-color:rgba(248,113,113,.3)')+'">🤖 '+(on?'AN ✅':'AUS ❌')+'</button></div>';
+      } else pre+='<div style="display:flex;justify-content:flex-end;margin-bottom:4px"><span class="tg" style="opacity:.4">🤖 Auto-Manager ab Level 5</span></div>';}
     if(pre)el.innerHTML=pre+el.innerHTML;
   }
 }
@@ -5494,19 +5636,32 @@ function compOrders(el){
         const remV=G.vehs.filter(v=>v.st==='idle'&&v.loc!==o.from&&!v.followUpOrder&&!v.pendingTransfer).sort((a2,b)=>{
           const da=hav(C(a2.loc)?.lat||0,C(a2.loc)?.lng||0,f.lat,f.lng);const db=hav(C(b.loc)?.lat||0,C(b.loc)?.lng||0,f.lat,f.lng);return da-db});
         const retV2=G.vehs.filter(v=>typeof isReturning==='function'&&isReturning(v));
+        // Calculate existing commitment
+        const approachVehs=G.vehs.filter(v=>v.st==='moving'&&v.followUpOrder===o.id&&!v.cargo?.oid);
+        const approachCap=approachVehs.reduce((s,v)=>s+vehCap(v),0);
         h+='<div style="margin-top:6px;padding:8px;border:1px solid rgba(56,189,248,.2);border-radius:8px;background:rgba(56,189,248,.03)">';
         h+='<div style="font-size:12px;font-weight:600;color:var(--a2);margin-bottom:3px">📍 Fahrzeuge zuweisen (Mehrfachauswahl)</div>';
         h+='<div class="sub" style="margin-bottom:4px">Fahren erst zum Abholort, dann startet der Auftrag automatisch.</div>';
         remV.slice(0,8).forEach(v=>{const vt=VT[v.type];const loc=C(v.loc);if(!loc)return;
           const dist=Math.round(hav(loc.lat,loc.lng,f.lat,f.lng));const tt=tripT(loc,f,vt.spd);
-          h+='<label class="veh-check" style="border-color:rgba(56,189,248,.2)"><input type="checkbox" class="rc-v" data-vid="'+v.id+'" data-type="remote" data-cap="'+vehCap(v)+'" onchange="updateRemoteCap(\''+o.id+'\','+remaining+')" onfocus="renderBlocked=true" onblur="renderBlocked=false"/>';
+          h+='<label class="veh-check" style="border-color:rgba(56,189,248,.2)"><input type="checkbox" class="rc-v" data-vid="'+v.id+'" data-type="remote" data-cap="'+vehCap(v)+'" onchange="updateRemoteCap(\''+o.id+'\')" onfocus="renderBlocked=true" onblur="renderBlocked=false"/>';
           h+='<span>'+vt.em+' <b>'+vehName(v)+'</b> · Kap: '+vehCap(v)+' · 📍 '+loc.name+' · '+dist+' km · '+ftime(tt)+'</span></label>'});
         if(retV2.length){h+='<div style="font-size:12px;font-weight:600;color:var(--go);margin-top:6px;margin-bottom:3px">🔙 Auf dem Rückweg (umleitbar)</div>';
           retV2.slice(0,4).forEach(v=>{const vt=VT[v.type];
             const dest=Cx(v.rt?.to)||{name:'?'};
-            h+='<label class="veh-check" style="border-color:rgba(251,191,36,.2)"><input type="checkbox" class="rc-v" data-vid="'+v.id+'" data-type="returning" data-cap="'+vehCap(v)+'" onchange="updateRemoteCap(\''+o.id+'\','+remaining+')" onfocus="renderBlocked=true" onblur="renderBlocked=false"/>';
+            h+='<label class="veh-check" style="border-color:rgba(251,191,36,.2)"><input type="checkbox" class="rc-v" data-vid="'+v.id+'" data-type="returning" data-cap="'+vehCap(v)+'" onchange="updateRemoteCap(\''+o.id+'\')" onfocus="renderBlocked=true" onblur="renderBlocked=false"/>';
             h+='<span>'+vt.em+' <b>'+vehName(v)+'</b> · Kap: '+vehCap(v)+' · 🔙 → '+dest.name+'</span></label>'})}
-        h+='<div id="remoteCap_'+o.id+'" style="font-size:12px;margin-top:4px;font-family:var(--mono)"><span class="sub">Fahrzeuge wählen...</span></div>';
+        // Capacity summary (with hidden data for JS)
+        h+='<div id="remoteCap_'+o.id+'" data-total="'+o.amt+'" data-delivered="'+delivered+'" data-transit="'+actualInTransit+'" data-approach="'+approachCap+'" style="font-size:12px;margin-top:6px;font-family:var(--mono);padding:6px;border-radius:6px;background:rgba(0,0,0,.2);border:1px solid var(--bd)">';
+        h+='<div style="display:flex;justify-content:space-between;margin-bottom:2px"><span>📦 Gesamt benötigt</span><span>'+o.amt+'</span></div>';
+        if(delivered>0)h+='<div style="display:flex;justify-content:space-between;color:var(--a)"><span>✅ Geliefert</span><span>'+delivered+'</span></div>';
+        if(actualInTransit>0)h+='<div style="display:flex;justify-content:space-between;color:var(--go)"><span>🚛 Im Transport</span><span>'+actualInTransit+'</span></div>';
+        if(approachCap>0)h+='<div style="display:flex;justify-content:space-between;color:#a855f7"><span>🔜 Auf Anfahrt (Kap.)</span><span>~'+approachCap+'</span></div>';
+        h+='<div style="display:flex;justify-content:space-between;color:var(--a2)" id="remoteSelLine_'+o.id+'"><span>☑️ Jetzt gewählt</span><span>0</span></div>';
+        const covered=delivered+actualInTransit+approachCap;
+        const gap=Math.max(0,o.amt-covered);
+        h+='<div style="border-top:1px solid var(--bd);margin-top:3px;padding-top:3px;display:flex;justify-content:space-between;font-weight:700;color:'+(gap<=0?'var(--a)':'var(--r)')+'" id="remoteGapLine_'+o.id+'"><span>'+(gap<=0?'✅ Abgedeckt':'⚠️ Noch offen')+'</span><span>'+gap+'/'+o.amt+'</span></div>';
+        h+='</div>';
         h+='<div style="display:flex;gap:4px;margin-top:6px">';
         h+='<button class="btn full" style="background:rgba(56,189,248,.1);color:var(--a2);border-color:rgba(56,189,248,.3)" onclick="sendSelectedRemote(\''+o.id+'\')">🚀 Ausgewählte senden</button>';
         h+='<button class="btn sm" onclick="G._remoteOid=null;renComp()">✕</button></div></div>';}
@@ -6280,7 +6435,14 @@ function renderBldDetail(b,cid,showUpgrades){const d=BLD[b.type];if(!d)return'';
   const tracks=BLD_UPGRADES[b.type]||[];const lCap=bldLocalCap(b),lTot=Object.values(b.localStor).reduce((a,v)=>a+v,0);
   let h='<div style="padding:4px 0">';
   h+='<div class="rw"><span>'+d.em+' '+d.name+'</span><div style="display:flex;gap:3px">';
-  if(d.tp!=='s'){const isStop=b.overflow==='stop';h+='<button class="btn sm" onclick="toggleOverflow(\''+cid+'\',\''+b.id+'\')" style="'+(isStop?'color:var(--r)':'')+'">'+( isStop?'⛔ Stop':'📦 Überlauf')+'</button>'}
+  if(d.tp!=='s'){
+    const isCity=b.overflow==='city';const isStop=b.overflow==='stop';
+    const lFull=lTot>=lCap;const cFull=Object.values(G.stor[cid]||{}).reduce((s,v)=>s+v,0)>=cityCap(cid);
+    const producing=isCity?(!lFull||!cFull):!lFull;
+    h+='<span class="tg" style="font-size:10px;'+(producing?'color:var(--a);border-color:rgba(61,214,140,.3)':'color:var(--r);border-color:rgba(248,113,113,.3)')+'">●'+(producing?' Läuft':' Pausiert')+'</span>';
+    h+='<button class="btn sm" onclick="setOverflow(\''+cid+'\',\''+b.id+'\',\'city\')" style="'+(isCity?'background:rgba(61,214,140,.15);color:var(--a);border-color:var(--a)':'')+'">📦 Stadtlager</button>';
+    h+='<button class="btn sm" onclick="setOverflow(\''+cid+'\',\''+b.id+'\',\'stop\')" style="'+(isStop?'background:rgba(248,113,113,.12);color:var(--r);border-color:var(--r)':'')+'">⛔ Stoppen</button>';
+  }
   h+='<button class="btn red sm" onclick="if(confirm(\'Abreißen?\'))demolishBld(\''+cid+'\',\''+b.id+'\')">🔨</button>';
   h+='</div></div>';
   // Storage building info
@@ -6298,7 +6460,7 @@ function renderBldDetail(b,cid,showUpgrades){const d=BLD[b.type];if(!d)return'';
     h+='</div>';return h}
   // Production info with speed
   if(d.tp==='p'){const interval=bldTickInterval(b);h+='<div class="sub">'+bldOutput(b)+'× '+(GOODS[d.prod]?.name||'')+' alle '+ftime(interval)+(d.inp?' (braucht '+bldInput(b)+'× '+(GOODS[d.inp]?.name||'')+')'  :'')+'</div>'}
-  else if(d.tp==='farm'){const interval=bldTickInterval(b);h+='<div class="sub">'+bldOutput(b)+'× '+(GOODS[d.prod]?.name||'Getreide')+' alle '+ftime(interval)+'</div>'}
+  else if(d.tp==='farm'){const interval=bldTickInterval(b);const tA=b.animals?Object.values(b.animals).reduce((s2,v)=>s2+v,0):0;const gPct=Math.round((1-tA/30)*100);const gAmt=Math.round(d.rate*(bUp(b,'prod_out')+1)*gPct/100);h+='<div class="sub">🌾 '+gAmt+'× '+(GOODS[d.prod]?.name||'Getreide')+' ('+gPct+'%) alle '+ftime(interval)+(tA?' · 🐄 '+tA+' Tiere':'')+'</div>'}
   
   // Recipe
   if(d.tp==='recipe'&&d.recipes&&RECIPES[d.recipes]){const pool=RECIPES[d.recipes];const interval=bldTickInterval(b);
@@ -6325,17 +6487,25 @@ function renderBldDetail(b,cid,showUpgrades){const d=BLD[b.type];if(!d)return'';
     if(lItems.length)h+='<div style="font-size:10px;color:var(--td)">'+lItems.map(([g,a])=>(GOODS[g]?.em||'')+' '+(GOODS[g]?.name||'')+': '+a).join(', ')+'</div>'}
   // Animals
   if(d.tp==='farm'){const animals=b.animals||{};const interval=bldTickInterval(b);const totalA=Object.values(animals).reduce((s2,v)=>s2+v,0);
+    const grainPct=Math.round((1-totalA/30)*100);const maxPerType=10;
     h+='<div style="margin-top:4px;padding-top:4px;border-top:1px solid var(--bd)">';
-    h+='<div class="rw"><span class="sub" style="font-weight:600">Tierhaltung'+(totalA?' · '+totalA+' Tiere':'')+'</span><span class="sub">Zyklus: '+ftime(interval)+'</span></div>';
+    // Grain vs Animal balance
+    h+='<div style="margin-bottom:4px;padding:4px 8px;border-radius:6px;background:rgba(255,255,255,.02);border:1px solid var(--bd)">';
+    h+='<div class="rw"><span style="font-size:12px">🌾 Getreide: <b style="color:'+(grainPct>0?'var(--a)':'var(--r)')+'">'+grainPct+'%</b></span>';
+    h+='<span style="font-size:12px">🐄 Tiere: <b>'+totalA+'/15</b></span></div>';
+    h+='<div class="pb" style="height:4px;margin-top:2px;background:rgba(248,113,113,.15)"><div class="pf" style="width:'+grainPct+'%;background:var(--a)"></div></div>';
+    h+='<div class="sub" style="margin-top:2px">'+(grainPct>=100?'Maximale Getreideproduktion':grainPct>0?'Getreide reduziert — mehr Tiere = weniger Getreide':'⛔ Kein Getreide — alle Flächen für Tiere genutzt')+'</div></div>';
+    h+='<div class="rw"><span class="sub" style="font-weight:600">Tierhaltung</span><span class="sub">Zyklus: '+ftime(interval)+'</span></div>';
     if(totalA){Object.entries(animals).filter(([,c2])=>c2>0).forEach(([aKey,cnt])=>{const a=ANIMALS[aKey];if(!a)return;
-      h+='<div class="crd" style="padding:4px 8px;margin:3px 0"><div class="rw"><span style="font-size:11px">'+a.em+' '+a.name+' ×'+cnt+'</span>';
+      h+='<div class="crd" style="padding:4px 8px;margin:3px 0"><div class="rw"><span style="font-size:11px">'+a.em+' '+a.name+' ×'+cnt+'/'+maxPerType+'</span>';
       h+='<button class="btn red sm" onclick="sellAnimal(\''+cid+'\',\''+b.id+'\',\''+aKey+'\')">−1 ('+fmt(Math.floor(a.price*0.4))+')</button></div>';
       h+='<div class="sub">Produziert alle '+ftime(interval)+': '+a.produces.map(p=>{const amt=p.rate*cnt*(bUp(b,'prod_out')+1);return(GOODS[p.good]?.em||'')+' '+(GOODS[p.good]?.name||'')+' ×'+amt}).join(', ')+'</div></div>'})}
     h+='<div style="display:flex;gap:3px;margin-top:4px;flex-wrap:wrap">';
     Object.entries(ANIMALS).forEach(([aKey,a])=>{
       const locked=a.lvl&&a.lvl>playerLvl();
+      const cur=animals[aKey]||0;const full=cur>=maxPerType;const totalFull=totalA>=15;
       if(locked){h+='<button class="btn sm off" style="opacity:.3" title="Level '+a.lvl+' benötigt">'+a.em+' 🔒 Lvl '+a.lvl+'</button>';return}
-      h+='<button class="btn sm'+(G.money<a.price?' off':'')+'" onclick="buyAnimal(\''+cid+'\',\''+b.id+'\',\''+aKey+'\')" title="Produziert: '+a.produces.map(p=>(GOODS[p.good]?.name||'')).join(', ')+'">'+a.em+' '+a.name+' · '+fmt(a.price)+'</button>'});
+      h+='<button class="btn sm'+(G.money<a.price||full||totalFull?' off':'')+'" onclick="buyAnimal(\''+cid+'\',\''+b.id+'\',\''+aKey+'\')" title="'+a.produces.map(p=>(GOODS[p.good]?.name||'')).join(', ')+(full?' (MAX)':'')+'">'+a.em+' '+a.name+(cur?' ('+cur+'/'+maxPerType+')':'')+' · '+fmt(a.price)+'</button>'});
     h+='</div></div>'}
 
   if(d.tp==='orchard'){const fruits=b.fruits||{};const interval=bldTickInterval(b);const totalF=Object.values(fruits).reduce((s2,v)=>s2+v,0);
@@ -6435,11 +6605,11 @@ async function showProfile(){
   h+='<div class="unlock-name" style="font-size:24px">👤 '+currentUser+'</div>';
   h+='<div style="text-align:center;margin:14px 0"><span style="font-size:36px">'+li.em+'</span><div style="font-family:var(--mono);font-size:14px;font-weight:700;color:var(--a);margin-top:6px">Level '+lvl+' – '+li.name+'</div></div>';
   h+='<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:14px 0">';
-  [['💰','Unternehmenswert',fmt(cv)],['🏦','Kontostand',fmt(G.money)],['📦','Lieferungen',(G.dels||0).toString()],['💵','Umsatz',fmt(G.earned||0)],
-   ['🏙️','Standorte',cities.length.toString()],['🏭','Gebäude',totalBld.toString()],['🚛','Fahrzeuge',G.vehs.length.toString()],['🛣️','km',totalKm.toLocaleString('de-DE')],
-   ['⏱️','Spielzeit',ftime(G.tick||0)],['🌍','Regionen',Object.keys(regCount).length.toString()]].forEach(([em,label,val])=>{
+  [['💰','Unternehmenswert',fmt(cv),'#c084fc'],['🏦','Kontostand',fmt(G.money),G.money>=0?'#34d399':'var(--r)'],['📦','Lieferungen',(G.dels||0).toString(),'var(--a)'],['💵','Umsatz',fmt(G.earned||0),'var(--a)'],
+   ['🏙️','Standorte',cities.length.toString(),'var(--a)'],['🏭','Gebäude',totalBld.toString(),'var(--a)'],['🚛','Fahrzeuge',G.vehs.length.toString(),'var(--a)'],['🛣️','km',totalKm.toLocaleString('de-DE'),'var(--a)'],
+   ['⏱️','Spielzeit',ftime(G.tick||0),'var(--a)'],['🌍','Regionen',Object.keys(regCount).length.toString(),'var(--a)']].forEach(([em,label,val,clr])=>{
     h+='<div style="padding:12px;background:rgba(255,255,255,.02);border:1px solid var(--bd);border-radius:10px;text-align:center">';
-    h+='<div style="font-size:22px">'+em+'</div><div style="font-family:var(--mono);font-size:18px;font-weight:700;color:var(--a)">'+val+'</div>';
+    h+='<div style="font-size:22px">'+em+'</div><div style="font-family:var(--mono);font-size:18px;font-weight:700;color:'+clr+'">'+val+'</div>';
     h+='<div style="font-size:13px;color:var(--td)">'+label+'</div></div>'});
   h+='</div>';
   const vTypes={};G.vehs.forEach(v=>{const vt=VT[v.type];if(vt){vTypes[v.type]=(vTypes[v.type]||0)+1}});
@@ -6568,7 +6738,16 @@ function showWiki(section){
       <div class="wk-h3">Preis-Breakdown</div>
       <div class="wk-desc">Jeder Auftrag zeigt: Preis/Stück · % über Markt · geschätzte Transportkosten · Nettogewinn</div>
       <div class="wk-h3">🤖 Auto-Manager (ab Level 5)</div>
-      <div class="wk-desc">Akzeptiert automatisch Aufträge wo Ware + Fahrzeug verfügbar sind und verschickt sofort.</div>
+      <div class="wk-desc">Wenn aktiviert, weist der Manager automatisch freie Fahrzeuge am Abholort zu <b>bereits angenommenen</b> Aufträgen zu.<br><br>
+      <b>Was der Manager macht:</b><br>
+      ✅ Freie Fahrzeuge am Standort beladen und losschicken<br>
+      ✅ Mehrere Fahrzeuge für große Aufträge nacheinander zuweisen<br>
+      ✅ Alle 5 Sekunden prüfen ob Fahrzeuge verfügbar sind<br><br>
+      <b>Was du weiterhin manuell machst:</b><br>
+      📋 Aufträge annehmen — der Manager akzeptiert keine Aufträge!<br>
+      📍 Fahrzeuge von anderen Standorten zuweisen<br>
+      ⚡ Express-Aufträge verwalten<br><br>
+      Status: <span style="color:var(--a)">🤖 AN ✅</span> = Grün, aktiv · <span style="color:var(--r)">🤖 AUS ❌</span> = Rot, deaktiviert</div>
       <div class="wk-h3">Nicht-freigeschaltete Ziele 🔓</div>
       <div class="wk-desc">Fahrzeug liefert und kehrt automatisch zum nächsten eigenen Standort zurück.</div>`},
     market:{t:'Marktplatz',c:`
@@ -7087,15 +7266,15 @@ document.addEventListener('keydown',e=>{
   if(e.ctrlKey&&e.shiftKey&&(e.key==='A'||e.key==='a'||e.code==='KeyA')){e.preventDefault();toggleAdmin()}
 });
 
-const ADMIN_PASS_DEFAULT='logistix2026';
+const ADMIN_PASS_DEFAULT='yoshdus2026';
 let _adminHash=null;
 async function getAdminHash(){
   if(_adminHash)return _adminHash;
-  try{const stored=await storeGet('lx_admin_hash');if(stored){_adminHash=JSON.parse(stored);return _adminHash}}catch(e){}
-  // First time: hash default password
+  try{const stored=await storeGet('lx_admin_hash_v2');if(stored){_adminHash=JSON.parse(stored);return _adminHash}}catch(e){}
+  // First time or password changed: hash default
   const{hash,salt}=await hashPassword(ADMIN_PASS_DEFAULT);
   _adminHash={hash,salt};
-  try{await storeSet('lx_admin_hash',JSON.stringify(_adminHash))}catch(e){}
+  try{await storeSet('lx_admin_hash_v2',JSON.stringify(_adminHash))}catch(e){}
   return _adminHash;
 }
 let adminAuthed=false;
@@ -7333,12 +7512,12 @@ async function renderAdminPlayer(userKey,userData){
 // Admin actions
 function adminAddMoney(){
   if(!G)return;const v=parseInt(document.getElementById('adminMoney')?.value)||0;
-  G.money+=v;adminLog('admin','💰 +'+fmt(v)+' an '+currentUser);uhud();renderAdmin();
+  G.money+=v;finLog('admin',v,'Admin: Geld hinzugefügt');adminLog('admin','💰 +'+fmt(v)+' an '+currentUser);uhud();renderAdmin();
 }
 async function adminGivePlayerMoney(userKey){
   const amt=parseInt(document.getElementById('adminPlayerMoney')?.value)||0;if(!amt)return;
   if(userKey===currentUser&&G){
-    G.money+=amt;uhud();save();
+    G.money+=amt;finLog('admin',amt,'Admin: Geld erhalten');uhud();save();
   } else {
     // For other players: modify their save + set reload flag
     try{
