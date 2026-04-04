@@ -1367,10 +1367,10 @@ function genExpressOrder(){
   const rew=Math.round(mktPrice*sendAmt*mult)||500;
   const maxRew=Math.max(40000,Math.round(companyValue()*0.10));
   const cappedRew=Math.min(rew,maxRew);
-  // Express: shorter but scaled by amount + distance
-  const acceptTl=Math.max(180,Math.floor(300+Math.random()*300)); // 5-10 min to accept
-  // Delivery: base 45min + 20s/km + 2min per unit + up to 45min random
-  const deliverTl=Math.max(2700,Math.floor(2700+dist*20+sendAmt*120+Math.random()*2700));
+  // Express: fast-paced, tight but doable
+  const acceptTl=Math.max(180,Math.floor(180+Math.random()*240)); // 3-7 min to accept
+  // Delivery: 15min base + 10s/km + 30s per unit + up to 15min random
+  const deliverTl=Math.max(900,Math.floor(900+dist*10+sendAmt*30+Math.random()*900));
   return{id:uid(),type:'express',from:fromC.id,to:toC.id,good,amt:sendAmt,rew:cappedRew,origRew:cappedRew,
     born:G.tick,tl:acceptTl,deliverTl,acc:false,shipped:0,delivered:0,num:G.orderNum=(G.orderNum||0)+1,
     pricePerUnit:Math.round(cappedRew/sendAmt)||1,mktRef:mktPrice};
@@ -1464,16 +1464,19 @@ function C(id){return cities.find(c=>c.id===id)}
 function Cx(id){
   if(!id)return null;
   const c=C(id);if(c)return c;
-  // Check if any order has this as target with stored coords
+  // Check vehicle routes for stored coordinates
+  if(G&&G.vehs){const rv=G.vehs.find(x=>x.rt&&(x.rt.to===id||x.rt.from===id));
+    if(rv&&rv.rt.to===id&&rv.rt.toLat)return{id,name:rv.rt.toName||id,co:'',lat:rv.rt.toLat,lng:rv.rt.toLng,pop:0}}
+  // Check orders for stored coords
   if(G&&G.orders){const o=G.orders.find(x=>x.to===id||x.from===id);
-    if(o){if(o.to===id&&o.toName)return{id,name:o.toName,co:'',lat:o.toLat||0,lng:o.toLng||0,pop:0};
+    if(o){if(o.to===id&&o.toLat)return{id,name:o.toName||id,co:'',lat:o.toLat,lng:o.toLng,pop:0};
       if(o.from===id){const fc=C(o.from);if(fc)return fc}}}
-  // Check history for coords
-  if(G&&G.history){const h2=G.history.find(x=>x.to===id);if(h2&&h2.toName)return{id,name:h2.toName,co:'',lat:0,lng:0,pop:0}}
-  // Check DB (handle db_ prefix)
-  if(typeof DB!=='undefined'){const cleanId=id.startsWith('db_')?id.slice(3):id;
-    for(const d of DB){const did=d[0].toLowerCase().replace(/\s+/g,'-').replace(/[^a-z0-9\-]/g,'');
-      if(cleanId===did||cleanId.startsWith(did))return{id,name:d[0],co:d[1],lat:d[3],lng:d[4],pop:d[2]}}}
+  // Check history
+  if(G&&G.history){const h2=G.history.find(x=>x.to===id);if(h2&&h2.toLat)return{id,name:h2.toName||id,co:'',lat:h2.toLat,lng:h2.toLng,pop:0}}
+  // Check DB (normalize IDs for matching)
+  if(typeof DB!=='undefined'){const cleanId=(id.startsWith('db_')?id.slice(3):id.startsWith('mkt_')?id.slice(4):id).replace(/[-_\s]/g,'');
+    for(const d of DB){const did=d[0].toLowerCase().replace(/[^a-z0-9äöüß]/g,'');
+      if(cleanId===did)return{id,name:d[0],co:d[1],lat:d[3],lng:d[4],pop:d[2]}}}
   return null;
 }
 function addLog(m){if(!G)return;G.log.unshift(m);if(G.log.length>40)G.log.pop()}
@@ -2164,11 +2167,13 @@ function showMarketSellPopup(cid,good){
   if(!G)return;const c=C(cid);if(!c)return;
   const stor=G.stor[cid];const stock=(stor&&stor[good])||0;if(!stock)return;
   const reg=getRegion((c.co||'').toUpperCase());const ri=REGIONS[reg];
-  // Pick destination
+  // Pick nearest destination in same region
   const allDB=typeof DB!=='undefined'?DB:[];
   const regCities=allDB.filter(x=>getRegion(x[1])===reg&&x[0]!==c.name);
   if(!regCities.length){addLog('❌ Kein Marktplatz in Region');return}
-  const destPick=regCities[Math.floor(Math.random()*regCities.length)];
+  // Sort by distance, pick nearest
+  regCities.sort((a,b)=>hav(c.lat,c.lng,a[3],a[4])-hav(c.lat,c.lng,b[3],b[4]));
+  const destPick=regCities[0];
   const dest={name:destPick[0],co:destPick[1],lat:destPick[3],lng:destPick[4]};
   const dist=Math.round(hav(c.lat,c.lng,dest.lat,dest.lng));
   // Available vehicles
@@ -5095,7 +5100,7 @@ function compDealer(el){
   const dCap2=depotCap(c.id);const vHere2=G.vehs.filter(v=>(v.depot||v.loc)===c.id).length;
   const depotFull=vHere2>=dCap2;
   h+='<div class="ch"><div class="ci">🛒</div><div><div class="cn">Fahrzeughändler · '+c.name+'</div><div class="cm">Level '+lvl+' · '+LEVELS[lvl-1].em+' '+LEVELS[lvl-1].name+' · 🏢 Depot '+vHere2+'/'+dCap2+'</div></div></div>';
-  if(depotFull)h+='<div style="padding:6px 10px;border-radius:8px;border:1px solid rgba(248,113,113,.3);background:rgba(248,113,113,.04);margin-bottom:8px;font-size:11px;color:var(--r)"><i class="ri-alert-line"></i> <b>Depot voll!</b> Kein Platz für neue Fahrzeuge. <button class="btn sm" style="color:var(--r);border-color:rgba(248,113,113,.3)" onclick="openComputer();setCompTab(\'fleet\')">Depot ausbauen</button></div>';
+  if(depotFull)h+='<div style="padding:6px 10px;border-radius:8px;border:1px solid rgba(248,113,113,.3);background:rgba(248,113,113,.04);margin-bottom:8px;font-size:11px;color:var(--r)"><i class="ri-alert-line"></i> <b>Depot voll!</b> Kein Platz für neue Fahrzeuge. <button class="btn sm" style="color:var(--r);border-color:rgba(248,113,113,.3)" onclick="G.fleetSub=\'overview\';setCompTab(\'fleet\')">Depot ausbauen</button></div>';
   // Per-region vehicle summary
   const regVeh={};G.vehs.forEach(v=>{const loc=C(v.loc);if(!loc)return;const rk=getRegion((loc.co||'').toUpperCase());const ri=REGIONS[rk];const rn=ri?ri.name:'?';regVeh[rn]=(regVeh[rn]||0)+1});
   if(Object.keys(regVeh).length){h+='<div style="display:flex;flex-wrap:wrap;gap:4px;margin-bottom:8px">';
@@ -5662,8 +5667,8 @@ function compMarket(el){
       const reg=getRegion((c.co||'').toUpperCase());const ri=REGIONS[reg];
       // Pick a preview destination for display
       const allDB2=typeof DB!=='undefined'?DB:[];
-      const regCities2=allDB2.filter(x=>getRegion(x[1])===reg&&x[0]!==c.name);
-      const previewDest=regCities2.length?regCities2[Math.floor((G.tick||0)/60%regCities2.length)]:null;
+      const regCities2=allDB2.filter(x=>getRegion(x[1])===reg&&x[0]!==c.name).sort((a,b)=>hav(c.lat,c.lng,a[3],a[4])-hav(c.lat,c.lng,b[3],b[4]));
+      const previewDest=regCities2.length?regCities2[0]:null;
       const vHere3=G.vehs.filter(v=>v.st==='idle'&&v.loc===c.id);
       h+='<div class="crd"><div class="rw"><span style="font-weight:600">📍 '+c.name+'</span><span class="sub">'+(ri?.em||'')+' '+(ri?.name||'')+'</span></div>';
       if(previewDest)h+='<div class="sub" style="margin-bottom:3px">🚛 Nächster Markt: <b>'+previewDest[0]+'</b> ('+Math.round(hav(c.lat,c.lng,previewDest[3],previewDest[4]))+' km)'+(vHere3.length?' · 🚛'+vHere3.length+' verfügbar':'')+'</div>';
