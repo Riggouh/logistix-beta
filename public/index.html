@@ -31,12 +31,10 @@ body{font-family:'Barlow',sans-serif;background:var(--bg);color:var(--t);overflo
 .top-btn.glow:hover{background:rgba(61,214,140,.12);box-shadow:0 0 20px var(--gw)}
 
 /* Level badge */
-.lvl-badge{display:flex;align-items:center;gap:6px;padding:3px 10px 3px 6px;border-radius:10px;cursor:pointer;transition:.2s;font-family:var(--mono);border:1px solid var(--bd)}
-.lvl-badge:hover{transform:scale(1.05);filter:brightness(1.2)}
-.lvl-num{display:flex;align-items:center;justify-content:center;width:26px;height:26px;border-radius:7px;font-size:14px;font-weight:800;color:#fff;text-shadow:0 1px 3px rgba(0,0,0,.4)}
-.lvl-info{display:flex;flex-direction:column;line-height:1.1}
-.lvl-title{font-size:9px;text-transform:uppercase;letter-spacing:.8px;opacity:.7}
-.lvl-name{font-size:11px;font-weight:700}
+.lvl-badge{display:flex;align-items:center;gap:5px;padding:4px 10px 4px 5px;border-radius:20px;cursor:pointer;transition:.2s;font-family:var(--mono);border:1px solid var(--bd)}
+.lvl-badge:hover{filter:brightness(1.15);box-shadow:0 0 12px rgba(255,255,255,.06)}
+.lvl-num{display:flex;align-items:center;justify-content:center;width:24px;height:24px;border-radius:50%;font-size:13px;font-weight:800;color:#fff;text-shadow:0 1px 2px rgba(0,0,0,.5)}
+.lvl-name{font-size:12px;font-weight:600;letter-spacing:.3px}
 
 /* ═══ HAMBURGER ═══ */
 .hamburger-wrap{position:relative;pointer-events:auto}
@@ -407,7 +405,7 @@ body{font-family:'Barlow',sans-serif;background:var(--bg);color:var(--t);overflo
   .top-stat{display:none}
   .top-stat:first-child{display:flex}
   .lvl-badge{display:flex!important}
-  .lvl-info{display:none}
+  .lvl-name{display:none}
   .top-btn{padding:4px 6px;font-size:10px}
   #dashPanel{top:44px}
   #map{top:44px!important}
@@ -509,8 +507,8 @@ body{font-family:'Barlow',sans-serif;background:var(--bg);color:var(--t);overflo
   /* Level badge compact on mobile */
   .lvl-badge{padding:2px 6px 2px 4px}
   .lvl-num{width:22px;height:22px;font-size:12px;border-radius:6px}
-  .lvl-info .lvl-title{display:none}
-  .lvl-info .lvl-name{font-size:10px}
+  .lvl-name{font-size:10px}
+  
   .top-btn{padding:5px 8px;font-size:11px}
   .top-right{gap:3px}
   .top-left{gap:8px}
@@ -954,9 +952,9 @@ const GOODS={
   obst_apfel:{name:"Äpfel",em:"🍎",bp:80,cat:"roh",tier:0},obst_traube:{name:"Trauben",em:"🍇",bp:100,cat:"roh",tier:0},
   obst_orange:{name:"Orangen",em:"🍊",bp:90,cat:"roh",tier:0},obst_kirsche:{name:"Kirschen",em:"🍒",bp:110,cat:"roh",tier:0},
   milch:{name:"Milch",em:"🥛",bp:80,cat:"tier",tier:0},wolle:{name:"Wolle",em:"🧶",bp:95,cat:"tier",tier:0},
-  schweinefleisch:{name:"Schweinefleisch",em:"🥩",bp:150,cat:"tier",tier:0},
+  schweinefleisch:{name:"Schweinefleisch",em:"🐷",bp:150,cat:"tier",tier:0},
   // ─── LVL 3: Advanced animals ───
-  rindfleisch:{name:"Rindfleisch",em:"🥩",bp:200,cat:"tier",tier:0},
+  rindfleisch:{name:"Rindfleisch",em:"🐄",bp:200,cat:"tier",tier:0},
   // ─── BASIC PROCESSED (Tier 1) ───
   mehl:{name:"Mehl",em:"🌾",bp:110,cat:"ver",tier:1},
   butter:{name:"Butter",em:"🧈",bp:160,cat:"ver",tier:1},
@@ -2186,10 +2184,12 @@ function showMarketSellPopup(cid,good){
   const destPick=regCities[0];
   const dest={name:destPick[0],co:destPick[1],lat:destPick[3],lng:destPick[4]};
   const dist=Math.round(hav(c.lat,c.lng,dest.lat,dest.lng));
-  // Available vehicles
-  const vehs=G.vehs.filter(v=>v.st==='idle'&&v.loc===cid);
-  const maxCap=vehs.reduce((s,v)=>s+vehCap(v),0);
-  const maxAmt=Math.min(stock,maxCap);
+  // Available vehicles (local + remote)
+  const localVehs=G.vehs.filter(v=>v.st==='idle'&&v.loc===cid&&!v.followUpOrder&&!v.pendingTransfer);
+  const remoteVehs=G.vehs.filter(v=>v.st==='idle'&&v.loc!==cid&&!v.followUpOrder&&!v.pendingTransfer);
+  const allVehs=[...localVehs,...remoteVehs];
+  const maxCap=localVehs.reduce((s,v)=>s+vehCap(v),0);
+  const maxAmt=Math.min(stock,maxCap||remoteVehs.reduce((s,v)=>s+vehCap(v),0));
   // Price
   let price=marketPrice(good,reg);
   const gm=eventEffect('globalMult')||1;price=Math.round(price*gm);
@@ -2208,11 +2208,15 @@ function showMarketSellPopup(cid,good){
   h+='<span class="sub">'+dist+' km</span></div>';
   h+='<div class="sub">'+(ri?.em||'')+' '+(ri?.name||'')+'</div></div>';
   // Vehicles
-  if(!vehs.length){h+='<div style="padding:12px;text-align:center;color:var(--r)">❌ Kein Fahrzeug am Standort</div>';
+  if(!allVehs.length){h+='<div style="padding:12px;text-align:center;color:var(--r)">❌ Kein Fahrzeug verfügbar</div>';
     h+='<button class="btn full" onclick="document.getElementById(\'mktPopup\').remove()">Schließen</button>';
     h+='</div></div>';popup.innerHTML=h;popup.addEventListener('click',e=>{if(e.target===popup)popup.remove()});document.body.appendChild(popup);return}
-  h+='<div class="sec-label">Fahrzeuge · 🚛'+vehs.length+'</div>';
-  vehs.slice(0,5).forEach(v=>{const vt=VT[v.type];h+='<div class="sub">'+vt.em+' '+vehName(v)+' · Kap: '+vehCap(v)+'</div>'});
+  if(localVehs.length){h+='<div class="sec-label">🚛 Am Standort · '+localVehs.length+'</div>';
+    localVehs.slice(0,4).forEach(v=>{const vt=VT[v.type];h+='<div class="sub">'+vt.em+' '+vehName(v)+' · Kap: '+vehCap(v)+'</div>'});}
+  if(remoteVehs.length){h+='<div class="sec-label">📍 Andere Standorte · '+remoteVehs.length+'</div>';
+    remoteVehs.slice(0,4).forEach(v=>{const vt=VT[v.type];const loc=C(v.loc);const rd=loc?Math.round(hav(c.lat,c.lng,loc.lat,loc.lng)):0;
+      h+='<div class="sub">'+vt.em+' '+vehName(v)+' · Kap: '+vehCap(v)+' · 📍 '+(loc?.name||'?')+' · '+rd+' km</div>'});}
+  if(!localVehs.length)h+='<div class="sub" style="color:var(--go);padding:4px 0">⚠️ Nur Fern-Fahrzeuge — fahren erst zum Standort</div>';
   // Quantity
   h+='<div class="sec-label">Menge</div>';
   h+='<div style="display:flex;align-items:center;gap:8px;margin-bottom:8px">';
@@ -2249,27 +2253,40 @@ function execMarketSell(cid,good,destName,destLat,destLng,price,dist){
   const amt=parseInt(document.getElementById('mktAmt')?.value||1);
   if((stor[good]||0)<amt){addLog('❌ Nicht genug Ware');return}
   const c=C(cid);if(!c)return;
-  // Select vehicles greedily
-  const vehs=G.vehs.filter(v=>v.st==='idle'&&v.loc===cid).sort((a,b)=>vehCap(b)-vehCap(a));
-  let remaining=amt;let sent=0;
   const transport=Math.round(dist*0.8+amt*3);
   const revenue=price*amt;const profit=revenue-transport;
   if(profit<=0){addLog('❌ Transportkosten übersteigen Erlös');return}
-  for(const v of vehs){
+  const destId='mkt_'+destName.toLowerCase().replace(/[^a-z0-9]/g,'');
+  // 1. Local vehicles first
+  const localV=G.vehs.filter(v=>v.st==='idle'&&v.loc===cid&&!v.followUpOrder).sort((a,b)=>vehCap(b)-vehCap(a));
+  let remaining=amt;
+  for(const v of localV){
     if(remaining<=0)break;
     const load=Math.min(remaining,vehCap(v));
     stor[good]-=load;if(stor[good]<=0)delete stor[good];
-    remaining-=load;sent+=load;
-    const vt=VT[v.type];
-    // Route TO destination
-    const destId='mkt_'+destName.toLowerCase().replace(/[^a-z0-9]/g,'');
+    remaining-=load;
     v.st='moving';v.rt={from:cid,to:destId,toLat:destLat,toLng:destLng,toName:destName};
     v.cargo={market:true,good,amt:load,revenue:Math.round(profit*(load/amt)),destName,returnTo:cid};
     v.prog=0;
     if(typeof ensureRoute==='function')ensureRoute(v);
-    addLog('💰 '+vehName(v)+': '+load+'× → '+destName);if(typeof toast==='function')toast('💰 Marktverkauf gestartet: '+load+'× → '+destName);
+    addLog('💰 '+vehName(v)+': '+load+'× → '+destName);
   }
-  if(!G.history)G.history=[];
+  // 2. Remote vehicles: send to origin, then they'll load and go to market
+  if(remaining>0){
+    const remV=G.vehs.filter(v=>v.st==='idle'&&v.loc!==cid&&!v.followUpOrder&&!v.pendingTransfer).sort((a,b)=>vehCap(b)-vehCap(a));
+    for(const v of remV){
+      if(remaining<=0)break;
+      const load=Math.min(remaining,vehCap(v));
+      stor[good]-=load;if(stor[good]<=0)delete stor[good];
+      remaining-=load;
+      // Send to origin with pending market info
+      v.st='moving';v.rt={from:v.loc,to:cid};v.prog=0;
+      v.pendingTransfer={good,amt:load,dest:destId,destLat,destLng,destName,market:true,revenue:Math.round(profit*(load/amt)),returnTo:cid};
+      if(typeof ensureRoute==='function')ensureRoute(v);
+      addLog('💰 '+vehName(v)+' → '+(c.name)+' (Anfahrt für Marktverkauf)');
+    }
+  }
+  if(typeof toast==='function')toast('💰 Marktverkauf: '+(amt-remaining)+'× gestartet');
   document.getElementById('mktPopup')?.remove();ua();
 }
 
@@ -2433,7 +2450,21 @@ function setOverflow(cid,bid,mode){
   const b=bs.find(x=>x.id===bid);if(!b)return;
   b.overflow=mode;
   const d=BLD[b.type];
-  addLog(mode==='city'?'📦 '+d.name+': Überlauf → Stadtlager':'⛔ '+d.name+': Produktion stoppt bei vollem Lager');ua();
+  addLog(mode==='city'?'📦 '+d.name+': Überlauf → Stadtlager':'🏭 '+d.name+': Nur Gebäudelager');ua();
+}
+function toggleBldOverflow(cid,bid){
+  if(!G)return;const bs=G.blds[cid];if(!bs)return;
+  const b=bs.find(x=>x.id===bid);if(!b)return;
+  b.overflow=b.overflow==='city'?'local':'city';
+  const d=BLD[b.type];
+  addLog(b.overflow==='city'?'📦 '+d.name+': Überlauf → Stadtlager':'🏭 '+d.name+': Nur Gebäudelager');ua();
+}
+function toggleBldPause(cid,bid){
+  if(!G)return;const bs=G.blds[cid];if(!bs)return;
+  const b=bs.find(x=>x.id===bid);if(!b)return;
+  b.paused=!b.paused;
+  const d=BLD[b.type];
+  addLog(b.paused?'⏸ '+d.name+': Produktion pausiert':'▶ '+d.name+': Produktion läuft');ua();
 }
 
 function toggleOverflow(cid,bid){setOverflow(cid,bid,G.blds[cid]?.find(x=>x.id===bid)?.overflow==='city'?'stop':'city')}
@@ -2441,9 +2472,19 @@ function toggleOverflow(cid,bid){setOverflow(cid,bid,G.blds[cid]?.find(x=>x.id==
 function collectLocalStor(cid,bid){
   if(!G)return;const bs=G.blds[cid];if(!bs)return;
   const b=bs.find(x=>x.id===bid);if(!b||!b.localStor)return;
-  if(!G.stor[cid])G.stor[cid]={};const s=G.stor[cid];let moved=0;
-  Object.entries(b.localStor).forEach(([g,a])=>{if(a>0){s[g]=(s[g]||0)+a;moved+=a;delete b.localStor[g]}});
-  if(moved)addLog('📦 '+moved+' → Stadtlager');ua();
+  if(!G.stor[cid])G.stor[cid]={};const s=G.stor[cid];
+  const cap=cityCap(cid);const used=Object.values(s).reduce((t,v)=>t+v,0);
+  const space=Math.max(0,cap-used);
+  if(space<=0){toast('❌ Stadtlager voll ('+used+'/'+cap+')','var(--r)');return}
+  let moved=0;
+  Object.entries(b.localStor).forEach(([g,a])=>{
+    if(a>0&&moved<space){
+      const mv=Math.min(a,space-moved);
+      s[g]=(s[g]||0)+mv;moved+=mv;
+      b.localStor[g]=a-mv;if(b.localStor[g]<=0)delete b.localStor[g];
+    }
+  });
+  if(moved)addLog('📦 '+moved+' → Stadtlager'+(moved<Object.values(b.localStor).reduce((t,v)=>t+v,0)+moved?' (Lager-Limit!)':''));ua();
 }
 
 function demolishBld(cid,bid){
@@ -3147,7 +3188,7 @@ function tickCore(){
   G.events=G.events.filter(e=>e.endTick>G.tick);
 
   // ── Enforce storage caps (fix any overflow) ──
-  if(G.tick%60===0){
+  if(G.tick%30===0){
     cities.forEach(c=>{const s=G.stor[c.id];if(!s)return;
       const cap=cityCap(c.id);const used=Object.values(s).reduce((t,v)=>t+v,0);
       if(used>cap){let excess=used-cap;
@@ -3173,41 +3214,61 @@ function tickCore(){
     const accOrders=G.orders.filter(o=>o.acc&&(o.amt-(o.delivered||0))>0);
     accOrders.forEach(o=>{
       const vehs=G.vehs.filter(x=>x.cargo?.oid===o.id&&x.st==='moving');
+      const approaching=G.vehs.filter(x=>x.followUpOrder===o.id&&x.st==='moving');
       const inTransit=vehs.reduce((s,v)=>s+(v.cargo?.amt||0),0);
-      const remaining=o.amt-(o.delivered||0)-inTransit;
+      const approachCap=approaching.reduce((s,v)=>s+vehCap(v),0);
+      const remaining=o.amt-(o.delivered||0)-inTransit-approachCap;
       if(remaining<=0)return;
-      const inS=G.stor[o.from]?.[o.good]||0;
-      // 1. Local vehicles at origin with stock
-      if(inS>0){
-        const avl=G.vehs.filter(v=>v.st==='idle'&&v.loc===o.from&&canVehTravel(v,o.to)&&!v.followUpOrder&&!v.pendingTransfer);
-        let loaded=0;
-        for(const v of avl){
-          if(loaded>=remaining)break;
-          const canLoad=Math.min(remaining-loaded,G.stor[o.from]?.[o.good]||0,vehCap(v));
-          if(canLoad<=0)break;
-          G.stor[o.from][o.good]-=canLoad;if(G.stor[o.from][o.good]<=0)delete G.stor[o.from][o.good];
-          if(!o.shipped)o.shipped=0;o.shipped+=canLoad;loaded+=canLoad;
-          v.st='moving';v.rt={from:o.from,to:o.to,toLat:o.toLat,toLng:o.toLng,toName:o.toName};
-          v.cargo={oid:o.id,good:o.good,amt:canLoad};v.prog=0;
-          if(typeof ensureRoute==='function')ensureRoute(v);
-          addLog('🤖 '+vehName(v)+': '+canLoad+'× '+(GOODS[o.good]?.em||'')+' → '+(Cx(o.to)?.name||'?'));
-          markCompDirty();
-        }
+      // Check available stock: city storage + all building localStors
+      const bs=G.blds[o.from]||[];
+      let totalStock=(G.stor[o.from]?.[o.good]||0);
+      bs.forEach(b2=>{if(b2.localStor&&b2.localStor[o.good])totalStock+=b2.localStor[o.good]});
+      if(totalStock<=0){
+        // No stock but maybe remote vehicles can be sent to wait
+        return;
       }
-      // 2. Remote vehicles: send to origin for pickup (if no local vehicles handled it)
-      const stillRemaining=o.amt-(o.delivered||0)-G.vehs.filter(x=>x.cargo?.oid===o.id&&x.st==='moving').reduce((s,v)=>s+(v.cargo?.amt||0),0);
-      if(stillRemaining>0&&inS>0){
-        const remV=G.vehs.filter(v=>v.st==='idle'&&v.loc!==o.from&&canVehTravel(v,o.from)&&!v.followUpOrder&&!v.pendingTransfer);
-        let sent=0;let capSent=0;
+      // 1. Local vehicles at origin
+      const avl=G.vehs.filter(v=>v.st==='idle'&&v.loc===o.from&&!v.followUpOrder&&!v.pendingTransfer);
+      let loaded=0;
+      for(const v of avl){
+        if(loaded>=remaining)break;
+        // Recalculate available (may have been consumed)
+        let avStock=(G.stor[o.from]?.[o.good]||0);
+        bs.forEach(b2=>{if(b2.localStor&&b2.localStor[o.good])avStock+=b2.localStor[o.good]});
+        const canLoad=Math.min(remaining-loaded,avStock,vehCap(v));
+        if(canLoad<=0)break;
+        // Take from building localStors first, then city
+        let toTake=canLoad;
+        for(let bi2=0;bi2<bs.length&&toTake>0;bi2++){
+          const ob=bs[bi2];if(!ob.localStor||!ob.localStor[o.good])continue;
+          const tk=Math.min(ob.localStor[o.good],toTake);ob.localStor[o.good]-=tk;toTake-=tk;
+          if(ob.localStor[o.good]<=0)delete ob.localStor[o.good];
+        }
+        if(toTake>0&&G.stor[o.from]?.[o.good]){
+          const tk=Math.min(G.stor[o.from][o.good],toTake);G.stor[o.from][o.good]-=tk;toTake-=tk;
+          if(G.stor[o.from][o.good]<=0)delete G.stor[o.from][o.good];
+        }
+        if(!o.shipped)o.shipped=0;o.shipped+=canLoad;loaded+=canLoad;
+        v.st='moving';v.rt={from:o.from,to:o.to,toLat:o.toLat,toLng:o.toLng,toName:o.toName};
+        v.cargo={oid:o.id,good:o.good,amt:canLoad};v.prog=0;
+        if(typeof ensureRoute==='function')ensureRoute(v);
+        addLog('🤖 '+vehName(v)+': '+canLoad+'× '+(GOODS[o.good]?.em||'')+' → '+(Cx(o.to)?.name||'?'));
+        markCompDirty();
+      }
+      // 2. Remote vehicles if still needed
+      const stillNeed=remaining-loaded;
+      if(stillNeed>0){
+        const remV=G.vehs.filter(v=>v.st==='idle'&&v.loc!==o.from&&!v.followUpOrder&&!v.pendingTransfer);
+        let sent=0,capSent=0;
         for(const v of remV){
-          if(capSent>=stillRemaining)break;
+          if(capSent>=stillNeed)break;
           v.st='moving';v.rt={from:v.loc,to:o.from};v.prog=0;
           v.followUpOrder=o.id;
           if(typeof ensureRoute==='function')ensureRoute(v);
           capSent+=vehCap(v);sent++;
-          addLog('🤖 '+vehName(v)+' → '+(C(o.from)?.name||'?')+' (Anfahrt für Auftrag)');
+          addLog('🤖 '+vehName(v)+' → '+(C(o.from)?.name||'?')+' (Anfahrt)');
           markCompDirty();
-          if(sent>=3)break; // Max 3 remote per tick to avoid spam
+          if(sent>=3)break;
         }
       }
     });
@@ -3261,6 +3322,9 @@ function tickCore(){
         if(b.overflow===undefined)b.overflow='city';
         if(typeof b._pt!=='number')b._pt=0;
 
+        // Skip if manually paused
+        if(b.paused)continue;
+
         // Increment counter
         b._pt++;
         const interval=bldTickInterval(b);
@@ -3280,11 +3344,13 @@ function tickCore(){
             const toLocal=Math.min(amt,lCap-lu);
             b.localStor[good]=(b.localStor[good]||0)+toLocal;
             const rest=amt-toLocal;
-            if(rest>0&&b.overflow==='city'&&cityUsed()<cc){
-              stor[good]=(stor[good]||0)+rest;
+            if(rest>0&&b.overflow==='city'){
+              const cSpace=Math.max(0,cc-cityUsed());
+              if(cSpace>0)stor[good]=(stor[good]||0)+Math.min(rest,cSpace);
             }
-          } else if(b.overflow==='city'&&cityUsed()<cc){
-            stor[good]=(stor[good]||0)+amt;
+          } else if(b.overflow==='city'){
+            const cSpace=Math.max(0,cc-cityUsed());
+            if(cSpace>0)stor[good]=(stor[good]||0)+Math.min(amt,cSpace);
           }
         };
 
@@ -3477,10 +3543,18 @@ function tickCore(){
             const canLoad=Math.min(pt.amt,s[pt.good]||0,vehCap(v));
             if(canLoad>0){
               s[pt.good]-=canLoad;if(s[pt.good]<=0)delete s[pt.good];
-              v.st='moving';v.rt={from:v.loc,to:pt.dest};
-              v.cargo={internal:true,good:pt.good,amt:canLoad};v.prog=0;
-              if(typeof ensureRoute==='function')ensureRoute(v);
-              addLog('📦 '+vehName(v)+': '+canLoad+'× '+(GOODS[pt.good]?.em||'')+' geladen → '+(C(pt.dest)?.name||''));
+              if(pt.market){
+                // Market sell: load and send to market
+                v.st='moving';v.rt={from:v.loc,to:pt.dest,toLat:pt.destLat,toLng:pt.destLng,toName:pt.destName};
+                v.cargo={market:true,good:pt.good,amt:canLoad,revenue:pt.revenue,destName:pt.destName,returnTo:pt.returnTo};v.prog=0;
+                if(typeof ensureRoute==='function')ensureRoute(v);
+                addLog('💰 '+vehName(v)+': '+canLoad+'× → '+pt.destName+' (Marktverkauf)');
+              } else {
+                v.st='moving';v.rt={from:v.loc,to:pt.dest};
+                v.cargo={internal:true,good:pt.good,amt:canLoad};v.prog=0;
+                if(typeof ensureRoute==='function')ensureRoute(v);
+                addLog('📦 '+vehName(v)+': '+canLoad+'× '+(GOODS[pt.good]?.em||'')+' geladen → '+(C(pt.dest)?.name||''));
+              }
             }
           }
           v.pendingTransfer=null;
@@ -3627,11 +3701,12 @@ function tickCore(){
 
         for(let i=0;i<bs.length;i++){
           const b=bs[i];
-          if(!b.localStor)continue;
+          if(!b.localStor||b.overflow!=='city')continue; // Only overflow=city buildings
           for(const g in b.localStor){
             const a=b.localStor[g];
-            if(a>0&&cityUsed()<cc){
-              const mv=Math.min(a,cc-cityUsed());
+            const space=Math.max(0,cc-cityUsed());
+            if(a>0&&space>0){
+              const mv=Math.min(a,space);
               stor[g]=(stor[g]||0)+mv;
               b.localStor[g]-=mv;
               if(b.localStor[g]<=0)delete b.localStor[g];
@@ -4662,8 +4737,8 @@ function uhud(){if(!G)return;const m=fmt(G.money),cv=fmt(companyValue());
   const lvl=playerLvl();const li=LEVELS[lvl-1];
   const lvlClr=['#22c55e','#4ade80','#34d399','#2dd4bf','#38bdf8','#818cf8','#a78bfa','#c084fc','#f59e0b','#eab308','#f97316','#ef4444','#e11d48','#9333ea','#ffd700'][Math.min(lvl-1,14)];
   try{
-    document.getElementById('hLvl').innerHTML='<div class="lvl-num" style="background:'+lvlClr+(lvl>=10?';box-shadow:0 0 8px '+lvlClr+'80':'')+'">'+lvl+'</div><div class="lvl-info"><span class="lvl-title" style="color:'+lvlClr+'">Level</span><span class="lvl-name" style="color:'+lvlClr+'">'+li.name+'</span></div>';
-    const wrap=document.getElementById('hLvlWrap');if(wrap){wrap.style.borderColor=lvlClr+'40';wrap.style.background=lvlClr+'0a'}
+    document.getElementById('hLvl').innerHTML='<div class="lvl-num" style="background:'+lvlClr+'">'+lvl+'</div><span class="lvl-name" style="color:'+lvlClr+'">'+li.name+'</span>';
+    const wrap=document.getElementById('hLvlWrap');if(wrap){wrap.style.borderColor=lvlClr+'30';wrap.style.background=lvlClr+'08'}
   }catch(e){}
   try{const hm=document.getElementById('hMoney');if(hm){hm.textContent=m;hm.style.color=G.money>=0?'#34d399':'#f87171'}
   document.getElementById('hVal').textContent=cv;
@@ -4845,7 +4920,7 @@ const TUT_STEPS=[
   {title:'⑥ Liefere den Auftrag aus',text:'Wechsle zu <b>Logistik → Routenplaner</b> und weise einem Auftrag ein Fahrzeug zu.<br><br>Du kannst auch direkt bei einem Auftrag <b>⚡ Auto</b> nutzen — das zählt ebenfalls!<br><br><span style="color:var(--go)">🎯 Aufgabe: Fahrzeug losschicken oder Lieferung abschließen</span>',
     btn:'Zum Routenplaner',action:"openComputer();setCompTab('logistics');G.logSub='routes'",
     check:()=>G.dels>=1||G.vehs.some(v=>v.st==='moving'&&v.cargo?.oid),reward:'🎉 Erste Lieferung gestartet! +12.000€ Bonus'},
-  {title:'Tutorial abgeschlossen! 🎉',text:'Du kennst die Grundlagen! Hier sind deine nächsten Ziele:<br><br>• Baue <b>Verarbeitungsfabriken</b> (Mühle, Bäckerei) für wertvollere Waren<br>• Erweitere dein <b>Lager</b> und <b>Depot</b> unter Infrastruktur<br>• Richte <b>Daueraufträge</b> für automatischen Transport ein<br>• Schau ins <b>📖 Wiki</b> (☰ Menü) für alle Details<br><br>Schau dir auch deine <b>Missionen</b> an — dort gibt es weitere Belohnungen!',
+  {title:'Tutorial abgeschlossen! 🎉',text:'Du kennst die Grundlagen! Hier sind deine nächsten Ziele:<br><br>• Baue <b>Verarbeitungsfabriken</b> (Mühle, Bäckerei) für wertvollere Waren<br>• Erweitere dein <b>Lager</b> und <b>Depot</b> unter Infrastruktur<br>• Richte <b>Daueraufträge</b> für automatischen Transport ein<br>• <b>⬆️ Level Up</b> — klicke auf dein Level-Badge in der Top-Bar oder öffne dein <b>Profil</b> im ☰ Menü<br>• Schau ins <b>📖 Wiki</b> (☰ Menü) für alle Details<br><br>Schau dir auch deine <b>Missionen</b> an — dort gibt es weitere Belohnungen!',
     btn:'🚀 Starten!',action:"openComputer();setCompTab('missions')",instant:true},
 ];
 
@@ -5617,18 +5692,26 @@ function compOrders(el){
       h+='</div>';
       vehs.forEach(v=>{const vt=VT[v.type],tn=tripT(f,t,vt.spd),pct=Math.min(v.prog/tn,1);
         h+='<div style="display:flex;align-items:center;gap:6px;margin-top:3px;font-size:12px;color:var(--td)">'+vt.em+' '+vehName(v)+' · '+v.cargo.amt+'× · <b style="color:var(--a)">'+Math.floor(pct*100)+'%</b> · '+ftime(Math.max(0,tn-v.prog))+'</div>'});
-      // Approaching vehicles
+      // Approaching vehicles with ETA
       const approaching=G.vehs.filter(v=>v.st==='moving'&&v.followUpOrder===o.id&&!v.cargo?.oid);
-      approaching.forEach(v=>{const vt=VT[v.type];h+='<div style="font-size:10px;color:#a855f7;margin-top:2px">'+vt.em+' '+vehName(v)+' auf Anfahrt...</div>'});
+      if(approaching.length){
+        const approachCap=approaching.reduce((s,v)=>s+vehCap(v),0);
+        h+='<div style="font-size:11px;color:#a855f7;margin-top:3px;padding:3px 6px;border-radius:6px;background:rgba(168,85,247,.06);border:1px solid rgba(168,85,247,.12)">🔜 '+approaching.length+' auf Anfahrt · Kap: ~'+approachCap+'</div>';
+        approaching.forEach(v=>{const vt=VT[v.type];
+          const vFrom=Cx(v.rt?.from);const vTo=Cx(v.rt?.to);
+          let eta='';if(vFrom&&vTo){const tn=tripT(vFrom,vTo,vt.spd);eta=ftime(Math.max(0,tn-v.prog))}
+          h+='<div style="font-size:10px;color:#a855f7;margin-top:1px;padding-left:6px">'+vt.em+' '+vehName(v)+' · Kap: '+vehCap(v)+(eta?' · ⏱ '+eta:'')+'</div>'});
+      }
       // Actions — ALWAYS show stornieren, show vehicle options when remaining > 0
       h+='<div style="display:flex;gap:4px;margin-top:5px;flex-wrap:wrap">';
       if(remaining>0){
-        const avlL=G.vehs.filter(v=>v.st==='idle'&&v.loc===o.from&&canVehTravel(v,o.to)&&!v.followUpOrder);
-        const avlR=G.vehs.filter(v=>v.st==='idle'&&v.loc!==o.from&&canVehTravel(v,o.from)&&!v.followUpOrder&&!v.pendingTransfer);
+        const avlL=G.vehs.filter(v=>v.st==='idle'&&v.loc===o.from&&!v.followUpOrder);
+        const avlR=G.vehs.filter(v=>v.st==='idle'&&v.loc!==o.from&&!v.followUpOrder&&!v.pendingTransfer);
         const retV=G.vehs.filter(v=>typeof isReturning==='function'&&isReturning(v));
+        const totalRemote=avlR.length+retV.length+approaching.length;
         if(avlL.length)h+='<button class="btn sm" style="background:rgba(251,191,36,.1);color:var(--go);border-color:rgba(251,191,36,.3)" onclick="autoAssign(\''+o.id+'\')">⚡ Senden (🚛'+avlL.length+')</button>';
-        if(avlR.length||retV.length)h+='<button class="btn sm" style="color:var(--a2);border-color:rgba(56,189,248,.3)" onclick="G._remoteOid=\''+o.id+'\';renComp()">📍 Anderer Standort ('+(avlR.length+retV.length)+')</button>';
-        if(!avlL.length&&!avlR.length&&!retV.length)h+='<span class="sub" style="color:var(--r);padding:3px 0">⏳ Kein freies Fzg</span>';
+        if(avlR.length||retV.length)h+='<button class="btn sm" style="color:var(--a2);border-color:rgba(56,189,248,.3)" onclick="G._remoteOid=\''+o.id+'\';renComp()">📍 Anderer Standort ('+(avlR.length+retV.length)+')'+(approaching.length?' + 🔜'+approaching.length:'')+'</button>';
+        if(!avlL.length&&!avlR.length&&!retV.length&&!approaching.length)h+='<span class="sub" style="color:var(--r);padding:3px 0">⏳ Kein freies Fzg</span>';
       }
       h+='<button class="btn red sm" onclick="cancelO(\''+o.id+'\')">Stornieren</button></div>';
       // Remote picker with multi-select
@@ -6436,12 +6519,12 @@ function renderBldDetail(b,cid,showUpgrades){const d=BLD[b.type];if(!d)return'';
   let h='<div style="padding:4px 0">';
   h+='<div class="rw"><span>'+d.em+' '+d.name+'</span><div style="display:flex;gap:3px">';
   if(d.tp!=='s'){
-    const isCity=b.overflow==='city';const isStop=b.overflow==='stop';
+    const isCity=b.overflow==='city';
+    const isPaused=b.paused;
     const lFull=lTot>=lCap;const cFull=Object.values(G.stor[cid]||{}).reduce((s,v)=>s+v,0)>=cityCap(cid);
-    const producing=isCity?(!lFull||!cFull):!lFull;
-    h+='<span class="tg" style="font-size:10px;'+(producing?'color:var(--a);border-color:rgba(61,214,140,.3)':'color:var(--r);border-color:rgba(248,113,113,.3)')+'">●'+(producing?' Läuft':' Pausiert')+'</span>';
-    h+='<button class="btn sm" onclick="setOverflow(\''+cid+'\',\''+b.id+'\',\'city\')" style="'+(isCity?'background:rgba(61,214,140,.15);color:var(--a);border-color:var(--a)':'')+'">📦 Stadtlager</button>';
-    h+='<button class="btn sm" onclick="setOverflow(\''+cid+'\',\''+b.id+'\',\'stop\')" style="'+(isStop?'background:rgba(248,113,113,.12);color:var(--r);border-color:var(--r)':'')+'">⛔ Stoppen</button>';
+    const blocked=isPaused||(isCity?lFull&&cFull:lFull);
+    h+='<button class="btn sm" onclick="toggleBldOverflow(\''+cid+'\',\''+b.id+'\')" style="'+(isCity?'color:var(--a);border-color:rgba(61,214,140,.3)':'color:var(--go);border-color:rgba(251,191,36,.3)')+'">'+( isCity?'📦 → Stadtlager':'🏭 Nur Gebäude')+'</button>';
+    h+='<button class="btn sm" onclick="toggleBldPause(\''+cid+'\',\''+b.id+'\')" style="'+(isPaused?'background:rgba(248,113,113,.12);color:var(--r);border-color:var(--r)':blocked?'color:var(--go);border-color:rgba(251,191,36,.3)':'background:rgba(61,214,140,.1);color:var(--a);border-color:rgba(61,214,140,.3)')+'">'+( isPaused?'⏸ Pausiert':blocked?'⏳ Voll':'▶ Läuft')+'</button>';
   }
   h+='<button class="btn red sm" onclick="if(confirm(\'Abreißen?\'))demolishBld(\''+cid+'\',\''+b.id+'\')">🔨</button>';
   h+='</div></div>';
@@ -6612,6 +6695,25 @@ async function showProfile(){
     h+='<div style="font-size:22px">'+em+'</div><div style="font-family:var(--mono);font-size:18px;font-weight:700;color:'+clr+'">'+val+'</div>';
     h+='<div style="font-size:13px;color:var(--td)">'+label+'</div></div>'});
   h+='</div>';
+  // Level-up section
+  if(lvl<LEVELS.length){
+    const next=LEVELS[lvl];const lu=typeof canLevelUp==='function'?canLevelUp():{};
+    h+='<div style="margin:12px 0;padding:10px;border-radius:10px;border:1px solid var(--bd);background:rgba(255,255,255,.02)">';
+    h+='<div style="font-family:var(--mono);font-size:13px;font-weight:700;color:var(--td);margin-bottom:6px">⬆️ Nächstes Level: '+next.em+' '+next.name+'</div>';
+    const reqs=[
+      {label:'Lieferungen',cur:G.dels||0,need:next.dels},
+      {label:'Unternehmenswert',cur:cv,need:next.value,fmt:true},
+      {label:'Standorte',cur:cities.length,need:next.cities},
+      {label:'Kosten',cur:G.money,need:next.cost,fmt:true},
+    ];
+    reqs.forEach(rq=>{const done=rq.cur>=rq.need;const pct=Math.min(Math.max(rq.cur/Math.max(rq.need,1),0),1);
+      h+='<div style="margin:2px 0"><div style="display:flex;justify-content:space-between;font-size:11px;color:'+(done?'var(--a)':'var(--td)')+'">';
+      h+='<span>'+rq.label+'</span><span>'+(rq.fmt?fmt(rq.cur)+'/'+fmt(rq.need):rq.cur+'/'+rq.need)+(done?' ✅':'')+'</span></div>';
+      h+='<div class="pb" style="height:3px;margin-top:1px"><div class="pf" style="width:'+pct*100+'%;background:'+(done?'var(--a)':'var(--go)')+'"></div></div></div>'});
+    h+='<div class="sub" style="margin-top:4px">🆕 '+next.desc+'</div>';
+    if(lu&&!lu.blocked)h+='<button class="btn full" style="margin-top:6px;background:var(--a);color:var(--bg);border-color:var(--a)" onclick="document.getElementById(\'profilePopup\').remove();doLevelUp()">⬆️ Level Up! (-'+fmt(next.cost)+')</button>';
+    h+='</div>';
+  }
   const vTypes={};G.vehs.forEach(v=>{const vt=VT[v.type];if(vt){vTypes[v.type]=(vTypes[v.type]||0)+1}});
   if(Object.keys(vTypes).length){h+='<div class="sec-label">Fahrzeugflotte</div>';
     Object.entries(vTypes).forEach(([t,n])=>{const vt=VT[t];h+='<div class="sub">'+vt.em+' '+vt.name+' ×'+n+'</div>'});}
