@@ -711,17 +711,10 @@ body{font-family:'Barlow',sans-serif;background:var(--bg);color:var(--t);overflo
   const API='/api/';
   async function api(action,params){
     try{
-      let url=API+action+'?shared='+(params.shared?'1':'0');
-      let opts={};
-      if(params.method==='POST'){
-        opts={method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(params.body)};
-      } else {
-        if(params.key!=null)url+='&key='+encodeURIComponent(params.key);
-        if(params.prefix!=null)url+='&prefix='+encodeURIComponent(params.prefix);
-      }
-      const r=await fetch(url,opts);
-      if(!r.ok)return null;
-      return await r.json();
+      let url=API+action+'?shared='+(params.shared?'1':'0');let opts={};
+      if(params.method==='POST'){opts={method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(params.body)}}
+      else{if(params.key!=null)url+='&key='+encodeURIComponent(params.key);if(params.prefix!=null)url+='&prefix='+encodeURIComponent(params.prefix)}
+      const r=await fetch(url,opts);if(!r.ok)return null;return await r.json()
     }catch(e){return null}
   }
   window.storage={
@@ -1369,16 +1362,17 @@ function genExpressOrder(){
   const sendAmt=Math.min(amt,Math.max(3,Math.floor(amt*0.4)));
   const toReg=getRegion((toC.co||'').toUpperCase());
   const mktPrice=typeof marketPrice==='function'?marketPrice(good,toReg):(BASE_PRICES[good]||100);
-  // Express pays 150-200% of market per unit
-  const mult=1.5+Math.random()*0.5; // 1.5x to 2.0x market
-  const rew=Math.round(mktPrice*sendAmt*mult);
-  // Cap at 10% of company value
+  if(!mktPrice||isNaN(mktPrice))return null;
+  const mult=1.5+Math.random()*0.5;
+  const rew=Math.round(mktPrice*sendAmt*mult)||500;
   const maxRew=Math.max(40000,Math.round(companyValue()*0.10));
   const cappedRew=Math.min(rew,maxRew);
-  const timeLimit=Math.max(60,Math.floor(dist/80*3.6+30));
-  return{id:uid(),type:'express',from:fromC.id,to:toC.id,good,amt:sendAmt,rew:cappedRew,
-    born:G.tick,tl:timeLimit,acc:false,shipped:0,delivered:0,num:G.orderNum=(G.orderNum||0)+1,
-    pricePerUnit:Math.round(cappedRew/sendAmt),mktRef:mktPrice};
+  // Express: short accept time, short delivery time
+  const acceptTl=Math.max(60,Math.floor(90+Math.random()*120)); // 1.5-3.5 min to accept
+  const deliverTl=Math.max(120,Math.floor(dist/60*3.6+120)); // tight delivery window
+  return{id:uid(),type:'express',from:fromC.id,to:toC.id,good,amt:sendAmt,rew:cappedRew,origRew:cappedRew,
+    born:G.tick,tl:acceptTl,deliverTl,acc:false,shipped:0,delivered:0,num:G.orderNum=(G.orderNum||0)+1,
+    pricePerUnit:Math.round(cappedRew/sendAmt)||1,mktRef:mktPrice};
 }
 
 // City storage capacity: base 100 + infra storage + building storage (with upgrades)
@@ -1410,7 +1404,7 @@ const ALLCITIES=DB.map(d=>({name:d[0],co:d[1],pop:d[2],lat:d[3],lng:d[4],harbor:
 function searchCities(q){const ql=q.toLowerCase();return ALLCITIES.filter(c=>c._s.includes(ql)).sort((a,b)=>{const ai=a._s.indexOf(ql),bi=b._s.indexOf(ql);if(ai===0&&bi!==0)return-1;if(bi===0&&ai!==0)return 1;return b.pop-a.pop}).slice(0,12)}
 
 const hav=(a,b,c,d)=>{const R=6371,x=(c-a)*Math.PI/180,y=(d-b)*Math.PI/180,z=Math.sin(x/2)**2+Math.cos(a*Math.PI/180)*Math.cos(c*Math.PI/180)*Math.sin(y/2)**2;return R*2*Math.atan2(Math.sqrt(z),Math.sqrt(1-z))};
-const fmt=n=>n.toLocaleString('de-DE',{style:'currency',currency:'EUR',maximumFractionDigits:0});
+const fmt=n=>{if(typeof n!=='number'||isNaN(n))n=0;return n.toLocaleString('de-DE',{style:'currency',currency:'EUR',maximumFractionDigits:0})};
 const cSz=p=>p>10e6?'Megastadt':p>1e6?'Metropole':p>1e5?'Großstadt':p>2e4?'Mittelstadt':p>5000?'Kleinstadt':'Dorf';
 const cSzIcon=p=>p>10e6?'🌐':p>1e6?'🌃':p>1e5?'🌆':p>2e4?'🏙️':p>5000?'🏘️':'🏡';
 const mxB=p=>p>10e6?10:p>1e6?7:p>1e5?5:p>2e4?4:p>5000?3:2;
@@ -1446,6 +1440,7 @@ let currentUser=null;
 function C(id){return cities.find(c=>c.id===id)}
 // Extended lookup: also check orders for non-unlocked city info
 function Cx(id){
+  if(!id)return null;
   const c=C(id);if(c)return c;
   // Check if any order has this as target with stored coords
   if(G&&G.orders){const o=G.orders.find(x=>x.to===id||x.from===id);
@@ -1722,14 +1717,9 @@ async function save(){
   if(!G||!currentUser)return;
   try{await storeSet('lx_save_'+currentUser,JSON.stringify({...G,_t:Date.now()}))}catch(e){}
   const now=Date.now();
-  if(now-_lastLbSync>300000){
-    _lastLbSync=now;
-    try{
-      const cv=typeof companyValue==='function'?companyValue():0;
-      const lvl=typeof playerLvl==='function'?playerLvl():1;
-      await window.storage.set('lb:'+currentUser,JSON.stringify({name:currentUser,lvl,dels:G.dels||0,value:cv,cities:cities.length,ally:G.alliance||''}),true);
-    }catch(e){}
-  }
+  if(now-_lastLbSync>300000){_lastLbSync=now;
+    try{const cv=typeof companyValue==='function'?companyValue():0;const lvl=typeof playerLvl==='function'?playerLvl():1;
+      await window.storage.set('lb:'+currentUser,JSON.stringify({name:currentUser,lvl,dels:G.dels||0,value:cv,cities:cities.length,ally:G.alliance||''}),true)}catch(e){}}
 }
 
 async function load(){
@@ -1738,7 +1728,41 @@ async function load(){
   if(r){const d=JSON.parse(r);const off=d._t?Math.floor((Date.now()-d._t)/1000):0;delete d._t;
     if(d.unlockedCities&&d.unlockedCities.length){cities=[];d.unlockedCities.forEach(c=>{if(!cities.find(x=>x.id===c.id))cities.push(c)})}
     G=d;if(!G.history)G.history=[];if(!G.infra)G.infra={};if(!G.standingOrders)G.standingOrders=[];if(!G.level)G.level=1;
-    const n=Math.min(off,7200);if(n>30){addLog('⏰ '+ftime(n)+' offline');for(let i=0;i<n;i++)tickCore();addLog('✅ Sim fertig!')}
+    // ── Comprehensive save repair ──
+    let repaired=false;
+    // Fix NaN numbers
+    if(typeof G.money!=='number'||isNaN(G.money)){G.money=50000;repaired=true}
+    if(typeof G.earned!=='number'||isNaN(G.earned)){
+      // Reconstruct earned from history
+      G.earned=(G.history||[]).reduce((s,h2)=>s+(h2.rew||0),0);repaired=true}
+    if(typeof G.dels!=='number'||isNaN(G.dels)){G.dels=(G.history||[]).length;repaired=true}
+    // Remove corrupted orders (NaN rewards, missing fields)
+    const preLen=(G.orders||[]).length;
+    G.orders=(G.orders||[]).filter(o=>o&&typeof o.rew==='number'&&!isNaN(o.rew)&&o.from&&o.good);
+    G.orders.forEach(o=>{
+      if(typeof o.origRew!=='number'||isNaN(o.origRew))o.origRew=o.rew;
+      if(!o.tl||isNaN(o.tl))o.tl=600;
+      if(!o.pricePerUnit||isNaN(o.pricePerUnit))o.pricePerUnit=Math.round(o.rew/(o.amt||1));
+      if(o.acc&&!o.accTick)o.accTick=G.tick||0;
+      if(o.acc&&(!o.deliverTl||isNaN(o.deliverTl)))o.deliverTl=o.tl||600;
+    });
+    if(G.orders.length<preLen){repaired=true;addLog('🔧 '+(preLen-G.orders.length)+' fehlerhafte Aufträge entfernt')}
+    // Fix vehicle state
+    G.vehs=(G.vehs||[]).map(v=>{
+      if(!v.depot)v.depot=v.loc;
+      // Fix stuck vehicles with no route
+      if(v.st==='moving'&&!v.rt){v.st='idle';repaired=true}
+      return v;
+    });
+    // Fix NaN in storage
+    Object.keys(G.stor||{}).forEach(cid=>{
+      Object.keys(G.stor[cid]||{}).forEach(g=>{
+        if(typeof G.stor[cid][g]!=='number'||isNaN(G.stor[cid][g]))G.stor[cid][g]=0;
+      });
+    });
+    if(repaired)addLog('🔧 Spielstand repariert');
+    // Offline simulation (skip if heavily corrupted)
+    const n=Math.min(off,repaired?600:7200);if(n>30){addLog('⏰ '+ftime(n)+' offline');for(let i=0;i<n;i++)tickCore();addLog('✅ Sim fertig!')}
     return true}}catch(e){}return false
 }
 
@@ -1780,15 +1804,17 @@ function genOrd(){
   const d=hav(f.lat,f.lng,tLat,tLng);
   const toReg=getRegion((tCo||'').toUpperCase());
   const mktPrice=typeof marketPrice==='function'?marketPrice(pick.good,toReg):(g.bp||100);
+  if(!mktPrice||isNaN(mktPrice))return null;
   const distFactor=Math.min(d/maxDist,1);
-  // Normal orders: 50% to 150% of market price per unit
-  // Longer distance = slightly better price, but still within range
   const orderMult=0.5+Math.random()*1.0+distFactor*0.15;
-  const rew=Math.round(mktPrice*amt*orderMult);
-  const tl=Math.max(3600,Math.floor(d/20*60+1800+Math.random()*3600));
+  const rew=Math.round(mktPrice*amt*orderMult)||100;
+  // Two timers: acceptTl = time to accept, deliverTl = time to deliver after accepting
+  const acceptTl=Math.max(300,Math.floor(600+Math.random()*600)); // 5-20 min to accept
+  const deliverTl=Math.max(600,Math.floor(d/15*60+600+Math.random()*1200)); // distance-based delivery time
   if(!G.orderNum)G.orderNum=0;G.orderNum++;
-  return{id:uid(),num:G.orderNum,from:pick.cid,to:tId,good:pick.good,amt,rew,tl,born:G.tick,acc:false,
-    pricePerUnit:Math.round(rew/amt),mktRef:mktPrice,toName:tName,toLat:tLat,toLng:tLng,toUnlocked:tUnlocked};
+  return{id:uid(),num:G.orderNum,from:pick.cid,to:tId,good:pick.good,amt,rew:rew,origRew:rew,
+    tl:acceptTl,deliverTl,born:G.tick,acc:false,
+    pricePerUnit:Math.round(rew/amt)||1,mktRef:mktPrice,toName:tName,toLat:tLat,toLng:tLng,toUnlocked:tUnlocked};
 }
 // ══════════════════════════════════════════
 // CACHE SYSTEM – persistent route + search cache
@@ -2209,18 +2235,18 @@ function doMaintenance(vid){
 function recallVehicle(vid){
   if(!G)return;const v=G.vehs.find(x=>x.id===vid);
   if(!v||v.st!=='moving')return;
-  const from=v.rt?.from;
-  if(v.cargo&&v.cargo.oid){
-    const o=G.orders.find(x=>x.id===v.cargo.oid);
-    if(o){o.shipped=Math.max(0,(o.shipped||0)-v.cargo.amt)}
-    if(!G.stor[from])G.stor[from]={};
-    G.stor[from][v.cargo.good]=(G.stor[from][v.cargo.good]||0)+v.cargo.amt;
-  } else if(v.cargo&&v.cargo.internal){
-    if(!G.stor[from])G.stor[from]={};
-    G.stor[from][v.cargo.good]=(G.stor[from][v.cargo.good]||0)+v.cargo.amt;
+  const from=v.rt?.from||v.loc;
+  // Return cargo to source
+  if(v.cargo&&v.cargo.good){
+    const retLoc=v.cargo.oid?v.rt?.from:from; // order cargo returns to pickup city
+    if(retLoc){if(!G.stor[retLoc])G.stor[retLoc]={};G.stor[retLoc][v.cargo.good]=(G.stor[retLoc][v.cargo.good]||0)+(v.cargo.amt||0)}
+    if(v.cargo.oid){const o=G.orders.find(x=>x.id===v.cargo.oid);if(o)o.shipped=Math.max(0,(o.shipped||0)-(v.cargo.amt||0))}
   }
-  v.st='idle';v.loc=from;v.rt=null;v.cargo=null;v.prog=0;v.postDelivery=null;
-  addLog('🔙 '+vehName(v)+' zurückgerufen → '+(C(from)?.name||''));ua();
+  // Set idle at departure point, then send to depot
+  const depot=v.depot||from;
+  v.st='idle';v.loc=from;v.rt=null;v.cargo=null;v.prog=0;v.postDelivery=null;v.followUpOrder=null;
+  if(from!==depot){v.st='moving';v.rt={from,to:depot};v.prog=0;if(typeof ensureRoute==='function')ensureRoute(v)}
+  addLog('🔙 '+vehName(v)+' zurückgerufen → '+(C(depot)?.name||''));ua();
 }
 // Quick recall: send idle vehicle back to its home depot
 function quickRecall(vid){
@@ -2462,14 +2488,16 @@ function startNextRoute(v){
 function accO(oid){if(!G)return;const o=G.orders.find(x=>x.id===oid);if(!o)return;
   const s=G.stor[o.from]||{};const avail=s[o.good]||0;
   if(avail<1){addLog('❌ Kein '+GOODS[o.good].name+' in '+(C(o.from)?.name||''));G.orders=G.orders.filter(x=>x.id!==oid);ua();return}
-  o.acc=true;o.shipped=0;o.delivered=0;
+  o.acc=true;o.shipped=0;o.delivered=0;o.accTick=G.tick;
   if(avail<o.amt)addLog('📋 Angenommen ('+avail+'/'+o.amt+' vorrätig – Teillieferung möglich)');
   else addLog('📋 Angenommen – weise ein Fahrzeug zu!');ua()}
 function declineO(oid){if(!G)return;G.orders=G.orders.filter(x=>x.id!==oid);addLog('✖️ Abgelehnt');ua()}
 function cancelO(oid){if(!G)return;const o=G.orders.find(x=>x.id===oid);if(!o)return;const v=G.vehs.find(x=>x.cargo&&x.cargo.oid===oid);
-  if(v){const rc=v.rt?v.rt.from:v.loc;if(!G.stor[rc])G.stor[rc]={};G.stor[rc][o.good]=(G.stor[rc][o.good]||0)+o.amt;v.st='idle';v.loc=rc;v.cargo=null;v.rt=null;v.prog=0}
-  else{if(!G.stor[o.from])G.stor[o.from]={};G.stor[o.from][o.good]=(G.stor[o.from][o.good]||0)+o.amt}
-  const penalty=Math.floor(o.rew*0.2);G.money-=penalty;G.orders=G.orders.filter(x=>x.id!==oid);addLog('❌ Storniert (−'+fmt(penalty)+')');ua()}
+  if(v){const rc=v.rt?v.rt.from:v.loc;if(!G.stor[rc])G.stor[rc]={};G.stor[rc][o.good]=(G.stor[rc][o.good]||0)+(v.cargo?.amt||0);v.st='idle';v.loc=rc;v.cargo=null;v.rt=null;v.prog=0;v.postDelivery=null;v.followUpOrder=null}
+  // Higher penalty the later in delivery timer
+  const delivAge=o.accTick?(G.tick-o.accTick):0;const pctUsed=o.deliverTl?Math.min(delivAge/o.deliverTl,1):0;
+  const penRate=0.2+pctUsed*0.3; // 20% early → 50% late
+  const penalty=Math.floor((o.origRew||o.rew)*penRate);G.money-=penalty;G.orders=G.orders.filter(x=>x.id!==oid);addLog('❌ Storniert (−'+fmt(penalty)+')');ua()}
 
 function shAsgn(oid){if(!G)return;const o=G.orders.find(x=>x.id===oid);if(!o)return;const fc=C(o.from),tc=C(o.to);if(!fc||!tc)return;const avl=G.vehs.filter(v=>v.st==='idle'&&v.loc===o.from);document.getElementById('mT').textContent=fc.name+' → '+tc.name;let h='<div class="crd"><div class="rw"><span>'+GOODS[o.good].em+' '+o.amt+'× '+GOODS[o.good].name+'</span><span style="color:var(--a);font-family:Chakra Petch;font-weight:600">'+fmt(o.rew)+'</span></div><div class="sub">'+fdist(fc,tc)+' km</div></div>';if(!avl.length)h+='<div style="color:var(--r);font-size:12px;padding:10px;text-align:center">⚠️ Kein Fahrzeug in '+fc.name+'!<br><span style="color:var(--td);font-size:10px">Sende eines im Fuhrpark-Tab.</span></div>';else avl.forEach(v=>{const vt=VT[v.type],ok=vehCap(v)>=o.amt;h+='<div class="crd'+(ok?' active':'')+'" style="cursor:'+(ok?'pointer':'default')+';'+(ok?'':'opacity:.4')+'" '+(ok?'onclick="asgn(\''+v.id+'\',\''+oid+'\')"':'')+'><div class="rw"><span>'+vt.em+' '+vt.name+'</span><span class="sub">Kap: '+vehCap(v)+' · ⏱'+ftime(tripT(fc,tc,vt.spd))+'</span></div></div>'});document.getElementById('mB').innerHTML=h;document.getElementById('mBg').style.display='flex'}
 function closeMdl(){document.getElementById('mBg').style.display='none'}
@@ -3001,19 +3029,32 @@ function tickCore(){
     if(G.priceHist.length>20)G.priceHist.shift();
   }
 
-  // ── Order timer: accepted orders lose value over time, expire with penalty ──
+  // ── Order timers: Accept timer + Delivery timer ──
   G.orders.forEach(o=>{
-    if(!o.acc)return;
-    const age=G.tick-o.born;
-    // After 80% of time limit, reward starts decreasing
-    if(age>o.tl*0.8){const decay=Math.min(0.3,(age-o.tl*0.8)/(o.tl*0.2)*0.3);o.rew=Math.max(Math.round(o.origRew*(1-decay)),Math.round(o.origRew*0.5))}
-    // Store original reward on first check
-    if(!o.origRew)o.origRew=o.rew;
-    // Expire accepted orders: auto-cancel with penalty
-    if(age>=o.tl*1.5){
-      const pen=Math.round(o.origRew*0.4);G.money-=pen;
-      addLog('❌ Auftrag '+fmtOrd(o.num)+' abgelaufen! -'+fmt(pen)+' Strafe');markCompDirty();
-      o._expired=true;
+    if(!o.origRew)o.origRew=o.rew||0;
+    if(isNaN(o.rew))o.rew=o.origRew||100;
+    if(isNaN(o.origRew))o.origRew=o.rew||100;
+    const age=G.tick-(o.born||0);
+
+    if(!o.acc){
+      // UNACCEPTED: tl = time to accept, expire when exceeded
+      if(age>=o.tl){o._expired=true}
+    } else {
+      // ACCEPTED: deliverTl = time to deliver (starts when accepted)
+      if(!o.accTick)o.accTick=G.tick; // legacy fix
+      if(!o.deliverTl)o.deliverTl=o.tl||600; // legacy: use tl as deliver time
+      const delivAge=G.tick-o.accTick;
+      // After 80% delivery time: reward starts decreasing (up to -50%)
+      if(delivAge>o.deliverTl*0.8){
+        const decay=Math.min(0.5,(delivAge-o.deliverTl*0.8)/(o.deliverTl*0.2)*0.5);
+        o.rew=Math.max(Math.round(o.origRew*(1-decay)),Math.round(o.origRew*0.3));
+      }
+      // After 150% delivery time: auto-cancel with penalty
+      if(delivAge>=o.deliverTl*1.5){
+        const pen=Math.round((o.origRew||0)*0.4)||0;if(pen>0)G.money-=pen;
+        addLog('❌ Auftrag '+fmtOrd(o.num)+' abgelaufen! -'+fmt(pen)+' Strafe');markCompDirty();
+        o._expired=true;
+      }
     }
   });
   G.orders=G.orders.filter(o=>!o._expired);
@@ -3045,7 +3086,6 @@ function tickCore(){
     if(cities.length>=2&&G.orders.filter(o=>!o.acc).length<10){
       const o=genOrd();if(o)G.orders.push(o);
     }
-    G.orders=G.orders.filter(o=>o.acc||(G.tick-o.born<o.tl));
     // Express order every 2-3 min
     if(G.tick%120===0&&G.orders.filter(o=>o.type==='express'&&!o.acc).length<2){
       const eo=genExpressOrder();if(eo)G.orders.push(eo);
@@ -3057,7 +3097,7 @@ function tickCore(){
     G.orders.filter(o=>!o.acc&&o.type!=='express').forEach(o=>{
       const avl=G.vehs.filter(v=>v.st==='idle'&&v.loc===o.from&&canVehTravel(v,o.to));
       const inS=G.stor[o.from]?.[o.good]||0;
-      if(inS>=o.amt&&avl.length){o.acc=true;autoAssign(o.id)}
+      if(inS>=o.amt&&avl.length){o.acc=true;o.accTick=G.tick;autoAssign(o.id)}
     });
   }
 
@@ -3227,7 +3267,8 @@ function tickCore(){
             o.delivered+=v.cargo.amt;
             if(o.delivered>=o.amt){
               // Order complete!
-              G.money+=o.rew;G.earned+=o.rew;G.dels++;trackSupply(o.good,o.amt);
+              const payRew=typeof o.rew==='number'&&!isNaN(o.rew)?o.rew:0;
+              G.money+=payRew;G.earned+=payRew;G.dels++;trackSupply(o.good,o.amt);
               if(!G.history)G.history=[];
               G.history.push({good:o.good,amt:o.amt,rew:o.rew,from:o.from,to:o.to,tick:G.tick,ts:Date.now(),express:o.type==='express',toName:o.toName||''});
               if(G.history.length>200)G.history.shift();
@@ -3257,7 +3298,7 @@ function tickCore(){
           if(!v.cargo.returning){
             // First leg done: complete sale, start return
             const profit=v.cargo.revenue||0;
-            G.money+=profit;G.earned+=profit;G.dels++;trackSupply(v.cargo.good,v.cargo.amt);
+            const profit2=typeof profit==='number'&&!isNaN(profit)?profit:0;G.money+=profit2;G.earned+=profit2;G.dels++;trackSupply(v.cargo.good,v.cargo.amt);
             if(!G.history)G.history=[];
             G.history.push({good:v.cargo.good,amt:v.cargo.amt,rew:profit,from:v.rt.from,to:'market_'+v.cargo.destName,tick:G.tick,ts:Date.now()});
             addLog('💰 Marktverkauf: +'+fmt(profit)+' ('+v.cargo.destName+')');
@@ -5268,10 +5309,11 @@ function compOrders(el){
       const totalPct=Math.min((pctDel+transitPct)*100,100);
       h+='<div class="crd"><div class="rw"><span style="font-weight:600">'+(GOODS[o.good]?.em||'')+' '+o.amt+'× '+(GOODS[o.good]?.name||'')+'</span>';
       h+='<span style="color:var(--a);font-family:var(--mono);font-weight:700;font-size:14px">'+fmt(o.rew)+'</span></div>';
-      // Timer for accepted orders
-      const oAge=G.tick-(o.born||0);const oRemain=Math.max(0,o.tl-oAge);const oDecay=oAge>o.tl*0.8;const oUrgent=oRemain<300;
+      // Delivery timer for accepted orders
+      const delivAge=G.tick-(o.accTick||o.born||0);const dTl=o.deliverTl||o.tl||600;
+      const dRemain=Math.max(0,dTl-delivAge);const dDecay=delivAge>dTl*0.8;const dUrgent=dRemain<120;
       h+='<div class="rw"><span class="sub">'+f.name+' → '+t.name+' · '+fdist(f,t)+' km</span>';
-      h+='<span style="font-family:var(--mono);font-size:11px;'+(oUrgent?'color:var(--r);font-weight:700':oDecay?'color:var(--go)':'color:var(--td)')+'">⏱ '+ftime(oRemain)+(oDecay?' ⚠️':'')+'</span></div>';
+      h+='<span style="font-family:var(--mono);font-size:11px;'+(dUrgent?'color:var(--r);font-weight:700':dDecay?'color:var(--go)':'color:var(--td)')+'">📦 '+ftime(dRemain)+(dDecay?' ⚠️':'')+'</span></div>';
       h+='<div class="pb" style="margin:4px 0;height:6px"><div class="pf" style="width:'+totalPct+'%"></div></div>';
       h+='<div style="display:flex;gap:8px;font-size:12px;color:var(--td)"><span>✅ '+delivered+'/'+o.amt+'</span>';
       if(transitAmt>0)h+='<span>🚛 '+transitAmt+' unterwegs</span>';
@@ -5361,7 +5403,7 @@ function compOrders(el){
     h+='<div class="sub" style="margin-bottom:8px">'+hist.length+' Lieferungen · '+fmt(hist.reduce((s,x)=>s+x.rew,0))+' Umsatz</div>';
     if(!hist.length)h+='<div class="sub" style="padding:12px;text-align:center">Noch keine</div>';
     hist.slice().reverse().slice(0,30).forEach(x=>{
-      const isE=x.express;const isM=x.to&&x.to.startsWith('market');
+      const isE=x.express;const isM=x.to&&typeof x.to==='string'&&x.to.startsWith('market');
       h+='<div class="crd" style="padding:5px 10px;'+(isE?'border-left:3px solid var(--go)':isM?'border-left:3px solid var(--bl)':'')+'"><div class="rw"><span>'+(isE?'⚡ ':isM?'💰 ':'')+(GOODS[x.good]?.em||'')+' '+x.amt+'×</span><span style="color:var(--a);font-family:var(--mono)">+'+fmt(x.rew)+'</span></div>';
       h+='<div class="sub">'+(C(x.from)?.name||Cx(x.from)?.name||'?')+' → '+(isM?'Markt':(C(x.to)?.name||Cx(x.to)?.name||'?'))+'</div></div>'});
   }
@@ -5692,9 +5734,9 @@ function compRoutes(el){
       const remV=G.vehs.filter(x=>x.st==='idle'&&x.loc!==o.from&&canVehTravel(x,o.from));
       if(avl.length){
         h+='<div class="sub" style="margin:4px 0;font-weight:600">Fahrzeuge wählen ('+remaining+' verbleibend):</div>';
-        avl.forEach(x=>{const xvt=VT[x.type],cap=vehCap(x);
+        avl.forEach(x=>{const xvt=VT[x.type],cap=vehCap(x);const dist=fdist(f,t);
           h+='<label class="veh-check"><input type="checkbox" class="vc" data-oid="'+o.id+'" data-vid="'+x.id+'" data-cap="'+cap+'" onchange="updateSelInfo(\''+o.id+'\','+remaining+')" onfocus="renderBlocked=true" onblur="renderBlocked=false"/>';
-          h+='<span>'+xvt.em+' <b>'+vehName(x)+'</b> · Kap: <b>'+cap+'</b> · '+ftime(tripT(f,t,xvt.spd))+'</span></label>'});
+          h+='<span>'+xvt.em+' <b>'+vehName(x)+'</b> · Kap: <b>'+cap+'</b> · '+dist+' km · '+ftime(tripT(f,t,xvt.spd))+'</span></label>'});
         h+='<div class="sel-info" id="selInfo_'+o.id+'"><span class="sub">Keine Fahrzeuge ausgewählt</span></div>';
         h+='<div style="display:flex;gap:4px;margin-top:6px"><button class="btn full" onclick="multiAssign(\''+o.id+'\')">🚀 Ausgewählte losschicken</button>';
         h+='<button class="btn" style="background:rgba(251,191,36,.15);color:var(--go);border:1px solid rgba(251,191,36,.3)" onclick="autoAssign(\''+o.id+'\')">⚡ Auto</button></div>';
@@ -7049,7 +7091,7 @@ async function renderAdminPlayer(userKey,userData){
       h+='<div style="display:flex;justify-content:space-between;font-size:11px;color:var(--td)">';
       h+='<span>'+vt.name+' · Kap: '+vehCap(v)+' · '+(v.km||0).toLocaleString('de-DE')+' km</span>';
       h+='<span>🏠 '+depotName+(v.loc!==v.depot?' · 📍 '+locName:'')+'</span></div>';
-      if(isCurrent)h+='<button class="btn sm" style="margin-top:3px;font-size:10px" onclick="adminRecallVeh(\''+v.id+'\')">🔙 Ins Depot zurücksetzen ('+depotName+')</button>';
+      h+='<button class="btn sm" style="margin-top:3px;font-size:10px" onclick="adminRecallVehFor(\''+userKey+'\',\''+v.id+'\')">🔙 Ins Depot ('+depotName+')</button>';
       h+='</div>'});
   }
 
@@ -7059,6 +7101,12 @@ async function renderAdminPlayer(userKey,userData){
   h+='<div class="crd" style="padding:6px 10px"><div class="rw"><span>💰 Geld senden</span>';
   h+='<div style="display:flex;gap:4px"><input type="number" class="sl" id="adminPlayerMoney" value="50000" style="width:90px"/>';
   h+='<button class="btn sm" onclick="adminGivePlayerMoney(\''+userKey+'\')">+</button></div></div></div>';
+  if(save.vehs?.some(v=>v.st==='moving')){
+    h+='<div class="crd" style="padding:6px 10px"><div class="rw"><span>🔙 Alle Fahrzeuge ins Depot</span>';
+    h+='<button class="btn sm" style="color:var(--go);border-color:rgba(251,191,36,.3)" onclick="adminRecallAllVehs(\''+userKey+'\')">Alle zurücksetzen</button></div></div>';
+  }
+  h+='<div class="crd" style="padding:6px 10px"><div class="rw"><span>🔧 Spielstand reparieren</span>';
+  h+='<button class="btn sm" onclick="adminRepairSave(\''+userKey+'\')">NaN/Fehler fixen</button></div></div>';
   h+='</div>';
 
   // Player's game log (last entries)
@@ -7088,18 +7136,34 @@ async function adminGivePlayerMoney(userKey){
   if(typeof toast==='function')toast('💰 +'+fmt(amt)+' an '+userKey);
   renderAdmin();
 }
-function adminRecallVeh(vid){
-  if(!G)return;const v=G.vehs.find(x=>x.id===vid);if(!v)return;
-  const depot=v.depot||v.loc||cities[0]?.id;if(!depot)return;
-  const oldLoc=v.loc;const wasMoving=v.st==='moving';
-  // Reset everything
-  v.st='idle';v.loc=depot;v.rt=null;v.prog=0;v.cargo=null;
-  v.postDelivery=null;v.followUpOrder=null;v.pendingTransfer=null;
-  v.recallToDepot=false;
-  const name=vehName(v);
-  adminLog('admin','🔙 '+name+' zurückgesetzt → '+(C(depot)?.name||'?')+(wasMoving?' (war unterwegs von '+(C(oldLoc)?.name||oldLoc)+')':''));
-  if(typeof toast==='function')toast('🔙 '+name+' → '+(C(depot)?.name||'?'));
-  ua();renderAdmin();
+async function adminRecallVehFor(userKey,vid){
+  if(userKey===currentUser&&G){
+    // Current player: modify live state
+    const v=G.vehs.find(x=>x.id===vid);if(!v)return;
+    const depot=v.depot||v.loc||cities[0]?.id;if(!depot)return;
+    const oldLoc=v.loc;const wasMoving=v.st==='moving';
+    v.st='idle';v.loc=depot;v.rt=null;v.prog=0;v.cargo=null;
+    v.postDelivery=null;v.followUpOrder=null;v.pendingTransfer=null;v.recallToDepot=false;
+    const name=vehName(v);
+    adminLog('admin','🔙 '+name+' ('+userKey+') → '+(C(depot)?.name||'?')+(wasMoving?' (war unterwegs)':''));
+    if(typeof toast==='function')toast('🔙 '+name+' → '+(C(depot)?.name||'?'));
+    ua();save();
+  } else {
+    // Other player: modify save file
+    try{
+      const raw=await storeGet('lx_save_'+userKey);if(!raw)return;
+      const d=JSON.parse(raw);
+      const v=(d.vehs||[]).find(x=>x.id===vid);if(!v)return;
+      const depot=v.depot||v.loc;
+      const depotName=d.unlockedCities?.find(c=>c.id===depot)?.name||depot||'?';
+      v.st='idle';v.loc=depot;v.rt=null;v.prog=0;v.cargo=null;
+      v.postDelivery=null;v.followUpOrder=null;v.pendingTransfer=null;v.recallToDepot=false;
+      await storeSet('lx_save_'+userKey,JSON.stringify(d));
+      adminLog('admin','🔙 Fahrzeug '+vid.substr(0,8)+' ('+userKey+') → '+depotName);
+      if(typeof toast==='function')toast('🔙 Fahrzeug von '+userKey+' → '+depotName);
+    }catch(e){adminLog('admin','❌ Fehler: '+e.message)}
+  }
+  renderAdmin();
 }
 function adminSimTicks(){
   if(!G)return;const n=parseInt(document.getElementById('adminTicks')?.value)||0;
@@ -7129,6 +7193,78 @@ async function adminDeleteUser(userKey){
   try{await storeDel('lx_save_'+userKey)}catch(e){}
   adminLog('admin','🗑️ Spieler gelöscht: '+userKey);
   adminSelPlayer=null;renderAdmin();
+}
+
+async function adminRecallAllVehs(userKey){
+  if(userKey===currentUser&&G){
+    let count=0;
+    G.vehs.forEach(v=>{
+      if(v.st!=='idle'||v.loc!==(v.depot||v.loc)){
+        const depot=v.depot||v.loc||cities[0]?.id;
+        v.st='idle';v.loc=depot;v.rt=null;v.prog=0;v.cargo=null;
+        v.postDelivery=null;v.followUpOrder=null;v.pendingTransfer=null;v.recallToDepot=false;
+        count++;
+      }
+    });
+    adminLog('admin','🔙 '+count+' Fahrzeuge von '+userKey+' ins Depot zurückgesetzt');
+    if(typeof toast==='function')toast('🔙 '+count+' Fahrzeuge zurückgesetzt');
+    ua();save();
+  } else {
+    try{
+      const raw=await storeGet('lx_save_'+userKey);if(!raw)return;
+      const d=JSON.parse(raw);let count=0;
+      (d.vehs||[]).forEach(v=>{
+        if(v.st!=='idle'||v.loc!==(v.depot||v.loc)){
+          const depot=v.depot||v.loc;
+          v.st='idle';v.loc=depot;v.rt=null;v.prog=0;v.cargo=null;
+          v.postDelivery=null;v.followUpOrder=null;v.pendingTransfer=null;v.recallToDepot=false;
+          count++;
+        }
+      });
+      await storeSet('lx_save_'+userKey,JSON.stringify(d));
+      adminLog('admin','🔙 '+count+' Fahrzeuge von '+userKey+' ins Depot zurückgesetzt');
+      if(typeof toast==='function')toast('🔙 '+count+' Fahrzeuge von '+userKey+' zurückgesetzt');
+    }catch(e){adminLog('admin','❌ Fehler: '+e.message)}
+  }
+  renderAdmin();
+}
+
+async function adminRepairSave(userKey){
+  try{
+    if(userKey===currentUser&&G){
+      // Repair live state
+      let fixes=0;
+      if(typeof G.money!=='number'||isNaN(G.money)){G.money=50000;fixes++}
+      if(typeof G.earned!=='number'||isNaN(G.earned)){G.earned=(G.history||[]).reduce((s,h)=>s+(h.rew||0),0);fixes++}
+      if(typeof G.dels!=='number'||isNaN(G.dels)){G.dels=(G.history||[]).length;fixes++}
+      const prelen=G.orders.length;
+      G.orders=(G.orders||[]).filter(o=>o&&typeof o.rew==='number'&&!isNaN(o.rew)&&o.from&&o.good);
+      if(G.orders.length<prelen)fixes+=(prelen-G.orders.length);
+      G.vehs.forEach(v=>{if(v.st==='moving'&&!v.rt){v.st='idle';v.loc=v.depot||v.loc;fixes++}});
+      Object.keys(G.stor||{}).forEach(cid=>{Object.keys(G.stor[cid]||{}).forEach(g=>{
+        if(typeof G.stor[cid][g]!=='number'||isNaN(G.stor[cid][g])){G.stor[cid][g]=0;fixes++}
+      })});
+      save();uhud();ua();
+      adminLog('admin','🔧 Live-Spielstand von '+userKey+' repariert ('+fixes+' Fixes)');
+    } else {
+      const raw=await storeGet('lx_save_'+userKey);if(!raw)return;
+      const d=JSON.parse(raw);let fixes=0;
+      if(typeof d.money!=='number'||isNaN(d.money)){d.money=50000;fixes++}
+      if(typeof d.earned!=='number'||isNaN(d.earned)){d.earned=(d.history||[]).reduce((s,h)=>s+(h.rew||0),0);fixes++}
+      if(typeof d.dels!=='number'||isNaN(d.dels)){d.dels=(d.history||[]).length;fixes++}
+      const prelen=(d.orders||[]).length;
+      d.orders=(d.orders||[]).filter(o=>o&&typeof o.rew==='number'&&!isNaN(o.rew)&&o.from&&o.good);
+      if(d.orders.length<prelen)fixes+=(prelen-d.orders.length);
+      (d.vehs||[]).forEach(v=>{if(v.st==='moving'&&!v.rt){v.st='idle';v.loc=v.depot||v.loc;fixes++}});
+      Object.keys(d.stor||{}).forEach(cid=>{Object.keys(d.stor[cid]||{}).forEach(g=>{
+        if(typeof d.stor[cid][g]!=='number'||isNaN(d.stor[cid][g])){d.stor[cid][g]=0;fixes++}
+      })});
+      await storeSet('lx_save_'+userKey,JSON.stringify(d));
+      adminLog('admin','🔧 Spielstand von '+userKey+' repariert ('+fixes+' Fixes)');
+    }
+    if(typeof toast==='function')toast('🔧 Spielstand repariert');
+    renderAdmin();
+  }catch(e){adminLog('admin','❌ Reparatur fehlgeschlagen: '+e.message)}
 }
 // ══════════════════════════════════════════
 // INIT
