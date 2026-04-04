@@ -49,7 +49,7 @@ location / {
 
 ## Features
 
-- 🌍 346 Städte weltweit
+- 🌍 Weltweit
 - 🏭 Produktionsgebäude & Rezepte
 - 🚛 Fahrzeugflotten-Management
 - 📦 Aufträge & Daueraufträge
