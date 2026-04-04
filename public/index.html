@@ -618,7 +618,7 @@ body{font-family:'Barlow',sans-serif;background:var(--bg);color:var(--t);overflo
     <div class="top-left">
       <div class="logo">LOGISTI<b>X</b></div>
       <div class="top-stats">
-        <div class="lvl-badge" id="hLvlWrap" onclick="if(typeof showProfile==='function')showProfile()" title="Profil öffnen"><span id="hLvl"></span></div>
+        <div class="lvl-badge" id="hLvlWrap" onclick="if(typeof showProfile==='function')showProfile()" title="Profil öffnen"><div id="hLvl" style="display:flex;align-items:center;gap:6px"></div></div>
         <div class="top-stat"><span class="top-stat-lbl">Konto</span><span class="top-stat-val" id="hMoney" style="color:#34d399">0 €</span></div>
         <div class="top-stat" style="border-color:rgba(168,85,247,.2);background:rgba(168,85,247,.04)"><span class="top-stat-lbl">Wert</span><span class="top-stat-val" id="hVal" style="color:#c084fc">0 €</span></div>
         <div class="top-stat"><span>🚛</span><span id="hVeh">0</span></div>
@@ -627,6 +627,8 @@ body{font-family:'Barlow',sans-serif;background:var(--bg);color:var(--t);overflo
       </div>
     </div>
     <div class="top-right">
+      <button class="top-btn" id="dutyBtn" onclick="toggleDuty()" style="font-size:11px">⏳</button>
+      <button class="top-btn" onclick="showDutyHelp()" style="font-size:11px;padding:4px 6px;opacity:.6" title="Was ist On/Off Duty?">❓</button>
       <button class="top-btn" id="viewToggleBtn" onclick="toggleView()">🗺️ Karte</button>
       <button class="top-btn glow" onclick="openComputer()">💻 Terminal</button>
       <button class="top-btn" style="border-color:rgba(168,85,247,.3);color:#a855f7" onclick="openAlliancePanel()">🤝 Allianz</button>
@@ -1461,6 +1463,20 @@ function finLog(type,amount,desc){
   G.finance.push({t:G.tick,ts:Date.now(),type,amount,desc});
   if(G.finance.length>500)G.finance.shift();
 }
+
+// ═══ REGIONAL MARKET: Same location for all players, rotates every 8h ═══
+function getRegionalMarket(region){
+  if(typeof DB==='undefined')return null;
+  const regCities=DB.filter(x=>getRegion(x[1])===region);
+  if(!regCities.length)return null;
+  // 8h epoch = 28800 ticks. Use real time so all players sync
+  const epoch=Math.floor(Date.now()/(8*3600*1000));
+  // Deterministic pick based on epoch + region hash
+  let hash=0;for(let i=0;i<region.length;i++)hash=((hash<<5)-hash)+region.charCodeAt(i);
+  const idx=Math.abs((epoch*31+hash))%regCities.length;
+  const c=regCities[idx];
+  return{name:c[0],co:c[1],lat:c[3],lng:c[4],pop:c[2],region};
+}
 // ══════════════════════════════════════════
 // AUTH + GAME STATE
 // ══════════════════════════════════════════
@@ -1800,13 +1816,23 @@ async function load(){
       });
     });
     if(repaired)addLog('🔧 Spielstand repariert');
-    // Offline simulation (skip if heavily corrupted)
-    // Offline simulation: process game time while logged out (up to 8h)
-    const n=Math.min(off,repaired?600:28800);
-    if(n>30){
-      addLog('⏰ '+ftime(n)+' offline — Fahrzeuge haben weitergearbeitet');
-      for(let i=0;i<n;i++)tickCore();
-      addLog('✅ '+ftime(n)+' nachgeholt!');
+    // Auto off-duty after 3 days (259200 seconds)
+    if(G.lastLogin&&(Date.now()-G.lastLogin)>259200000&&G.onDuty!==false){
+      G.onDuty=false;
+      addLog('🔴 Auto Off-Duty — 3 Tage inaktiv');
+    }
+    // Default onDuty for new saves
+    if(G.onDuty===undefined)G.onDuty=true;
+    // Offline simulation: only if on duty, up to 8h
+    if(G.onDuty!==false){
+      const n=Math.min(off,repaired?600:28800);
+      if(n>30){
+        addLog('⏰ '+ftime(n)+' offline — Fahrzeuge haben weitergearbeitet');
+        for(let i=0;i<n;i++)tickCore();
+        addLog('✅ '+ftime(n)+' nachgeholt!');
+      }
+    } else {
+      if(off>30)addLog('💤 Off Duty — '+ftime(off)+' übersprungen (keine Kosten)');
     }
     return true}}catch(e){}return false
 }
@@ -2150,10 +2176,19 @@ function canBuyVehAt(vtype,cid){
 }
 function canVehTravel(v,toCid){
   const vt=VT[v.type];if(!vt)return false;
-  if(vt.cat==='rail')return cityHasInfra(toCid,'bahnhof');
-  if(vt.cat==='sea')return cityHasInfra(toCid,'hafen');
-  if(vt.cat==='air')return cityHasInfra(toCid,'flughafen');
-  return true; // land vehicles go anywhere
+  if(vt.cat==='land')return true;
+  const infraType=vt.cat==='rail'?'bahnhof':vt.cat==='sea'?'hafen':vt.cat==='air'?'flughafen':null;
+  if(!infraType)return true;
+  const fromCid=v.loc||v.depot;
+  return cityHasInfra(fromCid,infraType)&&cityHasInfra(toCid,infraType);
+}
+// Check if a vehicle TYPE can do a specific route (both ends have infra)
+function canRouteForVeh(v,fromCid,toCid){
+  const vt=VT[v.type];if(!vt)return false;
+  if(vt.cat==='land')return true;
+  const infraType=vt.cat==='rail'?'bahnhof':vt.cat==='sea'?'hafen':vt.cat==='air'?'flughafen':null;
+  if(!infraType)return true;
+  return cityHasInfra(fromCid,infraType)&&cityHasInfra(toCid,infraType);
 }
 function reachableCities(v){return cities.filter(c=>canVehTravel(v,c.id))}
 function reachableExcept(v,excId){return cities.filter(c=>c.id!==excId&&canVehTravel(v,c.id))}
@@ -2175,25 +2210,23 @@ function showMarketSellPopup(cid,good){
   if(!G)return;const c=C(cid);if(!c)return;
   const stor=G.stor[cid];const stock=(stor&&stor[good])||0;if(!stock)return;
   const reg=getRegion((c.co||'').toUpperCase());const ri=REGIONS[reg];
-  // Pick nearest destination in same region
-  const allDB=typeof DB!=='undefined'?DB:[];
-  const regCities=allDB.filter(x=>getRegion(x[1])===reg&&x[0]!==c.name);
-  if(!regCities.length){addLog('❌ Kein Marktplatz in Region');return}
-  // Sort by distance, pick nearest
-  regCities.sort((a,b)=>hav(c.lat,c.lng,a[3],a[4])-hav(c.lat,c.lng,b[3],b[4]));
-  const destPick=regCities[0];
-  const dest={name:destPick[0],co:destPick[1],lat:destPick[3],lng:destPick[4]};
-  const dist=Math.round(hav(c.lat,c.lng,dest.lat,dest.lng));
+  // Use regional market
+  const market=getRegionalMarket(reg);
+  if(!market){addLog('❌ Kein Marktplatz in Region');return}
+  const dest={name:market.name,co:market.co,lat:market.lat,lng:market.lng};
+  const dist=Math.max(5,Math.round(hav(c.lat,c.lng,dest.lat,dest.lng)));
+  const isLocal=cities.some(x=>x.name===market.name);
   // Available vehicles (local + remote)
   const localVehs=G.vehs.filter(v=>v.st==='idle'&&v.loc===cid&&!v.followUpOrder&&!v.pendingTransfer);
   const remoteVehs=G.vehs.filter(v=>v.st==='idle'&&v.loc!==cid&&!v.followUpOrder&&!v.pendingTransfer);
   const allVehs=[...localVehs,...remoteVehs];
   const maxCap=localVehs.reduce((s,v)=>s+vehCap(v),0);
   const maxAmt=Math.min(stock,maxCap||remoteVehs.reduce((s,v)=>s+vehCap(v),0));
-  // Price
+  // Price (10% fee if market is at own city)
   let price=marketPrice(good,reg);
   const gm=eventEffect('globalMult')||1;price=Math.round(price*gm);
   const inf=G.infra[cid]||[];if(inf.find(i=>i.type==='logistikzentrum'))price=Math.round(price*1.15);
+  if(isLocal)price=Math.round(price*0.9); // 10% Marktgebühr at own city
 
   let existing=document.getElementById('mktPopup');if(existing)existing.remove();
   const popup=document.createElement('div');popup.id='mktPopup';popup.className='unlock-bg';
@@ -2203,10 +2236,12 @@ function showMarketSellPopup(cid,good){
   h+='<div class="crd"><div class="rw"><span>'+(GOODS[good]?.em||'')+' <b>'+(GOODS[good]?.name||good)+'</b></span>';
   h+='<span style="font-family:var(--mono);color:var(--a)">'+price.toLocaleString('de-DE')+'/St.</span></div>';
   h+='<div class="sub">Bestand: '+stock+' · Max. Kapazität: '+maxAmt+'</div></div>';
-  // Destination
-  h+='<div class="crd"><div class="rw"><span>📍 '+c.name+' → 🏪 '+dest.name+'</span>';
+  // Destination - Regional Market
+  h+='<div class="crd" style="border-color:rgba(251,191,36,.15)"><div class="rw"><span>📍 '+c.name+' → 🏪 '+dest.name+'</span>';
   h+='<span class="sub">'+dist+' km</span></div>';
-  h+='<div class="sub">'+(ri?.em||'')+' '+(ri?.name||'')+'</div></div>';
+  h+='<div class="sub">'+(ri?.em||'')+' '+(ri?.name||'')+' · Regionaler Marktplatz</div>';
+  if(isLocal)h+='<div class="sub" style="color:var(--go);margin-top:2px">📍 Markt an eigenem Standort — 10% Marktgebühr, kurzer Transport</div>';
+  h+='</div>';
   // Vehicles
   if(!allVehs.length){h+='<div style="padding:12px;text-align:center;color:var(--r)">❌ Kein Fahrzeug verfügbar</div>';
     h+='<button class="btn full" onclick="document.getElementById(\'mktPopup\').remove()">Schließen</button>';
@@ -2806,6 +2841,58 @@ function sendSelectedRemote(oid){
   if(typeof toast==='function')toast('🚛 '+sent+' Fahrzeuge losgeschickt','var(--a)');
   ua();
 }
+
+// ═══ DUTY SYSTEM ═══
+function toggleDuty(){
+  if(!G)return;
+  G.onDuty=!G.onDuty;
+  G.lastLogin=Date.now();
+  if(G.onDuty){
+    addLog('🟢 On Duty — Produktion und Kosten laufen');
+    toast('🟢 On Duty — alles läuft!','var(--a)');
+  } else {
+    addLog('🔴 Off Duty — alles eingefroren, keine Kosten');
+    toast('🔴 Off Duty — eingefroren','var(--r)');
+  }
+  updateDutyBtn();save();ua();
+}
+function updateDutyBtn(){
+  const btn=document.getElementById('dutyBtn');if(!btn||!G)return;
+  const on=G.onDuty!==false; // default on
+  btn.textContent=on?'🟢 On Duty':'🔴 Off Duty';
+  btn.style.borderColor=on?'rgba(61,214,140,.4)':'rgba(248,113,113,.4)';
+  btn.style.color=on?'var(--a)':'var(--r)';
+  btn.style.background=on?'rgba(61,214,140,.08)':'rgba(248,113,113,.08)';
+}
+
+function showDutyHelp(){
+  let existing=document.getElementById('dutyHelpPopup');if(existing){existing.remove();return}
+  const popup=document.createElement('div');popup.id='dutyHelpPopup';popup.className='unlock-bg';
+  let h='<div class="unlock-popup" style="width:440px;max-height:85vh;overflow-y:auto"><div class="unlock-body">';
+  h+='<div style="text-align:center;font-size:28px;margin-bottom:8px">🟢🔴</div>';
+  h+='<div style="font-family:var(--mono);font-size:16px;font-weight:700;color:var(--a);text-align:center;margin-bottom:12px">On/Off Duty</div>';
+  h+='<div class="crd" style="border-color:rgba(61,214,140,.2);background:rgba(61,214,140,.03)">';
+  h+='<div style="font-weight:700;color:var(--a);margin-bottom:4px">🟢 On Duty</div>';
+  h+='<div style="font-size:13px;line-height:1.6">• Produktion, Fahrzeuge, Aufträge — alles läuft<br>';
+  h+='• Auch wenn du ausgeloggt bist (bis 8h nachgeholt)<br>';
+  h+='• Laufende Kosten werden stündlich berechnet<br>';
+  h+='• Konto kann ins Minus gehen durch Kosten<br>';
+  h+='• Terminal und alle Aktionen verfügbar</div></div>';
+  h+='<div class="crd" style="border-color:rgba(248,113,113,.2);background:rgba(248,113,113,.03);margin-top:6px">';
+  h+='<div style="font-weight:700;color:var(--r);margin-bottom:4px">🔴 Off Duty</div>';
+  h+='<div style="font-size:13px;line-height:1.6">• Alles eingefroren — keine Produktion, kein Transport<br>';
+  h+='• Keine laufenden Kosten<br>';
+  h+='• Terminal gesperrt — keine Käufe oder Aktionen möglich<br>';
+  h+='• Ideal für Pausen oder wenn du ein paar Tage weg bist<br>';
+  h+='• Karte und Profil bleiben sichtbar</div></div>';
+  h+='<div class="crd" style="margin-top:6px"><div style="font-weight:600;margin-bottom:4px">⏰ Auto Off-Duty</div>';
+  h+='<div style="font-size:13px;color:var(--td)">Nach 3 Tagen ohne Login wirst du automatisch auf Off Duty gesetzt, damit keine Kosten auflaufen.</div></div>';
+  h+='<button class="btn full" style="margin-top:12px" onclick="document.getElementById(\'dutyHelpPopup\').remove()">Verstanden</button>';
+  h+='</div></div>';
+  popup.innerHTML=h;
+  popup.addEventListener('click',e=>{if(e.target===popup)popup.remove()});
+  document.body.appendChild(popup);
+}
 // ALLIANCE SYSTEM v3 — Country-based territories
 const ALLIANCE_LEVELS=[
   {lvl:1,name:'Startup',maxMembers:10,slots:3,maxTerr:2},
@@ -3102,6 +3189,11 @@ async function cancelAllianceRequest(reqId){
 function tickCore(){
   if(!G)return;
   G.tick++;
+  // Track last active time
+  G.lastLogin=Date.now();
+  // Auto off-duty after 3 days without login (checked on load, not here)
+  // Off Duty: skip all simulation
+  if(G.onDuty===false)return;
   if(!G.events)G.events=[];
   if(!G.market)G.market={};
   if(!G.supplyTrack)G.supplyTrack={};
@@ -3227,8 +3319,8 @@ function tickCore(){
         // No stock but maybe remote vehicles can be sent to wait
         return;
       }
-      // 1. Local vehicles at origin
-      const avl=G.vehs.filter(v=>v.st==='idle'&&v.loc===o.from&&!v.followUpOrder&&!v.pendingTransfer);
+      // 1. Local vehicles at origin (must be able to reach destination)
+      const avl=G.vehs.filter(v=>v.st==='idle'&&v.loc===o.from&&!v.followUpOrder&&!v.pendingTransfer&&canVehTravel(v,o.to));
       let loaded=0;
       for(const v of avl){
         if(loaded>=remaining)break;
@@ -3258,7 +3350,7 @@ function tickCore(){
       // 2. Remote vehicles if still needed
       const stillNeed=remaining-loaded;
       if(stillNeed>0){
-        const remV=G.vehs.filter(v=>v.st==='idle'&&v.loc!==o.from&&!v.followUpOrder&&!v.pendingTransfer);
+        const remV=G.vehs.filter(v=>v.st==='idle'&&v.loc!==o.from&&!v.followUpOrder&&!v.pendingTransfer&&canRouteForVeh(v,o.from,o.to));
         let sent=0,capSent=0;
         for(const v of remV){
           if(capSent>=stillNeed)break;
@@ -3629,10 +3721,19 @@ function tickCore(){
     }
   }catch(e){console.error('VEHICLE ERROR:',e)}
 
-  // Maintenance (every 10min)
-  if(G.tick%600===0){
-    const c=G.vehs.reduce((s,v)=>s+(VT[v.type]?.mt||0),0);
-    if(c>0){G.money-=c;finLog('running',-c,'Laufende Wartung');addLog('🔧 Wartung: '+fmt(c))}
+  // Running costs (every hour = 3600 ticks)
+  if(G.tick%3600===0&&G.tick>0){
+    let totalCost=0;
+    // Vehicle maintenance (based on mt value, scaled down for hourly)
+    const vehCost=G.vehs.reduce((s,v)=>s+Math.round((VT[v.type]?.mt||0)*0.1),0);
+    if(vehCost>0){G.money-=vehCost;totalCost+=vehCost;finLog('running',-vehCost,'Fahrzeug-Betrieb ('+G.vehs.length+' Fzg)')}
+    // Building operating costs (small fraction of build price)
+    const bldCost=Object.values(G.blds||{}).flat().reduce((s,b)=>{const d=BLD[b.type];return s+(d&&d.tp!=='s'?Math.round(d.price*0.002):0)},0);
+    if(bldCost>0){G.money-=bldCost;totalCost+=bldCost;finLog('running',-bldCost,'Gebäude-Betrieb ('+Object.values(G.blds||{}).flat().filter(b=>BLD[b.type]?.tp!=='s').length+' Gebäude)')}
+    // Infrastructure upkeep
+    const infraCost=Object.values(G.infra||{}).flat().reduce((s,i)=>{const d=INFRA[i.type];return s+Math.round((d?.price||0)*0.001)},0);
+    if(infraCost>0){G.money-=infraCost;totalCost+=infraCost;finLog('running',-infraCost,'Infrastruktur-Betrieb')}
+    if(totalCost>0)addLog('🔧 Laufende Kosten: '+fmt(totalCost)+' (stündlich)');
   }
 
   // Quests
@@ -4486,23 +4587,29 @@ function dashFinance(){
   if(!G._finTab)G._finTab='all';
   h+='<div class="dash-card" style="grid-column:span 2"><div class="dash-card-title">📋 Finanzverlauf</div>';
   h+='<div style="display:flex;gap:4px;margin-bottom:6px;flex-wrap:wrap">';
-  const finTabs=[['all','Alle'],['income','💰 Einnahmen'],['expense','🛒 Ausgaben'],['running','🔧 Laufend'],['penalty','⚠️ Strafen'],['quest','🎯 Missionen'],['admin','👑 Admin']];
+  const finTabs=[['all','Alle'],['income','💰 Einnahmen'],['expense','🛒 Ausgaben'],['running','🔧 Laufend'],['penalty','⚠️ Strafen'],['refund','🔙 Erstattungen'],['quest','🎯 Missionen'],['admin','👑 Admin']];
   finTabs.forEach(([id,lbl])=>{
     const isSel=G._finTab===id;
-    h+='<button class="tg'+(isSel?' g':'')+'" style="cursor:pointer;'+(isSel?'font-weight:700':'')+'" onclick="G._finTab=\''+id+'\';renComp()">'+lbl+'</button>'});
+    h+='<button class="tg'+(isSel?' g':'')+'" style="cursor:pointer;'+(isSel?'font-weight:700':'')+'" onclick="G._finTab=\''+id+'\';_compDirty=true;renComp()">'+lbl+'</button>'});
   h+='</div>';
   if(!fin.length)h+='<div class="sub" style="padding:8px;text-align:center">Noch keine Transaktionen</div>';
   else{
     const filtered=G._finTab==='all'?fin:fin.filter(f=>f.type===G._finTab);
-    const show=filtered.slice(-30).reverse();
-    if(!show.length)h+='<div class="sub" style="padding:8px;text-align:center">Keine Einträge in dieser Kategorie</div>';
-    show.forEach(f=>{
-      const isInc=f.amount>0;const d=new Date(f.ts);
-      const ts=d.toLocaleString('de-DE',{hour:'2-digit',minute:'2-digit'});
-      const typeEm={income:'💰',expense:'🛒',penalty:'⚠️',quest:'🎯',refund:'🔙',running:'🔧',admin:'👑'}[f.type]||'📌';
-      h+='<div style="display:flex;justify-content:space-between;align-items:center;padding:4px 0;border-bottom:1px solid var(--bd);font-size:12px">';
-      h+='<span style="flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap"><span style="color:var(--td);margin-right:4px">'+ts+'</span>'+typeEm+' '+f.desc+'</span>';
-      h+='<span style="font-family:var(--mono);font-weight:600;color:'+(isInc?'var(--a)':'var(--r)')+'flex-shrink:0;margin-left:6px">'+(isInc?'+':'')+fmt(f.amount)+'</span></div>'});
+    const show=filtered.slice(-25).reverse();
+    if(!show.length)h+='<div class="sub" style="padding:8px;text-align:center">Keine Einträge</div>';
+    else{
+      // Summary for filtered
+      const fInc=filtered.filter(f=>f.amount>0).reduce((s,f)=>s+f.amount,0);
+      const fExp=filtered.filter(f=>f.amount<0).reduce((s,f)=>s+f.amount,0);
+      if(G._finTab!=='all')h+='<div style="display:flex;gap:6px;margin-bottom:4px;font-size:11px;font-family:var(--mono)"><span style="color:var(--a)">▲ '+fmt(fInc)+'</span><span style="color:var(--r)">▼ '+fmt(fExp)+'</span><span style="color:var(--td)">'+filtered.length+' Einträge</span></div>';
+      show.forEach(f=>{
+        const isInc=f.amount>0;const d=new Date(f.ts);
+        const ts=d.toLocaleString('de-DE',{hour:'2-digit',minute:'2-digit'});
+        const typeEm={income:'💰',expense:'🛒',penalty:'⚠️',quest:'🎯',refund:'🔙',running:'🔧',admin:'👑'}[f.type]||'📌';
+        h+='<div style="display:flex;justify-content:space-between;align-items:center;padding:3px 0;border-bottom:1px solid var(--bd);font-size:12px">';
+        h+='<span style="flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap"><span style="color:var(--td);margin-right:4px">'+ts+'</span>'+typeEm+' '+f.desc+'</span>';
+        h+='<span style="font-family:var(--mono);font-weight:600;flex-shrink:0;margin-left:8px;color:'+(isInc?'var(--a)':'var(--r)')+'">'+(isInc?'+':'')+fmt(f.amount)+'</span></div>'});
+    }
   }
   h+='</div></div>';return h;
 }
@@ -4746,6 +4853,7 @@ function uhud(){if(!G)return;const m=fmt(G.money),cv=fmt(companyValue());
   try{document.getElementById('cMoney').textContent=m;document.getElementById('cVeh').textContent=G.vehs.length;
   document.getElementById('cCities').textContent=cities.length;document.getElementById('cDel').textContent=G.dels}catch(e){}
   try{document.getElementById('compMoney').textContent='💰 '+m}catch(e){}
+  try{updateDutyBtn()}catch(e){}
 }
 
 let _dashDirty=true;
@@ -4992,6 +5100,13 @@ function checkTutorial(){
 function setCompTab(t){compTab=t;renComp()}
 
 function renComp(){
+  // Off Duty: show frozen overlay
+  const body=document.getElementById('compBody');
+  if(G&&G.onDuty===false){
+    document.querySelectorAll('.ctab').forEach(t=>{t.classList.toggle('on',t.dataset.ct===compTab);t.onclick=()=>setCompTab(t.dataset.ct)});
+    if(body)body.innerHTML='<div style="display:flex;flex-direction:column;align-items:center;justify-content:center;height:60vh;text-align:center;gap:12px"><div style="font-size:48px">🔴</div><div style="font-family:var(--mono);font-size:20px;font-weight:700;color:var(--r)">Off Duty</div><div style="color:var(--td);max-width:300px;line-height:1.6">Dein Unternehmen ist eingefroren.<br>Keine Produktion, keine Kosten.<br><br>Schalte auf <b style="color:var(--a)">🟢 On Duty</b> um weiterzuspielen.</div><button class="btn full" style="max-width:200px;background:rgba(61,214,140,.1);color:var(--a);border-color:var(--a)" onclick="toggleDuty()">🟢 On Duty schalten</button></div>';
+    return;
+  }
   document.querySelectorAll('.ctab').forEach(t=>{t.classList.toggle('on',t.dataset.ct===compTab);t.onclick=()=>setCompTab(t.dataset.ct)});
   const locEl=document.getElementById('compLoc');if(locEl){const c=G.sel?C(G.sel):null;locEl.textContent=c?'📍 '+c.name:'📍 —'}
 
@@ -5705,8 +5820,8 @@ function compOrders(el){
       // Actions — ALWAYS show stornieren, show vehicle options when remaining > 0
       h+='<div style="display:flex;gap:4px;margin-top:5px;flex-wrap:wrap">';
       if(remaining>0){
-        const avlL=G.vehs.filter(v=>v.st==='idle'&&v.loc===o.from&&!v.followUpOrder);
-        const avlR=G.vehs.filter(v=>v.st==='idle'&&v.loc!==o.from&&!v.followUpOrder&&!v.pendingTransfer);
+        const avlL=G.vehs.filter(v=>v.st==='idle'&&v.loc===o.from&&canVehTravel(v,o.to)&&!v.followUpOrder);
+        const avlR=G.vehs.filter(v=>v.st==='idle'&&v.loc!==o.from&&!v.followUpOrder&&!v.pendingTransfer&&canRouteForVeh(v,o.from,o.to));
         const retV=G.vehs.filter(v=>typeof isReturning==='function'&&isReturning(v));
         const totalRemote=avlR.length+retV.length+approaching.length;
         if(avlL.length)h+='<button class="btn sm" style="background:rgba(251,191,36,.1);color:var(--go);border-color:rgba(251,191,36,.3)" onclick="autoAssign(\''+o.id+'\')">⚡ Senden (🚛'+avlL.length+')</button>';
@@ -5716,7 +5831,7 @@ function compOrders(el){
       h+='<button class="btn red sm" onclick="cancelO(\''+o.id+'\')">Stornieren</button></div>';
       // Remote picker with multi-select
       if(G._remoteOid===o.id){
-        const remV=G.vehs.filter(v=>v.st==='idle'&&v.loc!==o.from&&!v.followUpOrder&&!v.pendingTransfer).sort((a2,b)=>{
+        const remV=G.vehs.filter(v=>v.st==='idle'&&v.loc!==o.from&&!v.followUpOrder&&!v.pendingTransfer&&canRouteForVeh(v,o.from,o.to)).sort((a2,b)=>{
           const da=hav(C(a2.loc)?.lat||0,C(a2.loc)?.lng||0,f.lat,f.lng);const db=hav(C(b.loc)?.lat||0,C(b.loc)?.lng||0,f.lat,f.lng);return da-db});
         const retV2=G.vehs.filter(v=>typeof isReturning==='function'&&isReturning(v));
         // Calculate existing commitment
@@ -5756,7 +5871,7 @@ function compOrders(el){
     open.forEach(o=>{const f=Cx(o.from),t=Cx(o.to);if(!f||!t)return;
       const inS=(G.stor[o.from]?.[o.good]||0);
       const avlL=G.vehs.filter(v=>v.st==='idle'&&v.loc===o.from&&canVehTravel(v,o.to)&&!v.followUpOrder);
-      const avlR=G.vehs.filter(v=>v.st==='idle'&&v.loc!==o.from&&canVehTravel(v,o.from)&&!v.followUpOrder&&!v.pendingTransfer);
+      const avlR=G.vehs.filter(v=>v.st==='idle'&&v.loc!==o.from&&!v.followUpOrder&&!v.pendingTransfer&&canRouteForVeh(v,o.from,o.to));
       const canAcc=inS>=1;
       const isE=o.type==='express';const tl=Math.max(0,o.tl-(G.tick-o.born));
       const ppu=o.pricePerUnit||Math.round(o.rew/o.amt);
@@ -5902,28 +6017,29 @@ function compMarket(el){
   }
 
   if(G.marketSub==='sell'){
-    h+='<div class="sub" style="margin-bottom:8px">Fahrzeug transportiert Ware zum regionalen Marktplatz und kehrt zurück</div>';
+    // Show regional market info
+    const epoch8h=Math.floor(Date.now()/(8*3600*1000));
+    const nextRotate=((epoch8h+1)*8*3600*1000-Date.now())/1000;
+    h+='<div class="crd" style="border-color:rgba(251,191,36,.2);background:rgba(251,191,36,.03);margin-bottom:8px">';
+    h+='<div class="rw"><span style="font-weight:600;color:var(--go)">🏪 Regionale Marktplätze</span><span class="sub">Wechsel in '+ftime(Math.round(nextRotate))+'</span></div>';
+    h+='<div class="sub">Alle Spieler handeln am selben Marktplatz pro Region. Standort wechselt alle 8h.</div></div>';
     cities.forEach(c=>{const s=G.stor[c.id]||{};const items=Object.entries(s).filter(([,a])=>a>0);
       if(!items.length)return;
       const reg=getRegion((c.co||'').toUpperCase());const ri=REGIONS[reg];
-      // Pick a preview destination for display
-      const allDB2=typeof DB!=='undefined'?DB:[];
-      const regCities2=allDB2.filter(x=>getRegion(x[1])===reg&&x[0]!==c.name).sort((a,b)=>hav(c.lat,c.lng,a[3],a[4])-hav(c.lat,c.lng,b[3],b[4]));
-      const previewDest=regCities2.length?regCities2[0]:null;
-      const vHere3=G.vehs.filter(v=>v.st==='idle'&&v.loc===c.id);
+      const market=getRegionalMarket(reg);
+      if(!market)return;
+      const isLocal=cities.some(x=>x.name===market.name);
+      const dist3=Math.round(hav(c.lat,c.lng,market.lat,market.lng));
+      const vHere3=G.vehs.filter(v=>v.st==='idle'&&v.loc===c.id&&!v.followUpOrder);
+      const vRemote=G.vehs.filter(v=>v.st==='idle'&&v.loc!==c.id&&!v.followUpOrder&&!v.pendingTransfer);
       h+='<div class="crd"><div class="rw"><span style="font-weight:600">📍 '+c.name+'</span><span class="sub">'+(ri?.em||'')+' '+(ri?.name||'')+'</span></div>';
-      if(previewDest)h+='<div class="sub" style="margin-bottom:3px">🚛 Nächster Markt: <b>'+previewDest[0]+'</b> ('+Math.round(hav(c.lat,c.lng,previewDest[3],previewDest[4]))+' km)'+(vHere3.length?' · 🚛'+vHere3.length+' verfügbar':'')+'</div>';
-      if(!vHere3.length)h+='<div class="sub" style="color:var(--r);margin-bottom:3px">❌ Kein Fahrzeug am Standort</div>';
+      h+='<div class="sub" style="margin-bottom:3px">🏪 Markt: <b>'+market.name+'</b> · '+dist3+' km'+(isLocal?' <span style="color:var(--go)">📍 Eigener Standort (+10% Gebühr)</span>':'')+' · 🚛'+(vHere3.length+vRemote.length)+' verfügbar</div>';
       items.sort((a,b)=>marketPrice(b[0],reg)*b[1]-marketPrice(a[0],reg)*a[1]).forEach(([g,amt])=>{
         const price=marketPrice(g,reg);const total=price*amt;
-        const bestV2=vHere3.length?vHere3.sort((a2,b2)=>vehCap(b2)-vehCap(a2))[0]:null;
-        const maxSend=bestV2?Math.min(amt,vehCap(bestV2)):0;
-        const dist3=previewDest?Math.round(hav(c.lat,c.lng,previewDest[3],previewDest[4])):100;
-        const transCost=bestV2?Math.round(dist3*0.8+VT[bestV2.type].mt*0.3*Math.min(amt,maxSend)):0;
         h+='<div style="display:flex;align-items:center;gap:4px;padding:3px 0;font-size:11px;border-top:1px solid var(--bd)">';
         h+='<span style="flex:1;min-width:0">'+(GOODS[g]?.em||'')+' '+(GOODS[g]?.name||'')+' <b>'+amt+'</b> × '+fmt(price)+'</span>';
         h+='<span style="font-family:var(--mono);color:var(--a);min-width:50px;text-align:right">'+fmt(total)+'</span>';
-        if(maxSend>0)h+='<button class="btn sm" style="background:rgba(251,191,36,.1);color:var(--go);border-color:rgba(251,191,36,.25)" onclick="showMarketSellPopup(\''+c.id+'\',\''+g+'\')">💰 Verkaufen</button>';
+        if(vHere3.length||vRemote.length)h+='<button class="btn sm" style="background:rgba(251,191,36,.1);color:var(--go);border-color:rgba(251,191,36,.25)" onclick="showMarketSellPopup(\''+c.id+'\',\''+g+'\')">💰 Verkaufen</button>';
         else h+='<span class="sub" style="color:var(--r)">🚛 fehlt</span>';
         h+='</div>'});
       h+='</div>'});
@@ -7546,6 +7662,13 @@ async function renderAdminPlayer(userKey,userData){
     h+='<div class="crd" style="text-align:center;padding:6px"><div style="font-size:10px">'+em+'</div><div style="font-family:var(--mono);color:var(--a);font-weight:700;font-size:13px">'+val+'</div><div style="font-size:10px;color:var(--td)">'+lbl+'</div></div>'});
   h+='</div>';
 
+  // Duty status
+  const isOnDuty=save.onDuty!==false;
+  const lastLogin=save.lastLogin?new Date(save.lastLogin).toLocaleString('de-DE',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'}):'—';
+  h+='<div class="crd" style="margin-bottom:8px;border-color:'+(isOnDuty?'rgba(61,214,140,.2)':'rgba(248,113,113,.2)')+';background:'+(isOnDuty?'rgba(61,214,140,.03)':'rgba(248,113,113,.03)')+'">';
+  h+='<div class="rw"><span>'+(isOnDuty?'🟢 On Duty':'🔴 Off Duty')+' · Letzter Login: '+lastLogin+'</span>';
+  h+='<button class="btn sm" style="'+(isOnDuty?'color:var(--r);border-color:rgba(248,113,113,.3)':'color:var(--a);border-color:rgba(61,214,140,.3)')+'" onclick="adminToggleDuty(\''+userKey+'\','+(isOnDuty?'false':'true')+')">'+(isOnDuty?'⏸ Off setzen':'▶ On setzen')+'</button></div></div>';
+
   // Cities
   if(save.unlockedCities?.length){
     h+='<div class="sec-label">🏙️ Standorte · '+save.unlockedCities.length+'</div>';
@@ -7941,6 +8064,24 @@ async function adminForceReloginAll(){
   }
   adminLog('admin','🔁 Reload für alle '+Object.keys(users).length+' Spieler erzwungen');
   if(typeof toast==='function')toast('🔁 Reload für alle Spieler erzwungen');
+  renderAdmin();
+}
+
+async function adminToggleDuty(userKey,setOn){
+  const onDuty=setOn==='true'||setOn===true;
+  if(userKey===currentUser&&G){
+    G.onDuty=onDuty;
+    updateDutyBtn();save();
+  } else {
+    try{
+      const raw=await storeGet('lx_save_'+userKey);if(!raw)return;
+      const d=JSON.parse(raw);d.onDuty=onDuty;
+      await storeSet('lx_save_'+userKey,JSON.stringify(d));
+      await storeSet('lx_reload_'+userKey,Date.now().toString());
+    }catch(e){}
+  }
+  adminLog('admin',(onDuty?'🟢 On Duty':'🔴 Off Duty')+' für '+userKey);
+  toast((onDuty?'🟢 On Duty':'🔴 Off Duty')+' für '+userKey);
   renderAdmin();
 }
 // ══════════════════════════════════════════
