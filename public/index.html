@@ -1367,9 +1367,10 @@ function genExpressOrder(){
   const rew=Math.round(mktPrice*sendAmt*mult)||500;
   const maxRew=Math.max(40000,Math.round(companyValue()*0.10));
   const cappedRew=Math.min(rew,maxRew);
-  // Express: shorter but still fair
-  const acceptTl=Math.max(120,Math.floor(120+Math.random()*180)); // 2-5 min to accept
-  const deliverTl=Math.max(1200,Math.floor(dist*5+1200+Math.random()*1200)); // 20min base + 5s/km + up to 20min random
+  // Express: shorter but scaled by amount + distance
+  const acceptTl=Math.max(180,Math.floor(300+Math.random()*300)); // 5-10 min to accept
+  // Delivery: base 45min + 20s/km + 2min per unit + up to 45min random
+  const deliverTl=Math.max(2700,Math.floor(2700+dist*20+sendAmt*120+Math.random()*2700));
   return{id:uid(),type:'express',from:fromC.id,to:toC.id,good,amt:sendAmt,rew:cappedRew,origRew:cappedRew,
     born:G.tick,tl:acceptTl,deliverTl,acc:false,shipped:0,delivered:0,num:G.orderNum=(G.orderNum||0)+1,
     pricePerUnit:Math.round(cappedRew/sendAmt)||1,mktRef:mktPrice};
@@ -1434,11 +1435,11 @@ function companyValue(){
     if(b.ups)Object.entries(b.ups).forEach(([track,lvl])=>{for(let i=0;i<lvl;i++)val+=Math.floor(upCost(track,i)*0.4)})}));
   // Infrastructure (60% of build price)
   if(G.infra)Object.values(G.infra).forEach(arr=>(arr||[]).forEach(i=>{const d=INFRA[i.type];if(d)val+=Math.floor(d.price*0.6)}));
-  // Stored goods (10% of market price — raw materials, not finished products)
+  // Stored goods (1% of market price — raw inventory, minimal impact)
   Object.values(G.stor||{}).forEach(s=>Object.entries(s||{}).forEach(([g,a])=>{
     if(!GOODS[g]||typeof a!=='number'||isNaN(a))return;
     const price=typeof marketPrice==='function'?marketPrice(g):GOODS[g].bp;
-    val+=Math.floor(a*(price||GOODS[g].bp||0)*0.1);
+    val+=Math.floor(a*(price||GOODS[g].bp||0)*0.01);
   }));
   return isNaN(val)?0:Math.round(val);
 }
@@ -1842,9 +1843,9 @@ function genOrd(){
   const orderMult=0.5+Math.random()*1.0+distFactor*0.15;
   const rew=Math.round(mktPrice*amt*orderMult)||100;
   // Two timers: acceptTl = time to accept, deliverTl = time to deliver after accepting
-  const acceptTl=Math.max(600,Math.floor(600+Math.random()*600)); // 10-20 min to accept
-  // Delivery time: generous — accounts for vehicle travel from other cities
-  const deliverTl=Math.max(3600,Math.floor(d*8+3600+Math.random()*3600)); // 1h base + 8s/km + up to 1h random
+  const acceptTl=Math.max(1200,Math.floor(1800+Math.random()*1800)); // 30-60 min to accept
+  // Delivery time: base 2h + 30s/km + 3min per unit + up to 2h random
+  const deliverTl=Math.max(7200,Math.floor(7200+d*30+amt*180+Math.random()*7200));
   if(!G.orderNum)G.orderNum=0;G.orderNum++;
   return{id:uid(),num:G.orderNum,from:pick.cid,to:tId,good:pick.good,amt,rew:rew,origRew:rew,
     tl:acceptTl,deliverTl,born:G.tick,acc:false,
@@ -3093,12 +3094,17 @@ function tickCore(){
   // ── Rescue stuck idle vehicles at non-unlocked cities (every 10 ticks) ──
   if(G.tick%10===0){
     G.vehs.filter(v=>v.st==='idle'&&!cities.find(c=>c.id===v.loc)).forEach(v=>{
-      const nearest=cities.reduce((best,c)=>{const cl=C(c.id);if(!cl)return best;
-        const vLoc=Cx(v.loc);if(!vLoc)return best;
-        const d=hav(cl.lat,cl.lng,vLoc.lat,vLoc.lng);return(!best||d<best.d)?{id:c.id,d}:best},null);
-      if(nearest){v.st='moving';v.rt={from:v.loc,to:nearest.id};v.prog=0;
-        if(typeof ensureRoute==='function')ensureRoute(v);
-        addLog('🔄 '+vehName(v)+' kehrt zurück → '+(C(nearest.id)?.name||''))}
+      const vLoc=Cx(v.loc);
+      if(vLoc){
+        const nearest=cities.reduce((best,c)=>{const cl=C(c.id);if(!cl)return best;
+          const d=hav(cl.lat,cl.lng,vLoc.lat,vLoc.lng);return(!best||d<best.d)?{id:c.id,d}:best},null);
+        if(nearest){v.st='moving';v.rt={from:v.loc,to:nearest.id};v.prog=0;
+          if(typeof ensureRoute==='function')ensureRoute(v);
+          addLog('🔄 '+vehName(v)+' kehrt zurück → '+(C(nearest.id)?.name||''))}
+      } else if(v.depot){
+        // Can't find location at all → teleport to depot
+        v.st='idle';v.loc=v.depot;v.rt=null;v.prog=0;
+      }
     });
   }
 
@@ -3391,11 +3397,16 @@ function tickCore(){
         }
         // Check if arrived at non-unlocked city → go to nearest unlocked
         if(v.st==='idle'&&!cities.find(c=>c.id===v.loc)){
-          const nearest=cities.reduce((best,c)=>{const cl=C(c.id);if(!cl)return best;const d=hav(cl.lat,cl.lng,C(v.loc)?.lat||0,C(v.loc)?.lng||0);return(!best||d<best.d)?{id:c.id,d}:best},null);
-          if(nearest){v.st='moving';v.rt={from:v.loc,to:nearest.id};v.prog=0;
-            if(typeof ensureRoute==='function')ensureRoute(v);
-            addLog('🔄 '+vehName(v)+' kehrt zurück → '+(C(nearest.id)?.name||''));
-            continue;}
+          const vLoc=Cx(v.loc);
+          if(vLoc){
+            const nearest=cities.reduce((best,c)=>{const cl=C(c.id);if(!cl)return best;const d=hav(cl.lat,cl.lng,vLoc.lat,vLoc.lng);return(!best||d<best.d)?{id:c.id,d}:best},null);
+            if(nearest){v.st='moving';v.rt={from:v.loc,to:nearest.id};v.prog=0;
+              if(typeof ensureRoute==='function')ensureRoute(v);
+              addLog('🔄 '+vehName(v)+' kehrt zurück → '+(C(nearest.id)?.name||''));
+              continue;}
+          }
+          // Can't find location → teleport to depot
+          if(v.depot){v.loc=v.depot;addLog('🔄 '+vehName(v)+' → Depot (Standort unbekannt)');continue}
         }
         if(v.st==='idle'){v.rt=null;v.prog=0;}
         // Maintenance check based on km
