@@ -156,7 +156,7 @@ body{font-family:'Barlow',sans-serif;background:var(--bg);color:var(--t);overflo
 .city-dot:hover{transform:scale(1.3)}.city-dot.sel{border-color:#00e5a0;background:rgba(61,214,140,.4);box-shadow:0 0 20px var(--gw)}
 .city-dot.blt{border-color:var(--go);background:rgba(251,191,36,.15)}
 .clb{font-family:var(--mono);font-size:14px;font-weight:600;color:#fff;text-shadow:0 1px 3px rgba(0,0,0,.8),0 0 6px rgba(0,0,0,.5);white-space:nowrap;pointer-events:none}
-.bi{font-size:22px;filter:drop-shadow(0 2px 3px rgba(0,0,0,.6))}.vi{font-size:24px;filter:drop-shadow(0 2px 4px rgba(0,0,0,.7))}
+.bi{font-size:22px;filter:drop-shadow(0 2px 3px rgba(0,0,0,.6))}.vi{font-size:24px;filter:drop-shadow(0 2px 4px rgba(0,0,0,.7));pointer-events:auto;cursor:pointer}
 
 /* ═══ START SCREEN ═══ */
 #startScreen{position:fixed;inset:0;z-index:5000;background:var(--bg);display:flex;align-items:center;justify-content:center}
@@ -554,16 +554,16 @@ body{font-family:'Barlow',sans-serif;background:var(--bg);color:var(--t);overflo
       <button class="auth-tab" onclick="showAuth('register')">Registrieren</button>
     </div>
     <div id="authLogin">
-      <input type="text" class="auth-input" id="loginUser" placeholder="Benutzername" autocomplete="off"/>
-      <div style="position:relative"><input type="password" class="auth-input" id="loginPass" placeholder="Passwort"/><button class="pw-toggle" onclick="togglePassVis('loginPass')">👁️</button></div>
+      <input type="text" class="auth-input" id="loginUser" placeholder="Benutzername" autocomplete="off" onkeydown="if(event.key==='Enter')document.getElementById('loginPass').focus()"/>
+      <div style="position:relative"><input type="password" class="auth-input" id="loginPass" placeholder="Passwort" onkeydown="if(event.key==='Enter')doLogin()"/><button class="pw-toggle" onclick="togglePassVis('loginPass')">👁️</button></div>
       <button class="btn full" style="margin-top:8px;padding:10px" onclick="doLogin()">Anmelden</button>
       <div style="margin-top:10px;text-align:center"><button class="auth-link" onclick="showAuth('reset')">Passwort vergessen?</button></div>
     </div>
     <div id="authRegister" style="display:none">
-      <input type="text" class="auth-input" id="regUser" placeholder="Benutzername"/>
-      <input type="email" class="auth-input" id="regEmail" placeholder="E-Mail"/>
-      <div style="position:relative"><input type="password" class="auth-input" id="regPass" placeholder="Passwort"/><button class="pw-toggle" onclick="togglePassVis('regPass')">👁️</button></div>
-      <div style="position:relative"><input type="password" class="auth-input" id="regPass2" placeholder="Passwort wiederholen"/><button class="pw-toggle" onclick="togglePassVis('regPass2')">👁️</button></div>
+      <input type="text" class="auth-input" id="regUser" placeholder="Benutzername" onkeydown="if(event.key==='Enter')document.getElementById('regEmail').focus()"/>
+      <input type="email" class="auth-input" id="regEmail" placeholder="E-Mail" onkeydown="if(event.key==='Enter')document.getElementById('regPass').focus()"/>
+      <div style="position:relative"><input type="password" class="auth-input" id="regPass" placeholder="Passwort" onkeydown="if(event.key==='Enter')document.getElementById('regPass2').focus()"/><button class="pw-toggle" onclick="togglePassVis('regPass')">👁️</button></div>
+      <div style="position:relative"><input type="password" class="auth-input" id="regPass2" placeholder="Passwort wiederholen" onkeydown="if(event.key==='Enter')doRegister()"/><button class="pw-toggle" onclick="togglePassVis('regPass2')">👁️</button></div>
       <input type="text" class="auth-input" id="regQuestion" placeholder="Sicherheitsfrage"/>
       <input type="text" class="auth-input" id="regAnswer" placeholder="Antwort"/>
       <button class="btn full" style="margin-top:8px;padding:10px" onclick="doRegister()">Registrieren</button>
@@ -1367,9 +1367,9 @@ function genExpressOrder(){
   const rew=Math.round(mktPrice*sendAmt*mult)||500;
   const maxRew=Math.max(40000,Math.round(companyValue()*0.10));
   const cappedRew=Math.min(rew,maxRew);
-  // Express: short accept time, short delivery time
-  const acceptTl=Math.max(60,Math.floor(90+Math.random()*120)); // 1.5-3.5 min to accept
-  const deliverTl=Math.max(120,Math.floor(dist/60*3.6+120)); // tight delivery window
+  // Express: shorter but still fair
+  const acceptTl=Math.max(120,Math.floor(120+Math.random()*180)); // 2-5 min to accept
+  const deliverTl=Math.max(1200,Math.floor(dist*5+1200+Math.random()*1200)); // 20min base + 5s/km + up to 20min random
   return{id:uid(),type:'express',from:fromC.id,to:toC.id,good,amt:sendAmt,rew:cappedRew,origRew:cappedRew,
     born:G.tick,tl:acceptTl,deliverTl,acc:false,shipped:0,delivered:0,num:G.orderNum=(G.orderNum||0)+1,
     pricePerUnit:Math.round(cappedRew/sendAmt)||1,mktRef:mktPrice};
@@ -1417,16 +1417,30 @@ function unlockCost(lat,lng,pop){let md=99999;cities.forEach(c=>{const d=hav(c.l
 // Company value = cash + vehicles + buildings + infra + stored goods
 function companyValue(){
   if(!G)return 0;
-  let val=G.money;
-  // Vehicles (current market value = 70% of buy price + wagon upgrades)
-  G.vehs.forEach(v=>{const vt=VT[v.type];if(vt)val+=Math.floor(vt.price*.7);if(v.wagons)val+=v.wagons*Math.floor(WAGON_UPGRADE.baseCost*.5)});
+  let val=0;
+  // Cash on hand
+  const cash=typeof G.money==='number'&&!isNaN(G.money)?G.money:0;
+  val+=cash;
+  // City unlock costs (80% residual value)
+  cities.forEach(c=>{
+    const cost=typeof unlockCost==='function'?unlockCost(c.lat,c.lng,c.pop):Math.round((c.pop||500)/2);
+    val+=Math.floor(cost*0.8);
+  });
+  // Vehicles (70% of buy price + wagon upgrades)
+  G.vehs.forEach(v=>{const vt=VT[v.type];if(vt)val+=Math.floor(vt.price*0.7);
+    if(v.wagons)val+=v.wagons*Math.floor(WAGON_UPGRADE.baseCost*0.5)});
   // Buildings (50% of build price + upgrade investments)
-  Object.values(G.blds).forEach(bs=>bs.forEach(b=>{const d=BLD[b.type];if(d)val+=Math.floor(d.price*.5);if(b.ups)Object.entries(b.ups).forEach(([track,lvl])=>{for(let i=0;i<lvl;i++)val+=Math.floor(upCost(track,i)*.4)})}));
+  Object.values(G.blds||{}).forEach(bs=>(bs||[]).forEach(b=>{const d=BLD[b.type];if(d)val+=Math.floor(d.price*0.5);
+    if(b.ups)Object.entries(b.ups).forEach(([track,lvl])=>{for(let i=0;i<lvl;i++)val+=Math.floor(upCost(track,i)*0.4)})}));
   // Infrastructure (60% of build price)
-  if(G.infra)Object.values(G.infra).forEach(arr=>arr.forEach(i=>{const d=INFRA[i.type];if(d)val+=Math.floor(d.price*.6)}));
-  // Stored goods (at base price)
-  Object.values(G.stor).forEach(s=>Object.entries(s).forEach(([g,a])=>{if(GOODS[g])val+=a*GOODS[g].bp}));
-  return val;
+  if(G.infra)Object.values(G.infra).forEach(arr=>(arr||[]).forEach(i=>{const d=INFRA[i.type];if(d)val+=Math.floor(d.price*0.6)}));
+  // Stored goods (at market price if available, else base price)
+  Object.values(G.stor||{}).forEach(s=>Object.entries(s||{}).forEach(([g,a])=>{
+    if(!GOODS[g]||typeof a!=='number'||isNaN(a))return;
+    const price=typeof marketPrice==='function'?marketPrice(g):GOODS[g].bp;
+    val+=Math.floor(a*(price||GOODS[g].bp||0));
+  }));
+  return isNaN(val)?0:Math.round(val);
 }
 
 // Track supply for market pricing
@@ -1460,15 +1474,18 @@ function addLog(m){if(!G)return;G.log.unshift(m);if(G.log.length>40)G.log.pop()}
 const _memStore={};
 async function storeGet(k){
   if(window.storage){try{const r=await window.storage.get(k);return r?r.value:null}catch(e){return null}}
+  if(typeof localStorage!=='undefined'){try{return localStorage.getItem(k)}catch(e){}}
   return _memStore[k]||null;
 }
 async function storeSet(k,v){
   _memStore[k]=v;
   if(window.storage){try{await window.storage.set(k,v)}catch(e){}}
+  else if(typeof localStorage!=='undefined'){try{localStorage.setItem(k,v)}catch(e){}}
 }
 async function storeDel(k){
   delete _memStore[k];
   if(window.storage){try{await window.storage.delete(k)}catch(e){}}
+  else if(typeof localStorage!=='undefined'){try{localStorage.removeItem(k)}catch(e){}}
 }
 
 // ═══ SECURITY: Password hashing with SHA-256 + salt ═══
@@ -1628,6 +1645,7 @@ async function doResetStep2(){
 
 function doLogout(){
   save();
+  try{storeSet('lx_session','')}catch(e){}
   currentUser=null;G=null;gameStarted=false;cities=[];
   if(tickIv){clearInterval(tickIv);tickIv=null}
   document.getElementById('loginScreen').style.display='flex';
@@ -1668,6 +1686,8 @@ function openSettings(){
 
 async function afterLogin(userData){
   document.getElementById('loginScreen').style.display='none';
+  // Persist session
+  try{await storeSet('lx_session',currentUser)}catch(e){}
   // Try loading existing save
   const loaded=await load();
   if(loaded&&G&&cities.length>0){
@@ -1762,7 +1782,13 @@ async function load(){
     });
     if(repaired)addLog('🔧 Spielstand repariert');
     // Offline simulation (skip if heavily corrupted)
-    const n=Math.min(off,repaired?600:7200);if(n>30){addLog('⏰ '+ftime(n)+' offline');for(let i=0;i<n;i++)tickCore();addLog('✅ Sim fertig!')}
+    // Offline simulation: process game time while logged out (up to 8h)
+    const n=Math.min(off,repaired?600:28800);
+    if(n>30){
+      addLog('⏰ '+ftime(n)+' offline — Fahrzeuge haben weitergearbeitet');
+      for(let i=0;i<n;i++)tickCore();
+      addLog('✅ '+ftime(n)+' nachgeholt!');
+    }
     return true}}catch(e){}return false
 }
 
@@ -1809,8 +1835,9 @@ function genOrd(){
   const orderMult=0.5+Math.random()*1.0+distFactor*0.15;
   const rew=Math.round(mktPrice*amt*orderMult)||100;
   // Two timers: acceptTl = time to accept, deliverTl = time to deliver after accepting
-  const acceptTl=Math.max(300,Math.floor(600+Math.random()*600)); // 5-20 min to accept
-  const deliverTl=Math.max(600,Math.floor(d/15*60+600+Math.random()*1200)); // distance-based delivery time
+  const acceptTl=Math.max(600,Math.floor(600+Math.random()*600)); // 10-20 min to accept
+  // Delivery time: generous — accounts for vehicle travel from other cities
+  const deliverTl=Math.max(3600,Math.floor(d*8+3600+Math.random()*3600)); // 1h base + 8s/km + up to 1h random
   if(!G.orderNum)G.orderNum=0;G.orderNum++;
   return{id:uid(),num:G.orderNum,from:pick.cid,to:tId,good:pick.good,amt,rew:rew,origRew:rew,
     tl:acceptTl,deliverTl,born:G.tick,acc:false,
@@ -2836,10 +2863,7 @@ async function deliverToAlliance(cid,good,amt){
   const dest=nearby[0]||[c.name,c.co,0,c.lat+0.1,c.lng+0.1];
   const dist=Math.round(hav(c.lat,c.lng,dest[3],dest[4]));
   const vt=VT[v.type];
-  const tripTime=Math.round(dist/vt.spd*3.6*2);
-  // Send vehicle
-  const destId='ally_'+dest[0].toLowerCase().replace(/[^a-z0-9]/g,'');
-  v.st='moving';v.rt={from:cid,to:destId,toLat:dest[3],toLng:dest[4],toName:dest[0],tripTime};
+  v.st='moving';v.rt={from:cid,to:destId,toLat:dest[3],toLng:dest[4],toName:dest[0]};
   v.cargo={allianceDelivery:true,good,amt:maxAmt,allianceId:G.alliance,destName:dest[0],returnTo:cid};
   v.prog=0;
   if(typeof ensureRoute==='function')ensureRoute(v);
@@ -3253,10 +3277,11 @@ function tickCore(){
       else if(vt.cat==='land')spdMult=landSpd;
       else if(vt.cat==='rail'&&railStop){continue} // Trains stopped
       if(v.needsMaint)spdMult*=0.8; // 20% slower when needs maintenance
-      const tn=v.rt.tripTime||tripT(f,t,vt.spd*spdMult);
+      let tn=tripT(f,t,vt.spd*spdMult);
+      if(tn>14400)tn=14400; // Cap at 4 hours max
       v.prog++;
       // Safety: if stuck way past arrival, force arrive
-      if(v.prog>tn+60){v.prog=tn}
+      if(v.prog>tn+10){v.prog=tn}
       if(v.prog>=tn){
         // Arrived
         if(v.cargo&&v.cargo.oid){
@@ -3380,9 +3405,7 @@ function tickCore(){
         }
         // Post-delivery destination (return trip for standing orders etc.)
         if(v.st==='idle'&&v.postDelivery&&v.loc!==v.postDelivery){
-          const pdFrom=C(v.loc)||Cx(v.loc);const pdTo=C(v.postDelivery)||Cx(v.postDelivery);
-          const pdTt=pdFrom&&pdTo?tripT(pdFrom,pdTo,vt.spd):300;
-          v.st='moving';v.rt={from:v.loc,to:v.postDelivery,tripTime:pdTt};v.prog=0;
+          v.st='moving';v.rt={from:v.loc,to:v.postDelivery};v.prog=0;
           if(typeof ensureRoute==='function')ensureRoute(v);
           v.postDelivery=null;
           continue;
@@ -3444,9 +3467,7 @@ function tickCore(){
           if(loadAmt<=0)return;
           s[so.good]-=loadAmt;if(s[so.good]<=0)delete s[so.good];
           v.st='moving';
-          const fc2=C(so.from),tc2=C(so.to);
-          const tt=fc2&&tc2?tripT(fc2,tc2,vt.spd):300;
-          v.rt={from:so.from,to:so.to,tripTime:tt};
+          v.rt={from:so.from,to:so.to};
           v.cargo={internal:true,good:so.good,amt:loadAmt};v.prog=0;
           v.postDelivery=so.from;
           if(typeof ensureRoute==='function')ensureRoute(v);
@@ -3602,15 +3623,15 @@ function uvmk(){
   if(!MP)return;
   Object.values(vMk).forEach(m=>MP.removeLayer(m));Object.values(rLn).forEach(l=>MP.removeLayer(l));
   for(const k in vMk)delete vMk[k];for(const k in rLn)delete rLn[k];if(!G)return;
-  G.vehs.forEach(v=>{const vt=VT[v.type];
+  G.vehs.forEach(v=>{const vt=VT[v.type];const vN=typeof vehName==='function'?vehName(v):(vt?.name||'?');
     if(v.st==='idle'){const c=C(v.loc);if(!c)return;
       vMk[v.id]=L.marker([c.lat-.003,c.lng+.005],{icon:L.divIcon({className:'',iconSize:[22,22],iconAnchor:[11,11],html:'<div class="vi">'+vt.em+'</div>'}),interactive:true}).addTo(MP);
-      vMk[v.id].bindTooltip(vt.name+' · '+c.name,{direction:'top',offset:[0,-10]});
+      vMk[v.id].bindTooltip('<b>'+vN+'</b><br>'+vt.name+' · '+c.name,{direction:'top',offset:[0,-10]});
     } else if(v.rt){
       const f=C(v.rt.from)||Cx(v.rt.from),t=C(v.rt.to)||Cx(v.rt.to)||(v.rt.toLat?{lat:v.rt.toLat,lng:v.rt.toLng,name:v.rt.toName||'?'}:null);if(!f||!t)return;
       const tn=tripT(f,t,vt.spd),pct=Math.min(v.prog/tn,1);
       const cargo=v.cargo?(GOODS[v.cargo.good]?.em||'')+' '+v.cargo.amt+'×':'leer';
-      const tip=vt.em+' '+vt.name+'<br>'+f.name+' → '+t.name+'<br>'+cargo+' · '+Math.floor(pct*100)+'%';
+      const tip='<b>'+vN+'</b><br>'+f.name+' → '+t.name+'<br>'+cargo+' · '+Math.floor(pct*100)+'%';
       const rk=f.lat.toFixed(3)+','+f.lng.toFixed(3)+'>'+t.lat.toFixed(3)+','+t.lng.toFixed(3);
       const cached=routeCache[rk];
       if(cached&&cached.length>2){
@@ -5313,8 +5334,9 @@ function compOrders(el){
     if(acc.length){h+='<div class="sec-label">📋 Aktive Aufträge · '+acc.length+'</div>';
     acc.forEach(o=>{const f=Cx(o.from),t=Cx(o.to);if(!f||!t)return;
       const vehs=G.vehs.filter(x=>x.cargo?.oid===o.id&&x.st==='moving');
-      const shipped=o.shipped||0;const delivered=o.delivered||0;const remaining=o.amt-shipped;
-      const pctDel=delivered/o.amt;const transitAmt=vehs.reduce((s,v)=>s+(v.cargo?.amt||0),0);
+      const delivered=o.delivered||0;
+      const actualInTransit=vehs.reduce((s,v)=>s+(v.cargo?.amt||0),0);
+      const pctDel=delivered/o.amt;
       let transitPct=0;vehs.forEach(v=>{const vt2=VT[v.type];if(!vt2)return;const tn2=tripT(f,t,vt2.spd);transitPct+=(v.cargo?.amt||0)/o.amt*Math.min(v.prog/(tn2||1),1)});
       const totalPct=Math.min((pctDel+transitPct)*100,100);
       h+='<div class="crd"><div class="rw"><span style="font-weight:600">'+(GOODS[o.good]?.em||'')+' '+o.amt+'× '+(GOODS[o.good]?.name||'')+'</span>';
@@ -5325,8 +5347,12 @@ function compOrders(el){
       h+='<div class="rw"><span class="sub">'+f.name+' → '+t.name+' · '+fdist(f,t)+' km</span>';
       h+='<span style="font-family:var(--mono);font-size:11px;'+(dUrgent?'color:var(--r);font-weight:700':dDecay?'color:var(--go)':'color:var(--td)')+'">📦 '+ftime(dRemain)+(dDecay?' ⚠️':'')+'</span></div>';
       h+='<div class="pb" style="margin:4px 0;height:6px"><div class="pf" style="width:'+totalPct+'%"></div></div>';
+      // Recalculate actual shipped = what vehicles are carrying + delivered
+      const actualShipped=delivered+actualInTransit;
+      if(o.shipped!==actualShipped){o.shipped=actualShipped} // Fix desync
+      const remaining=o.amt-actualShipped;
       h+='<div style="display:flex;gap:8px;font-size:12px;color:var(--td)"><span>✅ '+delivered+'/'+o.amt+'</span>';
-      if(transitAmt>0)h+='<span>🚛 '+transitAmt+' unterwegs</span>';
+      if(actualInTransit>0)h+='<span>🚛 '+actualInTransit+' unterwegs</span>';
       if(remaining>0&&!vehs.length)h+='<span style="color:var(--go)">📦 '+remaining+' verbleibend</span>';
       h+='</div>';
       vehs.forEach(v=>{const vt=VT[v.type],tn=tripT(f,t,vt.spd),pct=Math.min(v.prog/tn,1);
@@ -5334,16 +5360,17 @@ function compOrders(el){
       // Approaching vehicles
       const approaching=G.vehs.filter(v=>v.st==='moving'&&v.followUpOrder===o.id&&!v.cargo?.oid);
       approaching.forEach(v=>{const vt=VT[v.type];h+='<div style="font-size:10px;color:#a855f7;margin-top:2px">'+vt.em+' '+vehName(v)+' auf Anfahrt...</div>'});
-      // Actions
+      // Actions — ALWAYS show stornieren, show vehicle options when remaining > 0
+      h+='<div style="display:flex;gap:4px;margin-top:5px;flex-wrap:wrap">';
       if(remaining>0){
-        h+='<div style="display:flex;gap:4px;margin-top:5px;flex-wrap:wrap">';
         const avlL=G.vehs.filter(v=>v.st==='idle'&&v.loc===o.from&&canVehTravel(v,o.to)&&!v.followUpOrder);
         const avlR=G.vehs.filter(v=>v.st==='idle'&&v.loc!==o.from&&canVehTravel(v,o.from)&&!v.followUpOrder&&!v.pendingTransfer);
         const retV=G.vehs.filter(v=>typeof isReturning==='function'&&isReturning(v));
         if(avlL.length)h+='<button class="btn sm" style="background:rgba(251,191,36,.1);color:var(--go);border-color:rgba(251,191,36,.3)" onclick="autoAssign(\''+o.id+'\')">⚡ Senden (🚛'+avlL.length+')</button>';
         if(avlR.length||retV.length)h+='<button class="btn sm" style="color:var(--a2);border-color:rgba(56,189,248,.3)" onclick="G._remoteOid=\''+o.id+'\';renComp()">📍 Anderer Standort ('+(avlR.length+retV.length)+')</button>';
-        if(!avlL.length&&!avlR.length&&!retV.length)h+='<span class="sub" style="color:var(--r);padding:3px 0">❌ Kein Fahrzeug</span>';
-        h+='<button class="btn red sm" onclick="cancelO(\''+o.id+'\')">Stornieren</button></div>';}
+        if(!avlL.length&&!avlR.length&&!retV.length)h+='<span class="sub" style="color:var(--r);padding:3px 0">⏳ Kein freies Fzg</span>';
+      }
+      h+='<button class="btn red sm" onclick="cancelO(\''+o.id+'\')">Stornieren</button></div>';
       // Remote picker with multi-select
       if(G._remoteOid===o.id){
         const remV=G.vehs.filter(v=>v.st==='idle'&&v.loc!==o.from&&!v.followUpOrder&&!v.pendingTransfer).sort((a2,b)=>{
@@ -6633,7 +6660,7 @@ async function compAlliance(){
     const incoming=G.vehs.filter(v=>v.st==='moving'&&v.cargo?.allianceDelivery&&!v.cargo.returning);
     if(incoming.length){h+='<div class="sec-label" style="color:#a855f7">🚛 Eintreffend · '+incoming.length+'</div>';
       incoming.forEach(v=>{const vt=VT[v.type];if(!vt)return;
-        const tn=v.rt.tripTime||60;const pct=Math.min(v.prog/(tn||1),1);
+        const f99=Cx(v.rt?.from),t99=Cx(v.rt?.to)||(v.rt?.toLat?{lat:v.rt.toLat,lng:v.rt.toLng}:null);const tn=f99&&t99?tripT(f99,t99,vt.spd):300;const pct=Math.min(v.prog/(tn||1),1);
         h+='<div class="crd" style="padding:4px 8px;border-left:3px solid #a855f7;background:rgba(168,85,247,.02)">';
         h+='<div class="rw"><span>'+vt.em+' '+(GOODS[v.cargo.good]?.em||'')+' <b>'+v.cargo.amt+'×</b> '+(GOODS[v.cargo.good]?.name||'')+'</span>';
         h+='<span class="eta" style="color:#a855f7">'+Math.floor(pct*100)+'%</span></div>';
@@ -7185,18 +7212,20 @@ async function adminGivePlayerMoney(userKey){
 }
 async function adminRecallVehFor(userKey,vid){
   if(userKey===currentUser&&G){
-    // Current player: modify live state
     const v=G.vehs.find(x=>x.id===vid);if(!v)return;
     const depot=v.depot||v.loc||cities[0]?.id;if(!depot)return;
-    const oldLoc=v.loc;const wasMoving=v.st==='moving';
+    const wasMoving=v.st==='moving';
     v.st='idle';v.loc=depot;v.rt=null;v.prog=0;v.cargo=null;
     v.postDelivery=null;v.followUpOrder=null;v.pendingTransfer=null;v.recallToDepot=false;
+    // Remove from standing order assignments so it doesn't get re-sent
+    (G.standingOrders||[]).forEach(so=>{
+      if(so.vehicleIds)so.vehicleIds=so.vehicleIds.filter(x=>x!==vid);
+    });
     const name=vehName(v);
     adminLog('admin','🔙 '+name+' ('+userKey+') → '+(C(depot)?.name||'?')+(wasMoving?' (war unterwegs)':''));
     if(typeof toast==='function')toast('🔙 '+name+' → '+(C(depot)?.name||'?'));
     ua();save();
   } else {
-    // Other player: modify save file
     try{
       const raw=await storeGet('lx_save_'+userKey);if(!raw)return;
       const d=JSON.parse(raw);
@@ -7205,6 +7234,7 @@ async function adminRecallVehFor(userKey,vid){
       const depotName=d.unlockedCities?.find(c=>c.id===depot)?.name||depot||'?';
       v.st='idle';v.loc=depot;v.rt=null;v.prog=0;v.cargo=null;
       v.postDelivery=null;v.followUpOrder=null;v.pendingTransfer=null;v.recallToDepot=false;
+      (d.standingOrders||[]).forEach(so=>{if(so.vehicleIds)so.vehicleIds=so.vehicleIds.filter(x=>x!==vid)});
       await storeSet('lx_save_'+userKey,JSON.stringify(d));
       adminLog('admin','🔙 Fahrzeug '+vid.substr(0,8)+' ('+userKey+') → '+depotName);
       if(typeof toast==='function')toast('🔙 Fahrzeug von '+userKey+' → '+depotName);
@@ -7246,14 +7276,16 @@ async function adminRecallAllVehs(userKey){
   if(userKey===currentUser&&G){
     let count=0;
     G.vehs.forEach(v=>{
-      if(v.st!=='idle'||v.loc!==(v.depot||v.loc)){
-        const depot=v.depot||v.loc||cities[0]?.id;
-        v.st='idle';v.loc=depot;v.rt=null;v.prog=0;v.cargo=null;
-        v.postDelivery=null;v.followUpOrder=null;v.pendingTransfer=null;v.recallToDepot=false;
-        count++;
-      }
+      const depot=v.depot||cities[0]?.id||v.loc;
+      v.st='idle';v.loc=depot;v.rt=null;v.prog=0;v.cargo=null;
+      v.postDelivery=null;v.followUpOrder=null;v.pendingTransfer=null;v.recallToDepot=false;
+      count++;
     });
-    adminLog('admin','🔙 '+count+' Fahrzeuge von '+userKey+' ins Depot zurückgesetzt');
+    // Also cancel all active orders to prevent re-assignment
+    G.orders=(G.orders||[]).filter(o=>!o.acc);
+    // Pause all standing orders
+    (G.standingOrders||[]).forEach(so=>{so.active=false});
+    adminLog('admin','🔙 '+count+' Fahrzeuge zurückgesetzt, Aufträge+Daueraufträge gestoppt ('+userKey+')');
     if(typeof toast==='function')toast('🔙 '+count+' Fahrzeuge zurückgesetzt');
     ua();save();
   } else {
@@ -7261,16 +7293,16 @@ async function adminRecallAllVehs(userKey){
       const raw=await storeGet('lx_save_'+userKey);if(!raw)return;
       const d=JSON.parse(raw);let count=0;
       (d.vehs||[]).forEach(v=>{
-        if(v.st!=='idle'||v.loc!==(v.depot||v.loc)){
-          const depot=v.depot||v.loc;
-          v.st='idle';v.loc=depot;v.rt=null;v.prog=0;v.cargo=null;
-          v.postDelivery=null;v.followUpOrder=null;v.pendingTransfer=null;v.recallToDepot=false;
-          count++;
-        }
+        const depot=v.depot||v.loc;
+        v.st='idle';v.loc=depot;v.rt=null;v.prog=0;v.cargo=null;
+        v.postDelivery=null;v.followUpOrder=null;v.pendingTransfer=null;v.recallToDepot=false;
+        count++;
       });
+      d.orders=(d.orders||[]).filter(o=>!o.acc);
+      (d.standingOrders||[]).forEach(so=>{so.active=false});
       await storeSet('lx_save_'+userKey,JSON.stringify(d));
-      adminLog('admin','🔙 '+count+' Fahrzeuge von '+userKey+' ins Depot zurückgesetzt');
-      if(typeof toast==='function')toast('🔙 '+count+' Fahrzeuge von '+userKey+' zurückgesetzt');
+      adminLog('admin','🔙 '+count+' Fahrzeuge zurückgesetzt ('+userKey+') — wird beim nächsten Login aktiv');
+      if(typeof toast==='function')toast('🔙 '+count+' Fzg von '+userKey+' zurückgesetzt (nächster Login)');
     }catch(e){adminLog('admin','❌ Fehler: '+e.message)}
   }
   renderAdmin();
@@ -7461,6 +7493,19 @@ function launchGame(sc){
   await loadCache();
   await loadAdminLog();
   await ensureTestAccount();
+  // Auto-login from saved session
+  try{
+    const session=await storeGet('lx_session');
+    if(session){
+      const users=await getUsers();
+      if(users[session]){
+        currentUser=session;
+        window.addEventListener('beforeunload',()=>{save();saveCache()});
+        afterLogin(users[session]);
+        return;
+      }
+    }
+  }catch(e){}
   document.getElementById('loginUser').disabled=false;
   window.addEventListener('beforeunload',()=>{save();saveCache()});
   setTimeout(()=>{const el=document.getElementById('loginUser');if(el)el.focus()},300);
