@@ -1726,7 +1726,6 @@ let _lastLbSync=0;
 async function save(){
   if(!G||!currentUser)return;
   try{await storeSet('lx_save_'+currentUser,JSON.stringify({...G,_t:Date.now()}))}catch(e){}
-  // Leaderboard-Score alle 5 Min automatisch aktualisieren
   const now=Date.now();
   if(now-_lastLbSync>300000){
     _lastLbSync=now;
@@ -6846,7 +6845,7 @@ function updAllyReqPrice(){
   el.innerHTML='Gesamt: <b style="color:#a855f7">'+fmt(total)+'</b> aus Allianzkasse · Marktpreis: '+fmt(mktP)+'/St. · <span style="color:'+(diff>=0?'var(--a)':'var(--r)')+'">'+(diff>=0?'+':'')+diff+'%</span>';
 }
 // ══════════════════════════════════════════
-// ADMIN PANEL – hidden (Ctrl+Shift+A)
+// ADMIN PANEL v2 – Explorer UI with player details
 // ══════════════════════════════════════════
 
 let adminOpen=false;
@@ -6858,28 +6857,20 @@ function adminLog(type,msg,data){
   if(_adminLog.length>ADMIN_MAX_LOG)_adminLog.pop();
   saveAdminLog();
 }
+async function saveAdminLog(){try{await storeSet('lx_admin_log',JSON.stringify(_adminLog.slice(0,300)))}catch(e){}}
+async function loadAdminLog(){try{const r=await storeGet('lx_admin_log');if(r){const d=JSON.parse(r);if(Array.isArray(d))_adminLog.push(...d)}}catch(e){}}
 
-async function saveAdminLog(){
-  try{await storeSet('lx_admin_log',JSON.stringify(_adminLog.slice(0,200)))}catch(e){}
-}
-async function loadAdminLog(){
-  try{const r=await storeGet('lx_admin_log');if(r){const d=JSON.parse(r);if(Array.isArray(d))_adminLog.push(...d)}}catch(e){}
-}
-
-// Hook into key actions for logging
 const _origAddLog=addLog;
-addLog=function(m){
-  _origAddLog(m);
-  adminLog('game',m);
-};
+addLog=function(m){_origAddLog(m);adminLog('game',m)};
 
-// Open admin panel with Ctrl+Shift+A
 document.addEventListener('keydown',e=>{
   if(e.ctrlKey&&e.shiftKey&&(e.key==='A'||e.key==='a'||e.code==='KeyA')){e.preventDefault();toggleAdmin()}
 });
 
 const ADMIN_PASS='logistix2026';
 let adminAuthed=false;
+let adminTab='players';
+let adminSelPlayer=null;
 
 function toggleAdmin(){
   adminOpen=!adminOpen;
@@ -6897,103 +6888,192 @@ function toggleAdmin(){
 }
 function adminLogin(){
   const inp=document.getElementById('adminPwInput');if(!inp)return;
-  if(inp.value===ADMIN_PASS){adminAuthed=true;renderAdmin()}
-  else{const err=document.getElementById('adminPwErr');if(err)err.textContent='❌ Falsches Passwort'}
+  if(inp.value===ADMIN_PASS){
+    adminAuthed=true;
+    adminLog('admin','🔑 Admin-Login: '+currentUser);
+    renderAdmin();
+  } else {
+    const err=document.getElementById('adminPwErr');if(err)err.textContent='❌ Falsches Passwort';
+    adminLog('admin','❌ Admin-Login fehlgeschlagen: '+currentUser);
+  }
 }
-
-let adminTab='log';
-function setAdminTab(t){adminTab=t;renderAdmin()}
+function setAdminTab(t){adminTab=t;adminSelPlayer=null;renderAdmin()}
 
 async function renderAdmin(){
   const panel=document.getElementById('adminPanel');if(!panel)return;
   const users=await getUsers();
-  const userKeys=Object.keys(users);
+  const userKeys=Object.keys(users).sort();
 
   let h='<div class="admin-frame">';
   h+='<div class="admin-bar"><span class="admin-title">🔐 LogistiX Admin</span>';
   h+='<div style="display:flex;gap:4px">';
-  ['log','players','stats','tools'].forEach(t=>{
-    h+='<button class="admin-tab'+(adminTab===t?' on':'')+'" onclick="setAdminTab(\''+t+'\')">'+
-      {log:'📋 Log',players:'👥 Spieler',stats:'📊 Stats',tools:'🔧 Tools'}[t]+'</button>';
-  });
+  [['players','👥 Spieler'],['log','📋 Log'],['tools','🔧 Tools']].forEach(([t,l])=>{
+    h+='<button class="admin-tab'+(adminTab===t?' on':'')+'" onclick="setAdminTab(\''+t+'\')">'+l+'</button>'});
   h+='</div><button class="admin-close" onclick="toggleAdmin()">✕</button></div>';
-  h+='<div class="admin-body">';
 
-  if(adminTab==='log'){
-    h+='<div class="admin-section">Aktivitäts-Log ('+_adminLog.length+')</div>';
-    h+='<div class="admin-log-controls"><button class="btn sm" onclick="clearAdminLog()">🗑️ Log leeren</button>';
-    h+=' <button class="btn sm" onclick="exportAdminLog()">📥 Exportieren</button></div>';
+  if(adminTab==='players'){
+    h+='<div style="display:flex;height:calc(80vh - 60px)">';
+    // Player list sidebar
+    h+='<div style="width:180px;min-width:180px;border-right:1px solid var(--bd);overflow-y:auto;padding:6px">';
+    h+='<div style="font-family:var(--mono);font-size:11px;color:var(--td);padding:4px 8px;margin-bottom:4px">'+userKeys.length+' Spieler</div>';
+    userKeys.forEach(k=>{const u=users[k];const sel=adminSelPlayer===k;
+      h+='<div style="padding:6px 10px;cursor:pointer;border-radius:8px;font-size:13px;margin-bottom:2px;'+(sel?'background:rgba(61,214,140,.1);border:1px solid rgba(61,214,140,.3);color:var(--a)':'border:1px solid transparent;color:var(--t)')+'" onclick="adminSelPlayer=\''+k+'\';renderAdmin()">';
+      h+='<div style="font-weight:600">'+sanitize(u.user||k)+'</div></div>'});
+    h+='</div>';
+    // Player detail
+    h+='<div style="flex:1;overflow-y:auto;padding:14px">';
+    if(adminSelPlayer&&users[adminSelPlayer]){
+      h+=await renderAdminPlayer(adminSelPlayer,users[adminSelPlayer]);
+    } else {
+      h+='<div style="display:flex;align-items:center;justify-content:center;height:100%;color:var(--td);font-size:14px">← Spieler auswählen</div>';
+    }
+    h+='</div></div>';
+
+  } else if(adminTab==='log'){
+    h+='<div class="admin-body">';
+    h+='<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">';
+    h+='<div class="admin-section" style="margin:0">Aktivitäts-Log · '+_adminLog.length+'</div>';
+    h+='<div style="display:flex;gap:4px"><button class="btn sm" onclick="exportAdminLog()">📥 Export</button>';
+    h+='<button class="btn red sm" onclick="clearAdminLog()">🗑️ Leeren</button></div></div>';
+    // Filter
+    h+='<div style="display:flex;gap:4px;margin-bottom:8px">';
+    ['alle','admin','auth','game'].forEach(f=>{
+      h+='<button class="btn sm" style="'+((!window._adminLogFilter&&f==='alle')||(window._adminLogFilter===f)?'background:rgba(61,214,140,.1);color:var(--a);border-color:rgba(61,214,140,.3)':'')+'" onclick="window._adminLogFilter=\''+f+'\';renderAdmin()">'+f+'</button>'});
+    h+='</div>';
     h+='<div class="admin-log">';
-    _adminLog.slice(0,100).forEach(l=>{
+    const filter=window._adminLogFilter||'alle';
+    _adminLog.filter(l=>filter==='alle'||l.type===filter).slice(0,80).forEach(l=>{
       const d=new Date(l.ts);
       const ts=d.toLocaleString('de-DE',{hour:'2-digit',minute:'2-digit',second:'2-digit',day:'2-digit',month:'2-digit'});
       const typeC={game:'var(--a)',auth:'var(--go)',admin:'var(--bl)',error:'var(--r)'}[l.type]||'var(--td)';
       h+='<div class="admin-log-row"><span class="admin-log-ts">'+ts+'</span>';
-      h+='<span class="admin-log-user">'+l.user+'</span>';
+      h+='<span class="admin-log-user">'+sanitize(l.user)+'</span>';
       h+='<span class="admin-log-type" style="color:'+typeC+'">'+l.type+'</span>';
-      h+='<span class="admin-log-msg">'+l.msg+'</span></div>';
-    });
-    h+='</div>';
-
-  } else if(adminTab==='players'){
-    h+='<div class="admin-section">Registrierte Spieler ('+userKeys.length+')</div>';
-    h+='<table class="admin-table"><tr><th>User</th><th>E-Mail</th><th>Erstellt</th><th>Aktion</th></tr>';
-    for(const k of userKeys){
-      const u=users[k];
-      const created=u.created?new Date(u.created).toLocaleDateString('de-DE'):'—';
-      h+='<tr><td><b>'+u.user+'</b></td><td>'+( u.email||'—')+'</td><td>'+created+'</td>';
-      h+='<td><button class="btn sm" onclick="adminViewSave(\''+k+'\')">💾</button> ';
-      if(k!=='test')h+='<button class="btn red sm" onclick="adminDeleteUser(\''+k+'\')">🗑️</button>';
-      h+='</td></tr>';
-    }
-    h+='</table>';
-
-  } else if(adminTab==='stats'){
-    h+='<div class="admin-section">Server-Statistiken</div>';
-    // Memory usage
-    h+='<div class="admin-stat"><span>Spieler registriert</span><span>'+userKeys.length+'</span></div>';
-    h+='<div class="admin-stat"><span>Route Cache</span><span>'+Object.keys(routeCache).length+' Einträge</span></div>';
-    h+='<div class="admin-stat"><span>Such-Cache</span><span>'+Object.keys(_searchCache).length+' Einträge</span></div>';
-    h+='<div class="admin-stat"><span>Admin Log</span><span>'+_adminLog.length+' Einträge</span></div>';
-    // Current game stats if logged in
-    if(G){
-      h+='<div class="admin-section" style="margin-top:12px">Aktuelles Spiel ('+currentUser+')</div>';
-      h+='<div class="admin-stat"><span>Tick</span><span>'+G.tick+'</span></div>';
-      h+='<div class="admin-stat"><span>Geld</span><span>'+fmt(G.money)+'</span></div>';
-      h+='<div class="admin-stat"><span>Unternehmenswert</span><span>'+fmt(companyValue())+'</span></div>';
-      h+='<div class="admin-stat"><span>Städte</span><span>'+cities.length+'</span></div>';
-      h+='<div class="admin-stat"><span>Fahrzeuge</span><span>'+G.vehs.length+'</span></div>';
-      h+='<div class="admin-stat"><span>Gebäude</span><span>'+Object.values(G.blds).flat().length+'</span></div>';
-      h+='<div class="admin-stat"><span>Lieferungen</span><span>'+G.dels+'</span></div>';
-      h+='<div class="admin-stat"><span>Verdient</span><span>'+fmt(G.earned)+'</span></div>';
-    }
+      h+='<span class="admin-log-msg">'+sanitize(l.msg)+'</span></div>'});
+    h+='</div></div>';
 
   } else if(adminTab==='tools'){
+    h+='<div class="admin-body">';
     h+='<div class="admin-section">Admin-Tools</div>';
     h+='<div style="display:flex;flex-direction:column;gap:8px">';
-    h+='<div class="crd"><div class="rw"><span>💰 Geld hinzufügen</span>';
-    h+='<div style="display:flex;gap:4px"><input type="number" class="sl" id="adminMoney" value="100000" style="width:100px" onfocus="renderBlocked=true" onblur="renderBlocked=false"/>';
-    h+='<button class="btn sm" onclick="adminAddMoney()">Hinzufügen</button></div></div></div>';
+    h+='<div class="crd"><div class="rw"><span>💰 Geld hinzufügen ('+currentUser+')</span>';
+    h+='<div style="display:flex;gap:4px"><input type="number" class="sl" id="adminMoney" value="100000" style="width:100px"/>';
+    h+='<button class="btn sm" onclick="adminAddMoney()">+</button></div></div></div>';
     h+='<div class="crd"><div class="rw"><span>⏩ Ticks simulieren</span>';
-    h+='<div style="display:flex;gap:4px"><input type="number" class="sl" id="adminTicks" value="3600" style="width:80px" onfocus="renderBlocked=true" onblur="renderBlocked=false"/>';
-    h+='<button class="btn sm" onclick="adminSimTicks()">Ausführen</button></div></div></div>';
-    h+='<div class="crd"><div class="rw"><span>🗑️ Route Cache</span>';
-    h+='<button class="btn red sm" onclick="adminClearRouteCache()">Leeren ('+Object.keys(routeCache).length+')</button></div></div>';
-    h+='<div class="crd"><div class="rw"><span>📦 Alle Lager füllen</span>';
-    h+='<button class="btn sm" onclick="adminFillStorage()">+20 je Ware</button></div></div>';
-    h+='<div class="crd"><div class="rw"><span>💾 Cache speichern</span>';
-    h+='<button class="btn sm" onclick="saveCache().then(()=>alert(\'Gespeichert!\'))">Jetzt speichern</button></div></div>';
+    h+='<div style="display:flex;gap:4px"><input type="number" class="sl" id="adminTicks" value="3600" style="width:80px"/>';
+    h+='<button class="btn sm" onclick="adminSimTicks()">▶</button></div></div></div>';
+    h+='<div class="crd"><div class="rw"><span>📦 Alle Lager +20</span>';
+    h+='<button class="btn sm" onclick="adminFillStorage()">Auffüllen</button></div></div>';
+    h+='<div class="crd"><div class="rw"><span>🗑️ Caches leeren</span>';
+    h+='<button class="btn red sm" onclick="adminClearCaches()">Leeren</button></div></div>';
+    h+='</div></div>';
+  }
+
+  h+='</div>';
+  panel.innerHTML=h;
+}
+
+async function renderAdminPlayer(userKey,userData){
+  let h='';
+  const created=userData.created?new Date(userData.created).toLocaleDateString('de-DE',{day:'2-digit',month:'2-digit',year:'numeric',hour:'2-digit',minute:'2-digit'}):'—';
+
+  // Header
+  h+='<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">';
+  h+='<div><div style="font-size:18px;font-weight:700;color:var(--a)">👤 '+sanitize(userData.user||userKey)+'</div>';
+  h+='<div class="sub">'+sanitize(userData.email||'—')+' · Registriert: '+created+'</div></div>';
+  if(userKey!=='test')h+='<button class="btn red sm" onclick="adminDeleteUser(\''+userKey+'\')">🗑️ Löschen</button>';
+  h+='</div>';
+
+  // Load save data
+  let save=null;
+  try{const raw=await storeGet('lx_save_'+userKey);if(raw)save=JSON.parse(raw)}catch(e){}
+
+  if(!save){
+    h+='<div class="sub" style="padding:12px;text-align:center">Kein Spielstand vorhanden</div>';
+    return h;
+  }
+
+  // Stats grid
+  const vehCount=(save.vehs||[]).length;
+  const bldCount=Object.values(save.blds||{}).flat().length;
+  const cityCount=(save.unlockedCities||[]).length;
+  const lvl=save.level||1;
+  h+='<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-bottom:12px">';
+  [['💰',fmt(save.money||0),'Kontostand'],
+   ['📊',fmt(save.earned||0),'Verdient'],
+   ['🏆',LEVELS[lvl-1]?.em+' Lvl '+lvl,LEVELS[lvl-1]?.name||''],
+   ['📦',save.dels||0,'Lieferungen'],
+   ['🏙️',cityCount,'Standorte'],
+   ['🏭',bldCount,'Gebäude'],
+   ['🚛',vehCount,'Fahrzeuge'],
+   ['⏱',save.tick||0,'Ticks'],
+   ['💎',fmt(Math.round((save.earned||0)-(save.money||0))),'Investiert']
+  ].forEach(([em,val,lbl])=>{
+    h+='<div class="crd" style="text-align:center;padding:6px"><div style="font-size:10px">'+em+'</div><div style="font-family:var(--mono);color:var(--a);font-weight:700;font-size:13px">'+val+'</div><div style="font-size:10px;color:var(--td)">'+lbl+'</div></div>'});
+  h+='</div>';
+
+  // Cities
+  if(save.unlockedCities?.length){
+    h+='<div class="sec-label">🏙️ Standorte · '+save.unlockedCities.length+'</div>';
+    h+='<div style="display:flex;flex-wrap:wrap;gap:3px;margin-bottom:8px">';
+    save.unlockedCities.forEach(c=>{h+='<span class="tg">📍 '+(c.name||'?')+'</span>'});
     h+='</div>';
   }
 
-  h+='</div></div>';
-  panel.innerHTML=h;
+  // Vehicles
+  if(save.vehs?.length){
+    h+='<div class="sec-label">🚛 Fahrzeuge · '+vehCount+'</div>';
+    save.vehs.forEach(v=>{const vt=VT[v.type];if(!vt)return;
+      const isMoving=v.st==='moving';
+      h+='<div class="crd" style="padding:4px 8px;margin-bottom:3px"><div class="rw"><span>'+vt.em+' '+(v.plate||v.id?.substr(0,8))+'</span>';
+      h+='<span style="font-size:11px">'+(isMoving?'🔶 unterwegs':'🟢 idle')+' · '+(v.km||0).toLocaleString('de-DE')+' km</span></div>';
+      if(isMoving&&userKey===currentUser)h+='<button class="btn sm" style="margin-top:2px;font-size:10px" onclick="adminRecallVeh(\''+v.id+'\')">🔙 Zum Depot</button>';
+      h+='</div>'});
+  }
+
+  // Admin actions for this player
+  h+='<div class="sec-label" style="margin-top:8px">⚙️ Aktionen</div>';
+  h+='<div style="display:flex;flex-direction:column;gap:6px">';
+  h+='<div class="crd" style="padding:6px 10px"><div class="rw"><span>💰 Geld senden</span>';
+  h+='<div style="display:flex;gap:4px"><input type="number" class="sl" id="adminPlayerMoney" value="50000" style="width:90px"/>';
+  h+='<button class="btn sm" onclick="adminGivePlayerMoney(\''+userKey+'\')">+</button></div></div></div>';
+  h+='</div>';
+
+  // Player's game log (last entries)
+  const playerLogs=_adminLog.filter(l=>l.user===userKey).slice(0,20);
+  if(playerLogs.length){
+    h+='<div class="sec-label" style="margin-top:8px">📋 Letzte Aktivitäten · '+playerLogs.length+'</div>';
+    playerLogs.forEach(l=>{const d=new Date(l.ts);
+      const ts=d.toLocaleString('de-DE',{hour:'2-digit',minute:'2-digit',day:'2-digit',month:'2-digit'});
+      const typeC={game:'var(--a)',auth:'var(--go)',admin:'var(--bl)'}[l.type]||'var(--td)';
+      h+='<div style="padding:2px 0;font-size:11px;border-bottom:1px solid var(--bd)"><span style="color:var(--td);margin-right:6px">'+ts+'</span><span style="color:'+typeC+'">'+sanitize(l.msg)+'</span></div>'});
+  }
+  return h;
 }
 
 // Admin actions
 function adminAddMoney(){
   if(!G)return;const v=parseInt(document.getElementById('adminMoney')?.value)||0;
-  G.money+=v;adminLog('admin','💰 +'+fmt(v)+' hinzugefügt');uhud();renderAdmin();
+  G.money+=v;adminLog('admin','💰 +'+fmt(v)+' an '+currentUser);uhud();renderAdmin();
+}
+async function adminGivePlayerMoney(userKey){
+  const amt=parseInt(document.getElementById('adminPlayerMoney')?.value)||0;if(!amt)return;
+  if(userKey===currentUser&&G){G.money+=amt;uhud();save()}
+  else{
+    try{const raw=await storeGet('lx_save_'+userKey);if(raw){const d=JSON.parse(raw);d.money=(d.money||0)+amt;await storeSet('lx_save_'+userKey,JSON.stringify(d))}}catch(e){}
+  }
+  adminLog('admin','💰 +'+fmt(amt)+' an '+userKey);
+  if(typeof toast==='function')toast('💰 +'+fmt(amt)+' an '+userKey);
+  renderAdmin();
+}
+function adminRecallVeh(vid){
+  if(!G)return;const v=G.vehs.find(x=>x.id===vid);if(!v)return;
+  const depot=v.depot||cities[0]?.id;if(!depot)return;
+  if(v.st==='moving'){v.st='idle';v.loc=v.rt?.from||depot;v.rt=null;v.prog=0;v.cargo=null}
+  v.loc=depot;
+  adminLog('admin','🔙 Fahrzeug '+vehName(v)+' zurückgesetzt → '+(C(depot)?.name||'?'));
+  if(typeof toast==='function')toast('🔙 '+vehName(v)+' zurückgesetzt');
+  ua();renderAdmin();
 }
 function adminSimTicks(){
   if(!G)return;const n=parseInt(document.getElementById('adminTicks')?.value)||0;
@@ -7001,34 +7081,28 @@ function adminSimTicks(){
   for(let i=0;i<Math.min(n,7200);i++)tickCore();
   uhud();markDirty();ren();renderAdmin();
 }
-function adminClearRouteCache(){
-  for(const k in routeCache)delete routeCache[k];
-  adminLog('admin','🗑️ Route Cache geleert');renderAdmin();
-}
 function adminFillStorage(){
   if(!G)return;
   cities.forEach(c=>{if(!G.stor[c.id])G.stor[c.id]={};
     Object.keys(GOODS).forEach(g=>{G.stor[c.id][g]=(G.stor[c.id][g]||0)+20})});
   adminLog('admin','📦 Alle Lager +20');uhud();markDirty();ren();renderAdmin();
 }
+function adminClearCaches(){
+  for(const k in routeCache)delete routeCache[k];
+  for(const k in _searchCache)delete _searchCache[k];
+  adminLog('admin','🗑️ Caches geleert');renderAdmin();
+}
 function clearAdminLog(){_adminLog.length=0;saveAdminLog();renderAdmin()}
 function exportAdminLog(){
   const blob=new Blob([JSON.stringify(_adminLog,null,2)],{type:'application/json'});
   const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='logistix-admin-log.json';a.click();
 }
-async function adminViewSave(userKey){
-  try{const raw=await storeGet('lx_save_'+userKey);
-    if(!raw){alert('Kein Spielstand');return}
-    const d=JSON.parse(raw);
-    alert('Spielstand '+userKey+':\n\nGeld: '+fmt(d.money)+'\nTick: '+d.tick+'\nStädte: '+(d.unlockedCities||[]).length+'\nFahrzeuge: '+(d.vehs||[]).length+'\nGebäude: '+Object.values(d.blds||{}).flat().length+'\nLieferungen: '+(d.dels||0)+'\nVerdient: '+fmt(d.earned||0));
-  }catch(e){alert('Fehler: '+e)}
-}
 async function adminDeleteUser(userKey){
-  if(!confirm('Spieler "'+userKey+'" wirklich löschen?'))return;
+  if(!confirm('Spieler "'+userKey+'" wirklich löschen? Spielstand wird ebenfalls gelöscht!'))return;
   const users=await getUsers();delete users[userKey];await saveUsers(users);
   try{await storeDel('lx_save_'+userKey)}catch(e){}
-  adminLog('admin','👥 Spieler gelöscht: '+userKey);
-  renderAdmin();
+  adminLog('admin','🗑️ Spieler gelöscht: '+userKey);
+  adminSelPlayer=null;renderAdmin();
 }
 // ══════════════════════════════════════════
 // INIT
