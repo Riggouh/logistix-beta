@@ -2686,7 +2686,7 @@ function interceptVehicle(vid,oid){
   if(typeof toast==='function')toast('🔄 '+vehName(v)+' umgeleitet');
   ua();
 }
-function isReturning(v){return v.st==='moving'&&(!v.cargo||v.cargo.returning||v.recallToDepot||v.postDelivery)&&!v.cargo?.oid}
+function isReturning(v){return v.st==='moving'&&(!v.cargo||v.cargo.returning||v.recallToDepot||v.postDelivery)&&!v.cargo?.oid&&!v.followUpOrder&&!v.pendingTransfer}
 
 // ═══ SEND MULTIPLE REMOTE VEHICLES ═══
 function sendSelectedRemote(oid){
@@ -4567,8 +4567,8 @@ const TUT_STEPS=[
   {title:'⑤ Nimm einen Auftrag an',text:'Unter <b>📋 Logistik → Aufträge</b> erscheinen jetzt Transportaufträge.<br><br>Klicke <b>Annehmen</b> bei einem Auftrag. Grüne Prozente = über Marktpreis!<br><br><span style="color:var(--go)">🎯 Aufgabe: 1 Auftrag annehmen</span>',
     btn:'Zu Aufträgen',action:"openComputer();setCompTab('logistics');G.logSub='orders'",
     check:()=>G.orders.some(o=>o.acc)||G.dels>=1,reward:'📋 Erster Auftrag! +4.000€ Bonus'},
-  {title:'⑥ Liefere den Auftrag aus',text:'Wechsle zu <b>Logistik → Routen</b> und weise einem Auftrag ein Fahrzeug zu.<br><br>Du kannst auch direkt bei einem Auftrag <b>⚡ Auto</b> nutzen — das zählt ebenfalls!<br><br><span style="color:var(--go)">🎯 Aufgabe: Fahrzeug losschicken oder Lieferung abschließen</span>',
-    btn:'Zu Routen',action:"openComputer();setCompTab('logistics');G.logSub='routes'",
+  {title:'⑥ Liefere den Auftrag aus',text:'Wechsle zu <b>Logistik → Routenplaner</b> und weise einem Auftrag ein Fahrzeug zu.<br><br>Du kannst auch direkt bei einem Auftrag <b>⚡ Auto</b> nutzen — das zählt ebenfalls!<br><br><span style="color:var(--go)">🎯 Aufgabe: Fahrzeug losschicken oder Lieferung abschließen</span>',
+    btn:'Zum Routenplaner',action:"openComputer();setCompTab('logistics');G.logSub='routes'",
     check:()=>G.dels>=1||G.vehs.some(v=>v.st==='moving'&&v.cargo?.oid),reward:'🎉 Erste Lieferung gestartet! +12.000€ Bonus'},
   {title:'Tutorial abgeschlossen! 🎉',text:'Du kennst die Grundlagen! Hier sind deine nächsten Ziele:<br><br>• Baue <b>Verarbeitungsfabriken</b> (Mühle, Bäckerei) für wertvollere Waren<br>• Erweitere dein <b>Lager</b> und <b>Depot</b> unter Infrastruktur<br>• Richte <b>Daueraufträge</b> für automatischen Transport ein<br>• Schau ins <b>📖 Wiki</b> (☰ Menü) für alle Details<br><br>Schau dir auch deine <b>Missionen</b> an — dort gibt es weitere Belohnungen!',
     btn:'🚀 Starten!',action:"openComputer();setCompTab('missions')",instant:true},
@@ -4666,7 +4666,7 @@ function renComp(){
     if(!G.logSub)G.logSub='orders';
     const hist=G.history||[];const soCount=(G.standingOrders||[]).length;
     eh+='<div class="ex-city'+(G.logSub==='orders'?' sel':'')+'" onclick="G.logSub=\'orders\';renComp()" style="font-weight:600;color:'+(G.logSub==='orders'?'var(--a)':'var(--td)')+'"><i class="ri-file-list-3-line"></i> Aufträge</div>';
-    eh+='<div class="ex-city'+(G.logSub==='routes'?' sel':'')+'" onclick="G.logSub=\'routes\';renComp()" style="font-weight:600;color:'+(G.logSub==='routes'?'var(--bl)':'var(--td)')+'"><i class="ri-route-line"></i> Routen</div>';
+    eh+='<div class="ex-city'+(G.logSub==='routes'?' sel':'')+'" onclick="G.logSub=\'routes\';renComp()" style="font-weight:600;color:'+(G.logSub==='routes'?'var(--bl)':'var(--td)')+'"><i class="ri-route-line"></i> Routenplaner</div>';
     eh+='<div class="ex-city'+(G.logSub==='transfer'?' sel':'')+'" onclick="G.logSub=\'transfer\';renComp()" style="font-weight:600;color:'+(G.logSub==='transfer'?'var(--go)':'var(--td)')+'"><i class="ri-send-plane-line"></i> Transfer</div>';
     eh+='<div class="ex-city'+(G.logSub==='standing'?' sel':'')+'" onclick="G.logSub=\'standing\';renComp()" style="font-weight:600;color:'+(G.logSub==='standing'?'var(--go)':'var(--td)')+'"><i class="ri-refresh-line"></i> Daueraufträge'+(soCount?' ('+soCount+')':'')+'</div>';
     eh+='<div class="ex-city'+(G.logSub==='stats'?' sel':'')+'" onclick="G.logSub=\'stats\';renComp()" style="font-weight:600;color:'+(G.logSub==='stats'?'var(--bl)':'var(--td)')+'"><i class="ri-bar-chart-line"></i> Statistiken</div>';
@@ -5337,8 +5337,8 @@ function compOrders(el){
       // Actions
       if(remaining>0){
         h+='<div style="display:flex;gap:4px;margin-top:5px;flex-wrap:wrap">';
-        const avlL=G.vehs.filter(v=>v.st==='idle'&&v.loc===o.from&&canVehTravel(v,o.to));
-        const avlR=G.vehs.filter(v=>v.st==='idle'&&v.loc!==o.from&&canVehTravel(v,o.from));
+        const avlL=G.vehs.filter(v=>v.st==='idle'&&v.loc===o.from&&canVehTravel(v,o.to)&&!v.followUpOrder);
+        const avlR=G.vehs.filter(v=>v.st==='idle'&&v.loc!==o.from&&canVehTravel(v,o.from)&&!v.followUpOrder&&!v.pendingTransfer);
         const retV=G.vehs.filter(v=>typeof isReturning==='function'&&isReturning(v));
         if(avlL.length)h+='<button class="btn sm" style="background:rgba(251,191,36,.1);color:var(--go);border-color:rgba(251,191,36,.3)" onclick="autoAssign(\''+o.id+'\')">⚡ Senden (🚛'+avlL.length+')</button>';
         if(avlR.length||retV.length)h+='<button class="btn sm" style="color:var(--a2);border-color:rgba(56,189,248,.3)" onclick="G._remoteOid=\''+o.id+'\';renComp()">📍 Anderer Standort ('+(avlR.length+retV.length)+')</button>';
@@ -5346,7 +5346,7 @@ function compOrders(el){
         h+='<button class="btn red sm" onclick="cancelO(\''+o.id+'\')">Stornieren</button></div>';}
       // Remote picker with multi-select
       if(G._remoteOid===o.id){
-        const remV=G.vehs.filter(v=>v.st==='idle'&&v.loc!==o.from).sort((a2,b)=>{
+        const remV=G.vehs.filter(v=>v.st==='idle'&&v.loc!==o.from&&!v.followUpOrder&&!v.pendingTransfer).sort((a2,b)=>{
           const da=hav(C(a2.loc)?.lat||0,C(a2.loc)?.lng||0,f.lat,f.lng);const db=hav(C(b.loc)?.lat||0,C(b.loc)?.lng||0,f.lat,f.lng);return da-db});
         const retV2=G.vehs.filter(v=>typeof isReturning==='function'&&isReturning(v));
         h+='<div style="margin-top:6px;padding:8px;border:1px solid rgba(56,189,248,.2);border-radius:8px;background:rgba(56,189,248,.03)">';
@@ -5371,8 +5371,8 @@ function compOrders(el){
     if(!open.length)h+='<div class="sub" style="padding:12px;text-align:center;color:var(--td)">Keine Aufträge — produziere Waren!</div>';
     open.forEach(o=>{const f=Cx(o.from),t=Cx(o.to);if(!f||!t)return;
       const inS=(G.stor[o.from]?.[o.good]||0);
-      const avlL=G.vehs.filter(v=>v.st==='idle'&&v.loc===o.from&&canVehTravel(v,o.to));
-      const avlR=G.vehs.filter(v=>v.st==='idle'&&v.loc!==o.from&&canVehTravel(v,o.from));
+      const avlL=G.vehs.filter(v=>v.st==='idle'&&v.loc===o.from&&canVehTravel(v,o.to)&&!v.followUpOrder);
+      const avlR=G.vehs.filter(v=>v.st==='idle'&&v.loc!==o.from&&canVehTravel(v,o.from)&&!v.followUpOrder&&!v.pendingTransfer);
       const canAcc=inS>=1;
       const isE=o.type==='express';const tl=Math.max(0,o.tl-(G.tick-o.born));
       const ppu=o.pricePerUnit||Math.round(o.rew/o.amt);
@@ -5713,7 +5713,7 @@ function compMarket(el){
 function compRoutes(el){
   if(routesSub==='standing'){compStanding(el);return}
   if(routesSub==='transfer'){compTransfer(el);return}
-  let h=tabHead('routes','🗺️ Routen','Lieferungen planen und verwalten');
+  let h=tabHead('routes','🗺️ Routenplaner','Lieferungen planen, verfolgen und Folgeaufträge zuweisen');
   // Fleet overview bar
   const idleV=G.vehs.filter(v=>v.st==='idle'),movingV=G.vehs.filter(v=>v.st==='moving');
   h+='<div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px">';
@@ -5740,8 +5740,8 @@ function compRoutes(el){
       h+='<div class="crd"><div class="rw"><span>'+fmtOrd(o.num)+' '+(GOODS[o.good]?.em||'')+' '+o.amt+'×</span><span style="color:var(--a);font-family:var(--mono);font-size:14px;font-weight:700">'+fmt(o.rew)+'</span></div>';
       h+='<div class="sub">'+f.name+' → '+t.name+' · '+fdist(f,t)+' km</div>';
       if(shipped>0)h+='<div class="sub" style="color:var(--go)">📦 Bereits verschickt: '+shipped+'/'+o.amt+'<div class="pb"><div class="pf" style="width:'+(shipped/o.amt*100)+'%"></div></div></div>';
-      const avl=G.vehs.filter(x=>x.st==='idle'&&x.loc===o.from&&canVehTravel(x,o.to));
-      const remV=G.vehs.filter(x=>x.st==='idle'&&x.loc!==o.from&&canVehTravel(x,o.from));
+      const avl=G.vehs.filter(x=>x.st==='idle'&&x.loc===o.from&&canVehTravel(x,o.to)&&!x.followUpOrder);
+      const remV=G.vehs.filter(x=>x.st==='idle'&&x.loc!==o.from&&canVehTravel(x,o.from)&&!x.followUpOrder&&!x.pendingTransfer);
       if(avl.length){
         h+='<div class="sub" style="margin:4px 0;font-weight:600">Fahrzeuge wählen ('+remaining+' verbleibend):</div>';
         avl.forEach(x=>{const xvt=VT[x.type],cap=vehCap(x);const dist=fdist(f,t);
@@ -5766,12 +5766,32 @@ function compRoutes(el){
       h+='<div class="crd"><div class="rw"><span style="font-weight:600">'+fmtOrd(o.num)+' '+(GOODS[o.good]?.em||'')+' '+o.amt+'× '+(GOODS[o.good]?.name||'')+'</span><span style="color:var(--a);font-family:var(--mono);font-size:14px;font-weight:700">'+fmt(o.rew)+'</span></div>';
       h+='<div class="sub">'+f.name+' → '+t.name+' · '+fdist(f,t)+' km · ✅ '+delivered+'/'+o.amt+'</div>';
       vehs.forEach(v=>{const vt=VT[v.type],tn=tripT(f,t,vt.spd),pct=Math.min(v.prog/(tn||1),1);
-        h+='<div style="display:flex;align-items:center;gap:6px;margin-top:4px;padding:4px 6px;border-radius:6px;background:rgba(255,255,255,.02)">';
+        h+='<div style="margin-top:4px;padding:4px 6px;border-radius:6px;background:rgba(255,255,255,.02)">';
+        h+='<div style="display:flex;align-items:center;gap:6px">';
         h+='<span style="font-size:12px">'+vt.em+' <b>'+vehName(v)+'</b></span>';
         h+='<span class="sub">'+(v.cargo?.amt||0)+'×</span>';
         h+='<div class="pb" style="flex:1;height:5px"><div class="pf" style="width:'+pct*100+'%"></div></div>';
         h+='<span style="font-family:var(--mono);font-size:12px;color:var(--a);font-weight:700">'+Math.floor(pct*100)+'%</span>';
-        h+='<span class="sub">'+ftime(Math.max(0,tn-v.prog))+'</span>';
+        h+='<span class="sub">'+ftime(Math.max(0,tn-v.prog))+'</span></div>';
+        // Follow-up order / post-delivery destination
+        const fuo=v.followUpOrder?G.orders.find(x=>x.id===v.followUpOrder):null;
+        const pd=v.postDelivery?C(v.postDelivery):null;
+        if(fuo){const fc2=C(fuo.from),tc2=C(fuo.to);
+          h+='<div class="sub" style="margin-top:3px"><span class="tg b" style="font-size:10px">📋 Folgeauftrag</span> '+(GOODS[fuo.good]?.em||'')+' '+(fc2?.name||'?')+' → '+(tc2?.name||'?')+' <button class="btn sm" style="padding:1px 5px;font-size:9px" onclick="event.stopPropagation();setFollowUpOrder(\''+v.id+'\',null);renComp()">✕</button></div>';
+        } else if(pd){
+          h+='<div class="sub" style="margin-top:3px"><span class="tg g" style="font-size:10px">→ Danach</span> '+pd.name+' <button class="btn sm" style="padding:1px 5px;font-size:9px" onclick="event.stopPropagation();setPostDelivery(\''+v.id+'\',null);renComp()">✕</button></div>';
+        }
+        // Follow-up dropdown
+        const unasOrd=G.orders.filter(x=>x.acc&&x.id!==o.id&&(x.amt-(x.shipped||0))>0);
+        h+='<select class="sl" style="margin-top:3px;font-size:11px;padding:3px 6px" onchange="const val=this.value;if(!val)return;if(val.startsWith(\'ord:\'))setFollowUpOrder(\''+v.id+'\',val.substr(4));else setPostDelivery(\''+v.id+'\',val);renComp()">';
+        h+='<option value="">Nach Lieferung…</option>';
+        if(unasOrd.length){h+='<optgroup label="📋 Folgeauftrag">';
+          unasOrd.forEach(uo=>{const uf=C(uo.from),ut=C(uo.to);if(!uf||!ut)return;
+            h+='<option value="ord:'+uo.id+'">'+fmtOrd(uo.num)+' '+(GOODS[uo.good]?.em||'')+' '+uf.name+'→'+ut.name+' '+fmt(uo.rew)+'</option>'});
+          h+='</optgroup>'}
+        h+='<optgroup label="📍 Zielort">';
+        cities.forEach(x=>{h+='<option value="'+x.id+'">'+x.name+'</option>'});
+        h+='</optgroup></select>';
         h+='</div>'});
       // Approaching vehicles
       const approaching=G.vehs.filter(v=>v.st==='moving'&&v.followUpOrder===o.id&&!v.cargo?.oid);
