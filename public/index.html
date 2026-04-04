@@ -3456,6 +3456,16 @@ function tickCore(){
     }catch(e){}
   }
 
+  // ── Stat Tracking (every 5 min) ──
+  if(tc%300===0&&G){
+    if(!G._stats)G._stats=[];
+    G._stats.push({t:G.tick,ts:Date.now(),m:Math.round(G.money),e:Math.round(G.earned||0),v:G.vehs.length,
+      b:Object.values(G.blds||{}).flat().length,c:cities.length,d:G.dels||0,
+      w:Math.round(typeof companyValue==='function'?companyValue():0),
+      o:(G.orders||[]).filter(x=>x.acc).length});
+    if(G._stats.length>2000)G._stats.shift();
+  }
+
   // Auto-transfer Gebäudekapazität → city storage (every 10s)
   if(G.tick%10===0){
     try{
@@ -6951,7 +6961,7 @@ async function renderAdmin(){
   let h='<div class="admin-frame">';
   h+='<div class="admin-bar"><span class="admin-title">🔐 LogistiX Admin</span>';
   h+='<div style="display:flex;gap:4px">';
-  [['players','👥 Spieler'],['log','📋 Log'],['tools','🔧 Tools']].forEach(([t,l])=>{
+  [['players','👥 Spieler'],['chart','📈 Verlauf'],['log','📋 Log'],['tools','🔧 Tools']].forEach(([t,l])=>{
     h+='<button class="admin-tab'+(adminTab===t?' on':'')+'" onclick="setAdminTab(\''+t+'\')">'+l+'</button>'});
   h+='</div><button class="admin-close" onclick="toggleAdmin()">✕</button></div>';
 
@@ -6970,6 +6980,23 @@ async function renderAdmin(){
       h+=await renderAdminPlayer(adminSelPlayer,users[adminSelPlayer]);
     } else {
       h+='<div style="display:flex;align-items:center;justify-content:center;height:100%;color:var(--td);font-size:14px">← Spieler auswählen</div>';
+    }
+    h+='</div></div>';
+
+  } else if(adminTab==='chart'){
+    h+='<div style="display:flex;height:calc(80vh - 60px)">';
+    // Player sidebar (same as players tab)
+    h+='<div style="width:180px;min-width:180px;border-right:1px solid var(--bd);overflow-y:auto;padding:6px">';
+    h+='<div style="font-family:var(--mono);font-size:11px;color:var(--td);padding:4px 8px;margin-bottom:4px">'+userKeys.length+' Spieler</div>';
+    userKeys.forEach(k=>{const u=users[k];const sel=adminSelPlayer===k;
+      h+='<div style="padding:6px 10px;cursor:pointer;border-radius:8px;font-size:13px;margin-bottom:2px;'+(sel?'background:rgba(61,214,140,.1);border:1px solid rgba(61,214,140,.3);color:var(--a)':'border:1px solid transparent;color:var(--t)')+'" onclick="adminSelPlayer=\''+k+'\';renderAdmin()">';
+      h+='<div style="font-weight:600">'+sanitize(u.user||k)+'</div></div>'});
+    h+='</div>';
+    h+='<div style="flex:1;overflow-y:auto;padding:14px">';
+    if(adminSelPlayer){
+      h+=await renderAdminChart(adminSelPlayer);
+    } else {
+      h+='<div style="display:flex;align-items:center;justify-content:center;height:100%;color:var(--td)">← Spieler auswählen</div>';
     }
     h+='</div></div>';
 
@@ -7265,6 +7292,126 @@ async function adminRepairSave(userKey){
     if(typeof toast==='function')toast('🔧 Spielstand repariert');
     renderAdmin();
   }catch(e){adminLog('admin','❌ Reparatur fehlgeschlagen: '+e.message)}
+}
+
+// ═══ ADMIN CHART ═══
+if(!window._chartSeries)window._chartSeries={m:true,w:true,e:false,v:false,b:false,c:false,d:false,o:false};
+const CHART_META={
+  m:{name:'Kontostand',color:'#3dd68c',unit:'€'},
+  w:{name:'Unternehmenswert',color:'#f87171',unit:'€'},
+  e:{name:'Verdient (gesamt)',color:'#38bdf8',unit:'€'},
+  v:{name:'Fahrzeuge',color:'#fbbf24',unit:'',axis:'right'},
+  b:{name:'Gebäude',color:'#a855f7',unit:'',axis:'right'},
+  c:{name:'Standorte',color:'#60a5fa',unit:'',axis:'right'},
+  d:{name:'Lieferungen',color:'#fb923c',unit:'',axis:'right'},
+  o:{name:'Aktive Aufträge',color:'#e879f9',unit:'',axis:'right'}
+};
+
+async function renderAdminChart(userKey){
+  let h='';
+  let stats=[];
+  if(userKey===currentUser&&G&&G._stats){stats=G._stats}
+  else{try{const raw=await storeGet('lx_save_'+userKey);if(raw){const d=JSON.parse(raw);stats=d._stats||[]}}catch(e){}}
+  
+  if(!stats.length){return'<div class="sub" style="padding:20px;text-align:center">Noch keine Verlaufsdaten für diesen Spieler.<br><span style="color:var(--td)">Daten werden alle 5 Minuten aufgezeichnet.</span></div>'}
+
+  const users2=await getUsers();const uName=users2[userKey]?.user||userKey;
+  h+='<div style="font-size:16px;font-weight:700;color:var(--a);margin-bottom:8px">📈 '+sanitize(uName)+' — Verlauf</div>';
+  h+='<div class="sub" style="margin-bottom:8px">'+stats.length+' Datenpunkte · seit '+new Date(stats[0].ts).toLocaleDateString('de-DE')+'</div>';
+
+  // Series toggles
+  h+='<div style="display:flex;flex-wrap:wrap;gap:4px;margin-bottom:10px">';
+  Object.entries(CHART_META).forEach(([k,m])=>{const on=window._chartSeries[k];
+    h+='<button style="padding:4px 10px;border-radius:6px;border:2px solid '+(on?m.color:'var(--bd)')+';background:'+(on?m.color+'20':'transparent')+';color:'+(on?m.color:'var(--td)')+';font-family:var(--mono);font-size:11px;font-weight:600;cursor:pointer" onclick="window._chartSeries.'+k+'=!window._chartSeries.'+k+';renderAdmin()">'+m.name+'</button>'});
+  h+='</div>';
+
+  // Canvas
+  h+='<div style="position:relative;width:100%;height:350px;background:rgba(0,0,0,.3);border:1px solid var(--bd);border-radius:10px;overflow:hidden">';
+  h+='<canvas id="adminChart" style="width:100%;height:100%"></canvas></div>';
+
+  // Data table
+  if(stats.length>1){
+    const last=stats[stats.length-1];const prev=stats[Math.max(0,stats.length-13)]; // ~1h ago
+    h+='<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:4px;margin-top:8px">';
+    Object.entries(CHART_META).forEach(([k,m])=>{
+      const cur=last[k]||0;const old=prev[k]||0;const diff=cur-old;
+      h+='<div class="crd" style="text-align:center;padding:4px"><div style="font-size:9px;color:'+m.color+'">'+m.name+'</div>';
+      h+='<div style="font-family:var(--mono);font-weight:700;font-size:12px">'+(m.unit==='€'?fmt(cur):cur)+'</div>';
+      h+='<div style="font-size:9px;color:'+(diff>=0?'var(--a)':'var(--r)')+'">'+(diff>=0?'+':'')+( m.unit==='€'?fmt(diff):diff)+'</div></div>'});
+    h+='</div>';
+  }
+
+  // Schedule chart draw after DOM update
+  setTimeout(()=>drawAdminChart(stats),50);
+  return h;
+}
+
+function drawAdminChart(stats){
+  const canvas=document.getElementById('adminChart');if(!canvas)return;
+  const rect=canvas.parentElement.getBoundingClientRect();
+  canvas.width=rect.width*2;canvas.height=rect.height*2;
+  const ctx=canvas.getContext('2d');
+  ctx.scale(2,2);// retina
+  const W=rect.width,H=rect.height;
+  const pad={t:10,r:50,b:30,l:60};
+  const cW=W-pad.l-pad.r,cH=H-pad.t-pad.b;
+
+  // Background grid
+  ctx.strokeStyle='rgba(255,255,255,.06)';ctx.lineWidth=1;
+  for(let i=0;i<=5;i++){const y=pad.t+cH*i/5;ctx.beginPath();ctx.moveTo(pad.l,y);ctx.lineTo(pad.l+cW,y);ctx.stroke()}
+  for(let i=0;i<=10;i++){const x=pad.l+cW*i/10;ctx.beginPath();ctx.moveTo(x,pad.t);ctx.lineTo(x,pad.t+cH);ctx.stroke()}
+
+  // Determine active series and value ranges
+  const leftKeys=Object.entries(CHART_META).filter(([k,m])=>window._chartSeries[k]&&m.unit==='€').map(([k])=>k);
+  const rightKeys=Object.entries(CHART_META).filter(([k,m])=>window._chartSeries[k]&&m.axis==='right').map(([k])=>k);
+
+  let lMin=Infinity,lMax=-Infinity;
+  leftKeys.forEach(k=>{stats.forEach(s=>{const v=s[k]||0;if(v<lMin)lMin=v;if(v>lMax)lMax=v})});
+  if(lMin===Infinity){lMin=0;lMax=1}
+  const lRange=Math.max(lMax-lMin,1);lMin-=lRange*0.05;lMax+=lRange*0.05;
+
+  let rMin=Infinity,rMax=-Infinity;
+  rightKeys.forEach(k=>{stats.forEach(s=>{const v=s[k]||0;if(v<rMin)rMin=v;if(v>rMax)rMax=v})});
+  if(rMin===Infinity){rMin=0;rMax=1}
+  const rRange=Math.max(rMax-rMin,1);rMin-=rRange*0.05;rMax+=rRange*0.05;
+
+  // Y-axis labels
+  ctx.font='10px Chakra Petch';ctx.textAlign='right';ctx.fillStyle='rgba(255,255,255,.4)';
+  for(let i=0;i<=5;i++){const v=lMin+(lMax-lMin)*((5-i)/5);ctx.fillText(v>=10000?(v/1000).toFixed(0)+'k':Math.round(v),pad.l-4,pad.t+cH*i/5+3)}
+  if(rightKeys.length){ctx.textAlign='left';ctx.fillStyle='rgba(255,255,255,.3)';
+    for(let i=0;i<=5;i++){const v=rMin+(rMax-rMin)*((5-i)/5);ctx.fillText(Math.round(v),pad.l+cW+4,pad.t+cH*i/5+3)}}
+
+  // X-axis labels (time)
+  ctx.textAlign='center';ctx.fillStyle='rgba(255,255,255,.3)';
+  const ticks2=Math.min(6,stats.length);
+  for(let i=0;i<ticks2;i++){const idx=Math.floor(i/(ticks2-1)*(stats.length-1));const s=stats[idx];if(!s)continue;
+    const d=new Date(s.ts);ctx.fillText(d.toLocaleString('de-DE',{hour:'2-digit',minute:'2-digit',day:'2-digit',month:'2-digit'}),pad.l+cW*i/(ticks2-1),pad.t+cH+16)}
+
+  // Draw lines
+  function drawLine(key,minV,maxV){
+    const m=CHART_META[key];if(!m)return;
+    ctx.strokeStyle=m.color;ctx.lineWidth=2;ctx.lineJoin='round';
+    ctx.beginPath();
+    stats.forEach((s,i)=>{const x=pad.l+(i/(stats.length-1))*cW;const v=s[key]||0;
+      const y=pad.t+cH*(1-(v-minV)/(maxV-minV||1));
+      if(i===0)ctx.moveTo(x,y);else ctx.lineTo(x,y)});
+    ctx.stroke();
+    // Fill area
+    ctx.globalAlpha=0.06;ctx.fillStyle=m.color;
+    ctx.lineTo(pad.l+cW,pad.t+cH);ctx.lineTo(pad.l,pad.t+cH);ctx.closePath();ctx.fill();
+    ctx.globalAlpha=1;
+  }
+
+  leftKeys.forEach(k=>drawLine(k,lMin,lMax));
+  rightKeys.forEach(k=>drawLine(k,rMin,rMax));
+
+  // Legend
+  const allKeys=[...leftKeys,...rightKeys];
+  let lx=pad.l+4;
+  allKeys.forEach(k=>{const m=CHART_META[k];
+    ctx.fillStyle=m.color;ctx.fillRect(lx,pad.t+2,12,3);
+    ctx.fillStyle='rgba(255,255,255,.5)';ctx.font='9px Chakra Petch';ctx.textAlign='left';
+    ctx.fillText(m.name,lx+15,pad.t+7);lx+=ctx.measureText(m.name).width+25});
 }
 // ══════════════════════════════════════════
 // INIT
