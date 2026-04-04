@@ -79,7 +79,7 @@ body{font-family:'Barlow',sans-serif;background:var(--bg);color:var(--t);overflo
 .srl{padding:10px;text-align:center;font-size:10px;color:var(--td)}
 
 /* ═══ COMPUTER OVERLAY ═══ */
-#computer{position:fixed;inset:0;z-index:1500;background:rgba(0,0,0,.7);backdrop-filter:blur(8px);display:flex;align-items:center;justify-content:center;padding:20px}
+#computer{position:fixed;inset:0;z-index:1500;background:rgba(0,0,0,.92);backdrop-filter:blur(12px);display:flex;align-items:center;justify-content:center;padding:20px}
 .comp-frame{width:100%;max-width:1100px;height:calc(100vh - 40px);background:var(--bg);border:1px solid var(--bd2);border-radius:14px;display:flex;flex-direction:column;overflow:hidden;box-shadow:0 30px 80px rgba(0,0,0,.6)}
 .comp-bar{display:flex;align-items:center;justify-content:space-between;padding:8px 14px;background:rgba(0,0,0,.3);border-bottom:1px solid var(--bd)}
 .comp-bar-left{display:flex;align-items:center;gap:8px}
@@ -706,11 +706,6 @@ body{font-family:'Barlow',sans-serif;background:var(--bg);color:var(--t);overflo
   </div>
 </div>
 <script>
-// ══════════════════════════════════════════
-// window.storage Polyfill (Server-Backend)
-// Only activates if no native storage API exists (i.e. NOT on Claude.ai)
-// Routes ALL data through /api/ for cross-device access
-// ══════════════════════════════════════════
 (function(){
   if(window.storage) return;
   const API='/api/';
@@ -4367,10 +4362,15 @@ function dashAlerts(){
 }
 // ═══ COMPUTER ═══
 function openComputer(){computerOpen=true;document.getElementById('computer').style.display='flex';
+  const dp=document.getElementById('dashPanel');if(dp)dp.style.display='none';
+  const mapEl=document.getElementById('map');if(mapEl)mapEl.style.display='none';
+  const tb=document.getElementById('topBar');if(tb)tb.style.display='none';
   if(!minimap){minimap=L.map('minimap',{zoomControl:false,attributionControl:false,dragging:true,scrollWheelZoom:true,doubleClickZoom:false}).setView([50,8],10);
     L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png',{maxZoom:19,subdomains:'abcd'}).addTo(minimap);setTimeout(()=>minimap.invalidateSize(),100)}
   document.getElementById('minimap-wrap').style.display=minimapOpen?'block':'none';updateMinimap();renComp()}
-function closeComputer(){computerOpen=false;document.getElementById('computer').style.display='none';markDirty();applyView()}
+function closeComputer(){computerOpen=false;document.getElementById('computer').style.display='none';
+  const tb=document.getElementById('topBar');if(tb)tb.style.display='flex';
+  markDirty();applyView()}
 function selectLocation(cid){G.sel=cid;routesShowAll=false;routesSub='city';try{udots()}catch(e){}if(computerOpen){updateMinimap();renComp()}else{const c=C(cid);if(c&&MP)MP.flyTo([c.lat,c.lng],Math.max(MP.getZoom(),9),{duration:.5});markDirty();ren()}}
 function toggleBuildCity(cid){buildExpanded[cid]=!buildExpanded[cid];ren()}
 function toggleMinimap(){minimapOpen=!minimapOpen;document.getElementById('minimap-wrap').style.display=minimapOpen?'block':'none';
@@ -6468,10 +6468,12 @@ let alliancePanelOpen=false;
 function openAlliancePanel(){
   if(!G){addLog('❌ Erst einloggen');return}
   document.getElementById('alliancePanel').classList.add('open');
+  const tb=document.getElementById('topBar');if(tb)tb.style.display='none';
   alliancePanelOpen=true;renderAlliance();
 }
 function closeAlliancePanel(){
   document.getElementById('alliancePanel').classList.remove('open');
+  const tb=document.getElementById('topBar');if(tb)tb.style.display='flex';
   alliancePanelOpen=false;
 }
 function renderAlliance(){if(alliancePanelOpen)compAlliance()}
@@ -7023,11 +7025,31 @@ async function renderAdminPlayer(userKey,userData){
   // Vehicles
   if(save.vehs?.length){
     h+='<div class="sec-label">🚛 Fahrzeuge · '+vehCount+'</div>';
-    save.vehs.forEach(v=>{const vt=VT[v.type];if(!vt)return;
+    save.vehs.forEach((v,vi)=>{const vt=VT[v.type];if(!vt)return;
       const isMoving=v.st==='moving';
-      h+='<div class="crd" style="padding:4px 8px;margin-bottom:3px"><div class="rw"><span>'+vt.em+' '+(v.plate||v.id?.substr(0,8))+'</span>';
-      h+='<span style="font-size:11px">'+(isMoving?'🔶 unterwegs':'🟢 idle')+' · '+(v.km||0).toLocaleString('de-DE')+' km</span></div>';
-      if(isMoving&&userKey===currentUser)h+='<button class="btn sm" style="margin-top:2px;font-size:10px" onclick="adminRecallVeh(\''+v.id+'\')">🔙 Zum Depot</button>';
+      const isCurrent=userKey===currentUser;
+      // Build vehicle name
+      let vName='?';
+      if(isCurrent&&G){const liveV=G.vehs.find(x=>x.id===v.id);if(liveV)vName=vehName(liveV)}
+      else{
+        const depotCity=save.unlockedCities?.find(c=>c.id===(v.depot||v.loc));
+        const cAbbr=depotCity?(depotCity.name||'?').substring(0,3).toUpperCase():'???';
+        const regKey=depotCity?getRegion((depotCity.co||'').toUpperCase()):'europa';
+        const rAbbr=REG_ABBR[regKey]||'??';
+        const abbr=VEH_ABBR[v.type]||v.type.substring(0,2).toUpperCase();
+        const sameType=save.vehs.filter(x=>(x.depot||x.loc)===(v.depot||v.loc)&&x.type===v.type);
+        const num=Math.max(1,sameType.indexOf(v)+1);
+        vName=rAbbr+'/'+cAbbr+'-'+abbr+(num<10?'0':'')+num;
+      }
+      const depotName=save.unlockedCities?.find(c=>c.id===(v.depot||v.loc))?.name||v.depot||'?';
+      const locName=save.unlockedCities?.find(c=>c.id===v.loc)?.name||v.loc||'?';
+      h+='<div class="crd" style="padding:5px 10px;margin-bottom:3px;'+(isMoving?'border-left:3px solid var(--go)':'')+'">';
+      h+='<div class="rw"><span style="font-weight:600">'+vt.em+' '+vName+'</span>';
+      h+='<span style="font-size:11px">'+(isMoving?'🔶 unterwegs':'🟢 idle')+'</span></div>';
+      h+='<div style="display:flex;justify-content:space-between;font-size:11px;color:var(--td)">';
+      h+='<span>'+vt.name+' · Kap: '+vehCap(v)+' · '+(v.km||0).toLocaleString('de-DE')+' km</span>';
+      h+='<span>🏠 '+depotName+(v.loc!==v.depot?' · 📍 '+locName:'')+'</span></div>';
+      if(isCurrent)h+='<button class="btn sm" style="margin-top:3px;font-size:10px" onclick="adminRecallVeh(\''+v.id+'\')">🔙 Ins Depot zurücksetzen ('+depotName+')</button>';
       h+='</div>'});
   }
 
@@ -7068,11 +7090,15 @@ async function adminGivePlayerMoney(userKey){
 }
 function adminRecallVeh(vid){
   if(!G)return;const v=G.vehs.find(x=>x.id===vid);if(!v)return;
-  const depot=v.depot||cities[0]?.id;if(!depot)return;
-  if(v.st==='moving'){v.st='idle';v.loc=v.rt?.from||depot;v.rt=null;v.prog=0;v.cargo=null}
-  v.loc=depot;
-  adminLog('admin','🔙 Fahrzeug '+vehName(v)+' zurückgesetzt → '+(C(depot)?.name||'?'));
-  if(typeof toast==='function')toast('🔙 '+vehName(v)+' zurückgesetzt');
+  const depot=v.depot||v.loc||cities[0]?.id;if(!depot)return;
+  const oldLoc=v.loc;const wasMoving=v.st==='moving';
+  // Reset everything
+  v.st='idle';v.loc=depot;v.rt=null;v.prog=0;v.cargo=null;
+  v.postDelivery=null;v.followUpOrder=null;v.pendingTransfer=null;
+  v.recallToDepot=false;
+  const name=vehName(v);
+  adminLog('admin','🔙 '+name+' zurückgesetzt → '+(C(depot)?.name||'?')+(wasMoving?' (war unterwegs von '+(C(oldLoc)?.name||oldLoc)+')':''));
+  if(typeof toast==='function')toast('🔙 '+name+' → '+(C(depot)?.name||'?'));
   ua();renderAdmin();
 }
 function adminSimTicks(){
