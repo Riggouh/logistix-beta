@@ -4020,8 +4020,35 @@ function tickCore(){
 let tc=0;let renderBlocked=false;
 document.addEventListener('focusin',e=>{if(e.target.tagName==='SELECT'||e.target.tagName==='INPUT'||e.target.type==='checkbox')renderBlocked=true});
 document.addEventListener('focusout',e=>{setTimeout(()=>{renderBlocked=false},200)});
+// ── Background catch-up: browsers throttle setInterval in background tabs ──
+let _lastTickMs=0;
+let _catchingUp=false;
+
 function tick(){
   if(!gameStarted||!G)return;
+  const now=Date.now();
+  if(!_lastTickMs){_lastTickMs=now;} // First tick
+
+  // Calculate missed ticks since last run
+  const elapsed=now-_lastTickMs;
+  _lastTickMs=now;
+
+  // If more than 1.5s passed, we missed ticks (tab was background/throttled)
+  if(elapsed>1500&&!_catchingUp){
+    const missedTicks=Math.floor(elapsed/1000)-1;
+    if(missedTicks>0){
+      _catchingUp=true;
+      // Cap at 28800 (8h) — same as offline catch-up
+      const toRun=Math.min(missedTicks,28800);
+      // Run missed ticks silently (no UI updates)
+      for(let i=0;i<toRun;i++){try{tickCore()}catch(e){}}
+      if(toRun>60)addLog('⏩ '+Math.floor(toRun/60)+' Min nachgeholt (Tab inaktiv)');
+      try{markDirty();uhud()}catch(e){}
+      _catchingUp=false;
+    }
+  }
+
+  // Normal tick
   try{tickCore()}catch(e){console.error('TICK ERROR:',e)}
   tc++;
   // HUD update every second
@@ -9042,6 +9069,9 @@ function launchGame(sc){
   if(G)try{Object.keys(G.blds).forEach(ubmk)}catch(e){}
   updCnt();
   if(!tickIv)tickIv=setInterval(tick,1000);
+  // Catch up immediately when tab becomes visible again
+  document.addEventListener('visibilitychange',()=>{if(!document.hidden&&gameStarted)tick()});
+  window.addEventListener('focus',()=>{if(gameStarted)tick()});
   if(typeof checkTutorial==='function')checkTutorial();
   setInterval(save,30000);
   setInterval(saveCache,120000); // Save cache every 2min
