@@ -7,7 +7,6 @@ const DATA_DIR = '/app/data';
 const PERSONAL_FILE = path.join(DATA_DIR, 'personal.json');
 const SHARED_FILE = path.join(DATA_DIR, 'shared.json');
 
-// ── JSON-Datei laden / speichern ──
 function loadJSON(file) {
   try { return JSON.parse(fs.readFileSync(file, 'utf8')); }
   catch { return {}; }
@@ -18,10 +17,8 @@ function saveJSON(file, data) {
   fs.renameSync(tmp, file);
 }
 
-// ── Sicherstellen dass data/ existiert ──
 if (!fs.existsSync(DATA_DIR)) fs.mkdirSync(DATA_DIR, { recursive: true });
 
-// ── Request-Body lesen ──
 function readBody(req) {
   return new Promise((resolve) => {
     let body = '';
@@ -32,7 +29,6 @@ function readBody(req) {
   });
 }
 
-// ── Statische Dateien ──
 function serveStatic(res, filePath) {
   const ext = path.extname(filePath);
   const types = { '.html': 'text/html', '.js': 'application/javascript', '.css': 'text/css', '.json': 'application/json', '.png': 'image/png', '.svg': 'image/svg+xml' };
@@ -43,33 +39,25 @@ function serveStatic(res, filePath) {
   });
 }
 
-// ── Server ──
 const server = http.createServer(async (req, res) => {
   const url = new URL(req.url, `http://localhost:${PORT}`);
-
-  // CORS
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'GET, POST, DELETE, OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
   if (req.method === 'OPTIONS') { res.writeHead(204); res.end(); return; }
 
-  // ── Storage API ──
   if (url.pathname.startsWith('/api/')) {
     res.setHeader('Content-Type', 'application/json');
     const action = url.pathname.replace('/api/', '');
     const shared = url.searchParams.get('shared') === '1';
     const file = shared ? SHARED_FILE : PERSONAL_FILE;
-
     try {
       if (action === 'get') {
         const key = url.searchParams.get('key');
         if (!key) { res.end('null'); return; }
         const db = loadJSON(file);
-        if (key in db) {
-          res.end(JSON.stringify({ key, value: db[key], shared }));
-        } else {
-          res.end('null');
-        }
+        if (key in db) { res.end(JSON.stringify({ key, value: db[key], shared })); }
+        else { res.end('null'); }
       }
       else if (action === 'set') {
         const body = await readBody(req);
@@ -95,22 +83,15 @@ const server = http.createServer(async (req, res) => {
         const keys = Object.keys(db).filter(k => !prefix || k.startsWith(prefix));
         res.end(JSON.stringify({ keys, prefix, shared }));
       }
-      else {
-        res.writeHead(404);
-        res.end('{"error":"unknown action"}');
-      }
-    } catch (e) {
-      res.writeHead(500);
-      res.end('{"error":"server error"}');
-    }
+      else { res.writeHead(404); res.end('{"error":"unknown action"}'); }
+    } catch (e) { res.writeHead(500); res.end('{"error":"server error"}'); }
     return;
   }
 
-  // ── Statische Dateien ──
   let filePath = path.join('/app/public', url.pathname === '/' ? 'index.html' : url.pathname);
   serveStatic(res, filePath);
 });
 
 server.listen(PORT, '0.0.0.0', () => {
-  console.log(`🚛 LogistiX läuft auf Port ${PORT}`);
+  console.log('🚛 LogistiX läuft auf Port ' + PORT);
 });
