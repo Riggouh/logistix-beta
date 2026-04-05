@@ -163,7 +163,7 @@ body{font-family:'Barlow',sans-serif;background:var(--bg);color:var(--t);overflo
 .city-dot:hover{transform:scale(1.3)}.city-dot.sel{border-color:#00e5a0;background:rgba(61,214,140,.4);box-shadow:0 0 20px var(--gw)}
 .city-dot.blt{border-color:var(--go);background:rgba(251,191,36,.15)}
 .clb{font-family:var(--mono);font-size:14px;font-weight:600;color:#fff;text-shadow:0 1px 3px rgba(0,0,0,.8),0 0 6px rgba(0,0,0,.5);white-space:nowrap;pointer-events:none}
-.bi{font-size:22px;filter:drop-shadow(0 2px 3px rgba(0,0,0,.6))}.vi{font-size:24px;filter:drop-shadow(0 2px 4px rgba(0,0,0,.7));pointer-events:auto;cursor:pointer}
+.bi{font-size:14px;filter:drop-shadow(0 1px 2px rgba(0,0,0,.5))}.vi{font-size:18px;filter:drop-shadow(0 2px 4px rgba(0,0,0,.7));pointer-events:auto;cursor:pointer}
 
 /* ═══ START SCREEN ═══ */
 #startScreen{position:fixed;inset:0;z-index:5000;background:var(--bg);display:flex;align-items:center;justify-content:center}
@@ -557,8 +557,8 @@ body{font-family:'Barlow',sans-serif;background:var(--bg);color:var(--t);overflo
 .comp-body,.comp-explorer,.dash-scroll,.unlock-popup{-webkit-overflow-scrolling:touch;scroll-behavior:smooth}
 
 /* Vehicle tracking */
-.vi-track{filter:drop-shadow(0 0 6px rgba(56,189,248,.6))}
-.track-ring{width:44px;height:44px;border-radius:50%;border:2px solid rgba(56,189,248,.7);animation:trackPulse 1.5s ease-in-out infinite;box-shadow:0 0 12px rgba(56,189,248,.3)}
+.vi-track{filter:drop-shadow(0 0 8px rgba(56,189,248,.8))}
+.track-ring{width:48px;height:48px;border-radius:50%;border:3px solid rgba(56,189,248,.8);animation:trackPulse 1.5s ease-in-out infinite;box-shadow:0 0 18px rgba(56,189,248,.5),inset 0 0 8px rgba(56,189,248,.2)}
 @keyframes trackPulse{0%,100%{transform:scale(1);opacity:.7}50%{transform:scale(1.3);opacity:.3}}
 
 /* Safe area for notched phones */
@@ -658,6 +658,7 @@ body{font-family:'Barlow',sans-serif;background:var(--bg);color:var(--t);overflo
           <div class="hb-item mob-only" onclick="openAlliancePanel();closeHamburger()"><i class="ri-team-line"></i> Allianz</div>
           <div class="hb-item mob-only" onclick="showDutyHelp();closeHamburger()"><i class="ri-question-line"></i> On/Off Duty Hilfe</div>
           <div class="hb-item" onclick="showWiki();closeHamburger()"><i class="ri-book-open-line"></i> LogistiX-Wiki</div>
+          <div class="hb-item" onclick="showExplorerUI();closeHamburger()"><i class="ri-layout-grid-line"></i> Explorer-UI</div>
           <div class="hb-item" onclick="showTutorial(0);closeHamburger()"><i class="ri-graduation-cap-line"></i> Tutorial</div>
           <div class="hb-item" onclick="openSettings();closeHamburger()"><i class="ri-settings-3-line"></i> Einstellungen</div>
           <div class="hb-item" onclick="showChangelog();closeHamburger()"><i class="ri-file-list-3-line"></i> Changelog</div>
@@ -1340,8 +1341,8 @@ function getRegionalMarket(region){
   if(typeof DB==='undefined')return null;
   const regCities=DB.filter(x=>getRegion(x[1])===region);
   if(!regCities.length)return null;
-  // 8h epoch = 28800 ticks. Use real time so all players sync
-  const epoch=Math.floor(Date.now()/(8*3600*1000));
+  // 24h epoch. Use real time so all players sync
+  const epoch=Math.floor(Date.now()/(24*3600*1000));
   // Deterministic pick based on epoch + region hash
   let hash=0;for(let i=0;i<region.length;i++)hash=((hash<<5)-hash)+region.charCodeAt(i);
   const idx=Math.abs((epoch*31+hash))%regCities.length;
@@ -1424,8 +1425,8 @@ const REGION_DEMAND={
 function marketPrice(good,regionKey){
   const base=BASE_PRICES[good]||100;
   const regMult=REGION_DEMAND[regionKey]?.[good]||1;
-  // 8h price cycle (28800 ticks) — prices shift each epoch
-  const epoch=Math.floor((G?.tick||0)/28800);
+  // 24h price cycle (86400 ticks) — prices shift each epoch
+  const epoch=Math.floor((G?.tick||0)/86400);
   const seed=hashStr(good+epoch);
   const wave=(seed%200-100)/600; // ±16% per epoch
   // Supply/demand: recent deliveries lower price, scarcity raises it
@@ -2408,7 +2409,7 @@ function recallAfterDelivery(vid){
 // PLAYER ACTIONS (with Route Queue)
 // ══════════════════════════════════════════
 
-function sel(id){if(!G)return;G.sel=id;udots();if(typeof updateMinimap==='function')updateMinimap();ren();const c=C(id);if(c&&!computerOpen)MP&&MP.flyTo([c.lat,c.lng],Math.max(MP.getZoom(),9),{duration:.5})}
+function sel(id){if(!G)return;G.sel=id;G._invFilter=id;G.sellCityFilter=id;G._orderFilter=id;udots();if(typeof updateMinimap==='function')updateMinimap();ren();const c=C(id);if(c&&!computerOpen)MP&&MP.flyTo([c.lat,c.lng],Math.max(MP.getZoom(),9),{duration:.5})}
 // ── Vehicle infrastructure check ──
 function cityHasInfra(cid,type){if(!G||!G.infra)return false;return(G.infra[cid]||[]).some(i=>i.type===type)}
 function canBuyVehAt(vtype,cid){
@@ -3342,8 +3343,8 @@ function tickCore(){
   if(!G.supplyTrack)G.supplyTrack={};
   if(!G.supplyHist)G.supplyHist=[];
 
-  // ── Supply epoch reset every 8h (28800 ticks) ──
-  const epoch=Math.floor(G.tick/28800);
+  // ── Supply epoch reset every 24h (86400 ticks) ──
+  const epoch=Math.floor(G.tick/86400);
   if(!G.lastEpoch)G.lastEpoch=epoch;
   if(epoch>G.lastEpoch){
     // Save old supply data as history
@@ -4105,11 +4106,16 @@ function initMap(){
     mapEl.style.cssText='position:fixed;top:56px;left:0;right:0;bottom:0;display:none;z-index:3';
     document.body.appendChild(mapEl);
   }
-  MP=L.map('map',{zoomControl:false,attributionControl:false}).setView([30,10],3);
-  L.tileLayer('https://tile.openstreetmap.de/{z}/{x}/{y}.png',{
-    maxZoom:19,
-    attribution:'© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
-  }).addTo(MP);
+  MP=L.map('map',{zoomControl:false}).setView([30,10],3);
+  // Tile layers
+  const osmLayer=L.tileLayer('https://tile.openstreetmap.de/{z}/{x}/{y}.png',{maxZoom:19,attribution:'© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>-Mitwirkende'});
+  const topoLayer=L.tileLayer('https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png',{maxZoom:17,attribution:'© <a href="https://opentopomap.org">OpenTopoMap</a> · © OSM'});
+  const satLayer=L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',{maxZoom:19,attribution:'© Esri · Maxar · Earthstar'});
+  const darkLayer=L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png',{maxZoom:19,attribution:'© <a href="https://carto.com">CARTO</a> · © OSM'});
+  osmLayer.addTo(MP);
+  L.control.layers({'🗺️ Standard':osmLayer,'⛰️ Gelände':topoLayer,'🛰️ Satellit':satLayer,'🌙 Dunkel':darkLayer},{},{position:'topright',collapsed:true}).addTo(MP);
+  // Hide building markers at low zoom
+  MP.on('zoomend',()=>{const z=MP.getZoom();Object.values(bMk).flat().forEach(m=>{if(z<10)m.getElement()&&(m.getElement().style.display='none');else m.getElement()&&(m.getElement().style.display='')})});
   // Create search element
   let swEl=document.getElementById('sw');
   if(!swEl){
@@ -4170,8 +4176,8 @@ function ubmk(cid){
   if(!MP)return;
   (bMk[cid]||[]).forEach(m=>MP.removeLayer(m));bMk[cid]=[];
   if(!G)return;const c=C(cid),bs=G.blds[cid]||[];if(!c)return;
-  bs.forEach((b,i)=>{const a=(i/Math.max(bs.length,1))*Math.PI*2,r=.006+i%2*.003;
-    bMk[cid].push(L.marker([c.lat+Math.cos(a)*r,c.lng+Math.sin(a)*r*1.6],{icon:L.divIcon({className:'',iconSize:[24,24],iconAnchor:[12,12],html:'<div class="bi">'+BLD[b.type].em+'</div>'}),interactive:false}).addTo(MP))});
+  bs.forEach((b,i)=>{const a=(i/Math.max(bs.length,1))*Math.PI*2,r=.004+i%2*.002;
+    bMk[cid].push(L.marker([c.lat+Math.cos(a)*r,c.lng+Math.sin(a)*r*1.6],{icon:L.divIcon({className:'',iconSize:[18,18],iconAnchor:[9,9],html:'<div class="bi" style="font-size:12px;opacity:.7">'+BLD[b.type].em+'</div>'}),interactive:false}).addTo(MP))});
 }
 
 let _trackVeh=null,_trackRing=null;
@@ -4193,36 +4199,36 @@ function uvmk(){
   G.vehs.forEach(v=>{const vt=VT[v.type];const vN=typeof vehName==='function'?vehName(v):(vt?.name||'?');
     const isTracked=v.id===_trackVeh;
     if(v.st==='idle'){const c=C(v.loc);if(!c)return;
-      vMk[v.id]=L.marker([c.lat-.003,c.lng+.005],{icon:L.divIcon({className:'',iconSize:[22,22],iconAnchor:[11,11],html:'<div class="vi">'+vt.em+'</div>'}),interactive:true}).addTo(MP);
+      vMk[v.id]=L.marker([c.lat-.002,c.lng+.003],{icon:L.divIcon({className:'',iconSize:[18,18],iconAnchor:[9,9],html:'<div class="vi" style="font-size:14px;opacity:.8">'+vt.em+'</div>'}),interactive:true}).addTo(MP);
       vMk[v.id].bindTooltip('<b>'+vN+'</b><br>'+vt.name+' · '+c.name+'<br><span style="font-size:10px;color:#888">Klick = Verfolgen</span>',{direction:'top',offset:[0,-10]});
       vMk[v.id].on('click',()=>trackVehicle(v.id));
     } else if(v.rt){
       const f=C(v.rt.from)||Cx(v.rt.from),t=C(v.rt.to)||Cx(v.rt.to)||(v.rt.toLat?{lat:v.rt.toLat,lng:v.rt.toLng,name:v.rt.toName||'?'}:null);if(!f||!t)return;
       const tn=tripT(f,t,vt.spd),pct=Math.min(v.prog/tn,1);
-      const cargo=v.cargo?(v.cargo.returning?'🔙 Rückfahrt':((GOODS[v.cargo.good]?.em||'')+' '+(v.cargo.amt||0)+'×')):'leer';
+      const cargo=v.cargo?(v.cargo.returning?'🔙 Rückfahrt':((v.cargo.goods?v.cargo.goods.map(g=>(GOODS[g.good]?.em||'')+g.amt+'×').join(' '):(GOODS[v.cargo.good]?.em||'')+' '+(v.cargo.amt||0)+'×'))):'leer';
       const tip='<b>'+vN+'</b><br>'+f.name+' → '+t.name+'<br>'+cargo+' · '+Math.floor(pct*100)+'%'+(isTracked?'<br><span style="color:#3dd68c">📡 Wird verfolgt</span>':'<br><span style="font-size:10px;color:#888">Klick = Verfolgen</span>');
       const rk=f.lat.toFixed(3)+','+f.lng.toFixed(3)+'>'+t.lat.toFixed(3)+','+t.lng.toFixed(3);
       const cached=routeCache[rk];
       const routeColor=isTracked?'#38bdf8':'#3dd68c';
-      const routeWeight=isTracked?3.5:2.5;
+      const routeWeight=isTracked?4:2;
       let pos;
       if(cached&&cached.length>2){
-        rLn[v.id]=L.polyline(cached,{color:routeColor,weight:routeWeight,opacity:isTracked?.7:.4}).addTo(MP);
+        rLn[v.id]=L.polyline(cached,{color:routeColor,weight:routeWeight,opacity:isTracked?.8:.35}).addTo(MP);
         pos=interpRoute(cached,pct);
       } else {
-        rLn[v.id]=L.polyline([[f.lat,f.lng],[t.lat,t.lng]],{color:routeColor,weight:isTracked?2:1.5,opacity:isTracked?.4:.2,dashArray:'6,8'}).addTo(MP);
+        rLn[v.id]=L.polyline([[f.lat,f.lng],[t.lat,t.lng]],{color:routeColor,weight:isTracked?2.5:1.5,opacity:isTracked?.5:.2,dashArray:'6,8'}).addTo(MP);
         const lat=f.lat+(t.lat-f.lat)*pct,lng=f.lng+(t.lng-f.lng)*pct;
         pos=[lat,lng];
         ensureRoute(v);
       }
       if(pos){
-        const sz=isTracked?30:24;
+        const sz=isTracked?28:20;
         vMk[v.id]=L.marker(pos,{icon:L.divIcon({className:'',iconSize:[sz,sz],iconAnchor:[sz/2,sz/2],
-          html:'<div class="vi'+(isTracked?' vi-track':'')+'" style="font-size:'+(isTracked?24:20)+'px">'+vt.em+'</div>'}),interactive:true,zIndexOffset:isTracked?1000:0}).addTo(MP);
+          html:'<div class="vi'+(isTracked?' vi-track':'')+'" style="font-size:'+(isTracked?22:16)+'px">'+vt.em+'</div>'}),interactive:true,zIndexOffset:isTracked?1000:0}).addTo(MP);
         vMk[v.id].bindTooltip(tip,{direction:'top',offset:[0,-10]});
         vMk[v.id].on('click',()=>trackVehicle(v.id));
         if(isTracked){trackPos=pos;
-          _trackRing=L.marker(pos,{icon:L.divIcon({className:'',iconSize:[44,44],iconAnchor:[22,22],
+          _trackRing=L.marker(pos,{icon:L.divIcon({className:'',iconSize:[48,48],iconAnchor:[24,24],
             html:'<div class="track-ring"></div>'}),interactive:false,zIndexOffset:999}).addTo(MP);
         }
       }
@@ -5243,8 +5249,8 @@ const TAB_TIPS={
     tips:['⏱ Annahme-Timer: Auftrag verfällt wenn nicht rechtzeitig angenommen','📦 Liefer-Timer: ab 80% sinkt die Belohnung schrittweise','⚡ Express: alle 4min, 1,5-2× Marktpreis, 5-10min Annahme, 50% Level-Distanz','📍 Express-Ziele: auch nicht-freigeschaltete Städte (🔓)','📍 Fern-Fahrzeuge: Von anderen Standorten zuweisbar','🔙 Rückwegige Fahrzeuge: Können umgeleitet werden','🤖 Auto-Manager (Lv5): Weist Fahrzeuge zu — Aufträge manuell annehmen!','🔄 Folgeaufträge: Im Routenplaner nach Lieferung nächsten Auftrag planen','Stornierung: 20% (früh) bis 50% (spät) Strafe']},
   inventory:{title:'📦 Lager',tutorial:'Warenbestand pro Standort. Stadtlager hat ein hartes Limit. Gebäudelager separat.',
     tips:['📦 Stadtlager: Basis 300 — absolut begrenzt, kein Überfüllen','🏭 Gebäudelager: Produzierte Waren landen erst hier (×2.5 Kapazität)','📦→Stadtlager: Button zum manuellen Übertragen, respektiert Limit','Lagerhalle: +500 Plätze · Große Lagerhalle: +1.500','💰 Marktverkauf: Fahrzeug fährt zum regionalen Marktplatz','📍 Auch Fern-Fahrzeuge für Marktverkauf nutzbar']},
-  market:{title:'📊 Markt',tutorial:'Regionaler Marktplatz — gleicher Standort für alle Spieler, rotiert alle 8 Stunden.',
-    tips:['🏪 Marktplatz rotiert alle 8h — nächster Wechsel wird angezeigt','📍 Markt am eigenen Standort = 10% Gebühr (Anti-Exploit)','📈 Logistikzentrum: +15% auf Marktpreise','⚡ Events beeinflussen Preise: Boom +30%, Rezession -15%','Aufträge zahlen 1,3-3× Marktpreis — meist profitabler']},
+  market:{title:'📊 Markt',tutorial:'Regionaler Marktplatz — gleicher Standort für alle Spieler, rotiert alle 24 Stunden.',
+    tips:['🏪 Marktplatz rotiert alle 24h — nächster Wechsel wird angezeigt','📍 Markt am eigenen Standort = 10% Gebühr (Anti-Exploit)','📈 Logistikzentrum: +15% auf Marktpreise','⚡ Events beeinflussen Preise: Boom +30%, Rezession -15%','Aufträge zahlen 1,3-3× Marktpreis — meist profitabler']},
   build:{title:'🏗️ Bauen',tutorial:'Produktionsgebäude automatisieren deine Wirtschaft. Verfügbarkeit nach Level und Region. Bestehende Gebäude oben sichtbar.',
     tips:['📊 Oben siehst du vorhandene Gebäude (lokal + global aufklappbar)','Rohstoff-Gebäude produzieren ohne Input (Farmen, Minen)','Fabriken brauchen Rohstoffe — Rezepte im Verwalten-Tab!','🌍 Regionale Gebäude nur in passenden Regionen baubar','Max. Gebäude pro Stadt abhängig von Stadtgröße']},
   buildings:{title:'🏭 Gebäude verwalten',tutorial:'Upgrades, Rezeptauswahl, Lagerkontrolle und Produktionssteuerung. Zwei separate Buttons für Überlauf und Pause.',
@@ -5396,7 +5402,7 @@ const CHANGELOG=[
   {date:'05.04.2026',title:'Wirtschaft, Duty & Balancing',items:[
     '🟢🔴 On/Off Duty System — Unternehmen einfrieren ohne Kosten',
     '❓ Hilfe-Button erklärt On/Off Duty',
-    '🏪 Regionaler Marktplatz — gleicher Standort für alle, rotiert alle 8h',
+    '🏪 Regionaler Marktplatz — gleicher Standort für alle, rotiert alle 24h',
     '📍 Marktverkauf mit Fern-Fahrzeugen möglich',
     '🔙 "Nach Lieferung → Depot" — sanfter Rückruf in Routenplaner, Fuhrpark & Wartung',
     '🌾 Getreide pro Bauernhof abschaltbar (AN/AUS Button)',
@@ -5525,32 +5531,33 @@ function renComp(){
     if(G.marketDetail)eh+='<div class="ex-city'+(G.marketSub==='detail'?' sel':'')+'" onclick="G.marketSub=\'detail\';renComp()" style="font-weight:600;color:'+(G.marketSub==='detail'?'var(--a2)':'var(--td)')+'"><i class="ri-focus-3-line"></i> '+(GOODS[G.marketDetail]?.name||'Detail')+'</div>';
     eh+='<div style="height:1px;background:var(--bd);margin:4px 6px"></div>';
   }
-  // Explorer sort & group controls
-  if(!G._expSort)G._expSort='alpha'; // alpha | date
-  if(!G._expGroup)G._expGroup='region'; // region | custom
-  if(!G.cityGroups)G.cityGroups=[];
-  eh+='<div style="display:flex;gap:2px;padding:2px 6px;border-bottom:1px solid var(--bd);font-size:9px">';
+  // Explorer sort & category controls
+  if(!G._expSort)G._expSort='alpha';
+  if(!G._expCats)G._expCats={rohstoffe:true,verarbeitung:true,lager:true,depot:true};
+  const catDefs={rohstoffe:{name:'🌾 Roh',match:b=>{const d=BLD[b.type];return d&&(d.tp==='farm'||d.tp==='orchard'||(d.tp==='p'&&!d.inp))}},
+    verarbeitung:{name:'🏭 Verarb',match:b=>{const d=BLD[b.type];return d&&(d.tp==='recipe'||(d.tp==='p'&&d.inp))}},
+    lager:{name:'📦 Lager',match:b=>{const d=BLD[b.type];return d&&d.tp==='s'}},
+    depot:{name:'🚛 Depot',match:b=>{const d=BLD[b.type];return d&&d.tp==='d'}}};
+  function cityMatchesCats(cid){
+    const bs=G.blds[cid]||[];if(!bs.length)return true; // Cities without buildings always show
+    const activeCats=Object.entries(G._expCats).filter(([,v])=>v).map(([k])=>k);
+    if(!activeCats.length||activeCats.length===4)return true; // All or none = show all
+    return activeCats.some(cat=>bs.some(b=>catDefs[cat]?.match(b)));
+  }
+  eh+='<div style="display:flex;gap:2px;padding:2px 6px;border-bottom:1px solid var(--bd);font-size:9px;flex-wrap:wrap">';
   eh+='<button class="tg'+(G._expSort==='alpha'?' g':'')+'" style="cursor:pointer;font-size:9px;padding:1px 4px" onclick="G._expSort=\'alpha\';renComp()">A-Z</button>';
   eh+='<button class="tg'+(G._expSort==='date'?' g':'')+'" style="cursor:pointer;font-size:9px;padding:1px 4px" onclick="G._expSort=\'date\';renComp()">Neu</button>';
-  eh+='<button class="tg" style="cursor:pointer;font-size:9px;padding:1px 4px" onclick="promptCityGroup()">+Grp</button>';
+  Object.entries(catDefs).forEach(([k,cd])=>{const on=G._expCats[k];
+    eh+='<button class="tg'+(on?' g':'')+'" style="cursor:pointer;font-size:9px;padding:1px 4px;opacity:'+(on?1:.5)+'" onclick="G._expCats[\''+k+'\']=!G._expCats[\''+k+'\'];renComp()">'+cd.name+'</button>'});
+  eh+='<button class="tg" style="cursor:pointer;font-size:9px;padding:1px 4px" onclick="showExplorerUI()" title="Explorer-Einstellungen">⚙️</button>';
   eh+='</div>';
 
   // Sort cities
   let sortedCities=[...cities];
-  if(G._expSort==='date')sortedCities.reverse(); // Newest first (purchase order)
+  if(G._expSort==='date')sortedCities.reverse();
   else sortedCities.sort((a,b)=>a.name.localeCompare(b.name));
-
-  // Show custom groups first
-  if(G.cityGroups.length){
-    G.cityGroups.forEach((grp,gi)=>{
-      const grpCities=sortedCities.filter(c=>grp.ids.includes(c.id));
-      if(!grpCities.length)return;
-      const collapsed=explorerCollapsed['grp_'+gi];
-      eh+='<div class="ex-continent" onclick="explorerCollapsed[\'grp_'+gi+'\']=!explorerCollapsed[\'grp_'+gi+'\'];renComp()"><span class="arrow'+(collapsed?'':' open')+'">▶</span> '+grp.name+' <span style="font-size:10px;font-weight:400;opacity:.5">'+grpCities.length+'</span> <span style="font-size:8px;cursor:pointer;color:var(--r)" onclick="event.stopPropagation();removeCityGroup('+gi+')">✕</span></div>';
-      if(!collapsed){grpCities.forEach(ci=>{renderExpCity(ci)})}
-    });
-    eh+='<div style="height:1px;background:var(--bd);margin:2px 6px"></div>';
-  }
+  // Filter by active categories
+  sortedCities=sortedCities.filter(c=>cityMatchesCats(c.id));
 
   // Region groups
   const grouped={};
@@ -5564,14 +5571,18 @@ function renComp(){
   });
 
   function renderExpCity(ci){
-    const isSel=G.sel===ci.id&&!routesShowAll;const hasBld=(G.blds[ci.id]||[]).length>0;
+    const isSel=G.sel===ci.id&&!routesShowAll;const bs=G.blds[ci.id]||[];const hasBld=bs.length>0;
     let badge='';
     if(compTab==='routes'){
       const rc=G.orders.filter(o=>o.acc&&(o.from===ci.id||o.to===ci.id)).length;
       const vc=G.vehs.filter(v=>v.st==='moving'&&(v.rt?.from===ci.id||v.rt?.to===ci.id)).length;
       if(rc||vc)badge=' <span style="font-size:8px;color:var(--go)">'+(rc?'📋'+rc:'')+(vc?' 🚛'+vc:'')+'</span>';
+    } else if(hasBld){
+      // Show first 3 building emojis
+      const bldEms=[...new Set(bs.map(b=>BLD[b.type]?.em||'').filter(Boolean))].slice(0,3).join('');
+      if(bldEms)badge=' <span style="font-size:9px;opacity:.6">'+bldEms+'</span>';
     }
-    eh+='<div class="ex-city'+(isSel?' sel':'')+(hasBld?' has-bld':'')+'" onclick="selectLocation(\''+ci.id+'\')" oncontextmenu="event.preventDefault();showCityGroupMenu(\''+ci.id+'\')"><span class="ex-cc">'+(ci.co||'?')+'</span>'+ci.name+badge+'</div>';
+    eh+='<div class="ex-city'+(isSel?' sel':'')+(hasBld?' has-bld':'')+'" onclick="selectLocation(\''+ci.id+'\')" title="'+(bs.map(b=>BLD[b.type]?.name||'').join(', ')||'Keine Gebäude')+'"><span class="ex-cc">'+(ci.co||'?')+'</span>'+ci.name+badge+'</div>';
   }
   exp.innerHTML=eh;
 
@@ -5681,6 +5692,76 @@ function termUnlock(idx){
   document.getElementById('termSearch').value='';
   document.getElementById('termSearchRes').style.display='none';
   showUnlockPopup(c,cost,idx);
+}
+
+function showExplorerUI(){
+  let ex=document.getElementById('explorerUIPopup');if(ex)ex.remove();
+  const popup=document.createElement('div');popup.id='explorerUIPopup';popup.className='unlock-bg';popup.style.zIndex='9999';
+  if(!G._expCats)G._expCats={rohstoffe:true,verarbeitung:true,lager:true,depot:true};
+  const catDefs={
+    rohstoffe:{name:'🌾 Rohstoffe',desc:'Farmen, Minen, Plantagen',match:b=>{const d=BLD[b.type];return d&&(d.tp==='farm'||d.tp==='orchard'||(d.tp==='p'&&!d.inp))}},
+    verarbeitung:{name:'🏭 Verarbeitung',desc:'Fabriken, Rezeptgebäude',match:b=>{const d=BLD[b.type];return d&&(d.tp==='recipe'||(d.tp==='p'&&d.inp))}},
+    lager:{name:'📦 Lager',desc:'Lagerhallen',match:b=>{const d=BLD[b.type];return d&&d.tp==='s'}},
+    depot:{name:'🚛 Depot',desc:'Fahrzeughallen',match:b=>{const d=BLD[b.type];return d&&d.tp==='d'}}
+  };
+  let h='<div class="unlock-popup" style="width:700px;max-width:95vw;max-height:85vh;overflow-y:auto"><div class="unlock-body">';
+  h+='<div style="text-align:center;margin-bottom:12px"><span style="font-size:28px">⚙️</span>';
+  h+='<div style="font-family:var(--mono);font-size:18px;font-weight:700;color:var(--a);margin-top:4px">Explorer-Einstellungen</div>';
+  h+='<div class="sub">Kategorien filtern, Standorte verwalten</div></div>';
+  // Category toggles
+  h+='<div style="display:flex;gap:6px;margin-bottom:14px;flex-wrap:wrap;justify-content:center">';
+  Object.entries(catDefs).forEach(([k,cd])=>{const on=G._expCats[k];
+    h+='<button class="btn sm" style="padding:6px 12px;'+(on?'background:var(--a);color:var(--bg);border-color:var(--a)':'opacity:.5')+'" onclick="G._expCats[\''+k+'\']=!G._expCats[\''+k+'\'];showExplorerUI()">'+cd.name+(on?' ✓':'')+'</button>'});
+  h+='</div>';
+  // Sort
+  h+='<div style="display:flex;gap:6px;margin-bottom:10px;align-items:center">';
+  h+='<span class="sub" style="font-weight:600">Sortierung:</span>';
+  ['alpha','date'].forEach(s=>{const lbl=s==='alpha'?'A-Z':'Kaufdatum';
+    h+='<button class="btn sm" style="'+(G._expSort===s?'background:var(--a);color:var(--bg);border-color:var(--a)':'')+'" onclick="G._expSort=\''+s+'\';showExplorerUI()">'+lbl+'</button>'});
+  h+='</div>';
+  // City table
+  let sorted=[...cities];
+  if(G._expSort==='date')sorted.reverse();
+  else sorted.sort((a,b)=>a.name.localeCompare(b.name));
+  h+='<div style="overflow-x:auto"><table style="width:100%;border-collapse:collapse;font-size:12px">';
+  h+='<tr style="border-bottom:2px solid var(--bd);position:sticky;top:0;background:var(--bg)">';
+  h+='<th style="text-align:left;padding:6px;color:var(--td)">Stadt</th>';
+  h+='<th style="text-align:left;padding:6px;color:var(--td)">Gebäude</th>';
+  Object.entries(catDefs).forEach(([k,cd])=>{
+    h+='<th style="padding:6px;text-align:center;color:'+(G._expCats[k]?'var(--a)':'var(--td)')+';font-size:11px;white-space:nowrap">'+cd.name.split(' ')[0]+'</th>'});
+  h+='</tr>';
+  sorted.forEach(c=>{
+    const bs=G.blds[c.id]||[];
+    const catMatch={};
+    Object.entries(catDefs).forEach(([k,cd])=>{catMatch[k]=bs.some(b=>cd.match(b))});
+    const anyActive=Object.entries(G._expCats).filter(([,v])=>v).some(([k])=>catMatch[k]);
+    const allOn=Object.values(G._expCats).every(v=>v);
+    const visible=allOn||!Object.values(G._expCats).some(v=>v)||anyActive;
+    h+='<tr style="border-bottom:1px solid var(--bd);opacity:'+(visible?1:.35)+';cursor:pointer" onclick="sel(\''+c.id+'\');document.getElementById(\'explorerUIPopup\').remove();renComp()">';
+    h+='<td style="padding:5px 6px;white-space:nowrap"><span class="ex-cc" style="display:inline">'+c.co+'</span> <b>'+c.name+'</b></td>';
+    h+='<td style="padding:5px 6px;font-size:11px">';
+    if(bs.length){
+      const grouped={};bs.forEach(b=>{const d=BLD[b.type];if(d){const k2=d.em+' '+d.name;grouped[k2]=(grouped[k2]||0)+1}});
+      h+=Object.entries(grouped).map(([n,cnt])=>n+(cnt>1?' ×'+cnt:'')).join(', ');
+    } else h+='<span style="opacity:.4">—</span>';
+    h+='</td>';
+    Object.entries(catDefs).forEach(([k])=>{
+      h+='<td style="padding:5px 6px;text-align:center;font-size:14px">'+(catMatch[k]?'<span style="color:var(--a)">●</span>':'<span style="opacity:.15">○</span>')+'</td>'});
+    h+='</tr>'});
+  h+='</table></div>';
+  // Summary
+  const activeCats=Object.entries(G._expCats).filter(([,v])=>v);
+  const visCount=sorted.filter(c=>{
+    const bs=G.blds[c.id]||[];if(!bs.length)return true;
+    if(!activeCats.length||activeCats.length===4)return true;
+    return activeCats.some(([k])=>bs.some(b=>catDefs[k]?.match(b)));
+  }).length;
+  h+='<div class="sub" style="margin-top:8px;text-align:center">'+visCount+' / '+cities.length+' Standorte sichtbar</div>';
+  h+='<button class="btn full" style="margin-top:12px" onclick="document.getElementById(\'explorerUIPopup\').remove();renComp()">Schließen</button>';
+  h+='</div></div>';
+  popup.innerHTML=h;
+  popup.addEventListener('click',e=>{if(e.target===popup){popup.remove();renComp()}});
+  document.body.appendChild(popup);
 }
 function compMissions(el){let h=tabHead('missions','<i class="ri-flag-line"></i> Missionen','Erfülle Aufgaben für Belohnungen');
   const tutDone=TUTORIAL.filter(q=>G.quests.tutorial[q.id]==='claimed').length;
@@ -6184,7 +6265,7 @@ function compOrders(el){
   const orderCounts={};[...allAcc,...allOpen].forEach(o=>{orderCounts[o.from]=(orderCounts[o.from]||0)+1;orderCounts[o.to]=(orderCounts[o.to]||0)+1});
   const activeCities=cities.filter(c=>orderCounts[c.id]).sort((a,b)=>(orderCounts[b.id]||0)-(orderCounts[a.id]||0));
   h+='<div style="display:flex;gap:6px;margin-bottom:6px;align-items:center;flex-wrap:wrap">';
-  h+='<select class="sl" style="font-size:12px;padding:4px 8px;min-width:160px;max-width:250px" onchange="G._orderFilter=this.value||null;renComp()">';
+  h+='<select class="sl" style="font-size:12px;padding:4px 8px;min-width:160px;max-width:250px" onchange="G._orderFilter=this.value||null;if(this.value)sel(this.value);renComp()">';
   h+='<option value="">📍 Alle Standorte ('+(allAcc.length+allOpen.length)+')</option>';
   activeCities.forEach(c=>{h+='<option value="'+c.id+'"'+(filterCity===c.id?' selected':'')+'>📍 '+c.name+' ('+orderCounts[c.id]+')</option>'});
   h+='</select>';
@@ -6207,7 +6288,7 @@ function compOrders(el){
       const pctDel=delivered/o.amt;
       let transitPct=0;vehs.forEach(v=>{const vt2=VT[v.type];if(!vt2)return;const tn2=tripT(f,t,vt2.spd);transitPct+=(v.cargo?.amt||0)/o.amt*Math.min(v.prog/(tn2||1),1)});
       const totalPct=Math.min((pctDel+transitPct)*100,100);
-      h+='<div class="crd"><div class="rw" style="cursor:pointer" onclick="showOrderDetail(\''+o.id+'\')" title="Details anzeigen"><span style="font-weight:600">'+(GOODS[o.good]?.em||'')+' '+o.amt+'× '+(GOODS[o.good]?.name||'')+'</span>';
+      h+='<div class="crd"><div class="rw"><span style="font-weight:600">'+(GOODS[o.good]?.em||'')+' '+o.amt+'× '+(GOODS[o.good]?.name||'')+'</span>';
       h+='<span style="color:var(--a);font-family:var(--mono);font-weight:700;font-size:14px">'+fmt(o.rew)+'</span></div>';
       // Delivery timer for accepted orders
       const delivAge=G.tick-(o.accTick||o.born||0);const dTl=o.deliverTl||o.tl||600;
@@ -6248,6 +6329,7 @@ function compOrders(el){
       }
       const _penAge=o.accTick?(G.tick-o.accTick):0;const _penPct=o.deliverTl?Math.min(_penAge/o.deliverTl,1):0;
       const _penAmt=Math.floor((o.origRew||o.rew)*(0.2+_penPct*0.3));
+      h+='<button class="btn sm" onclick="showOrderDetail(\''+o.id+'\')">📋 Details</button>';
       h+='<button class="btn red sm" onclick="cancelO(\''+o.id+'\')" title="Strafe: '+Math.round((0.2+_penPct*0.3)*100)+'% vom Auftragswert">Stornieren (−'+fmt(_penAmt)+')</button></div>';
       // Remote picker with multi-select
       if(G._remoteOid===o.id){
@@ -6430,7 +6512,7 @@ function showOrderDetail(oid){
 
   // City filter dropdown
   h+='<div style="display:flex;gap:6px;margin-bottom:6px;align-items:center;flex-wrap:wrap">';
-  h+='<select class="sl" style="font-size:12px;padding:4px 8px;min-width:150px" onchange="G._invFilter=this.value||null;renComp()">';
+  h+='<select class="sl" style="font-size:12px;padding:4px 8px;min-width:150px" onchange="G._invFilter=this.value||null;if(this.value)sel(this.value);renComp()">';
   h+='<option value="">🌍 Alle Standorte</option>';
   cityData.filter(d=>d.used>0||Object.keys(d.bldStock).length>0).forEach(d=>{
     h+='<option value="'+d.c.id+'"'+(fc===d.c.id?' selected':'')+'>📍 '+d.c.name+' ('+d.used+'/'+d.cap+')</option>'});
@@ -6455,14 +6537,18 @@ function showOrderDetail(oid){
     const sorted=Object.entries(globalGoods).filter(([g])=>matchCat(g)).sort((a,b)=>b[1]-a[1]);
     if(sorted.length){
       sorted.forEach(([g,total])=>{const gd=GOODS[g];if(!gd)return;
-        // Find which cities have this good
-        const inCities=cityData.filter(d=>(d.s[g]||0)>0).map(d=>({name:d.c.name,id:d.c.id,amt:d.s[g]}));
+        // Find which cities have this good (city storage + building storage)
+        const inCities=cityData.filter(d=>(d.s[g]||0)>0||(d.bldStock[g]||0)>0).map(d=>({name:d.c.name,id:d.c.id,amt:d.s[g]||0,bld:d.bldStock[g]||0}));
         const bldAmt=cityData.reduce((s2,d)=>s2+(d.bldStock[g]||0),0);
+        const totalAll=total+bldAmt;
         h+='<div class="crd" style="padding:5px 8px;margin-bottom:3px">';
         h+='<div class="rw"><span style="font-size:13px">'+(gd.em||'')+' <b>'+(gd.name||g)+'</b></span>';
-        h+='<span style="font-family:var(--mono);color:var(--a);font-weight:700">'+total+(bldAmt?' <span style="font-size:10px;color:var(--td)">(+'+bldAmt+' 🏭)</span>':'')+'</span></div>';
-        if(inCities.length>1){h+='<div style="display:flex;flex-wrap:wrap;gap:3px;margin-top:2px">';
-          inCities.forEach(ic2=>{h+='<span class="tg" style="font-size:9px;cursor:pointer" onclick="G._invFilter=\''+ic2.id+'\';renComp()">📍 '+ic2.name+': '+ic2.amt+'</span>'});
+        h+='<span style="font-family:var(--mono);color:var(--a);font-weight:700">'+totalAll+(bldAmt?' <span style="font-size:10px;color:var(--td)">('+total+' 📦 + '+bldAmt+' 🏭)</span>':'')+'</span></div>';
+        if(inCities.length>=1){h+='<div style="display:flex;flex-wrap:wrap;gap:3px;margin-top:2px">';
+          inCities.forEach(ic2=>{
+            let label='📍 '+ic2.name+': '+ic2.amt;
+            if(ic2.bld>0)label+=' +'+ic2.bld+' 🏭';
+            h+='<span class="tg" style="font-size:9px;cursor:pointer" onclick="G._invFilter=\''+ic2.id+'\';sel(\''+ic2.id+'\');renComp()">'+label+'</span>'});
           h+='</div>';}
         h+='</div>'});
     } else h+='<div class="sub" style="text-align:center;padding:12px">Kein Bestand'+(G._invCat!=='all'?' in dieser Kategorie':'')+'</div>';
@@ -6557,17 +6643,40 @@ function compMarket(el){
     h+='</table></div>';
 
     // Legend
-    h+='<div class="sub" style="margin-top:8px"><i class="ri-information-line"></i> Grün = über Basispreis · Rot = unter Basispreis · Preise ändern sich alle ~10 Min</div>';
+    h+='<div class="sub" style="margin-top:8px"><i class="ri-information-line"></i> Grün = über Basispreis · Rot = unter Basispreis · Preise ändern sich alle 24h</div>';
   }
 
   if(G.marketSub==='sell'){
-    const epoch8h=Math.floor(Date.now()/(8*3600*1000));
-    const nextRotate=((epoch8h+1)*8*3600*1000-Date.now())/1000;
+    const epoch8h=Math.floor(Date.now()/(24*3600*1000));
+    const nextRotate=((epoch8h+1)*24*3600*1000-Date.now())/1000;
     h+='<div class="crd" style="border-color:rgba(251,191,36,.2);background:rgba(251,191,36,.03);margin-bottom:8px">';
     h+='<div class="rw"><span style="font-weight:600;color:var(--go)">🏪 Regionale Marktplätze</span><span class="sub">Wechsel in '+ftime(Math.round(nextRotate))+'</span></div>';
-    h+='<div class="sub">Alle Spieler handeln am selben Marktplatz pro Region. Standort wechselt alle 8h.</div></div>';
-    const sellCities=G.sel?cities.filter(c=>c.id===G.sel):cities;
-    sellCities.forEach(c=>{const s=G.stor[c.id]||{};const items=Object.entries(s).filter(([,a])=>a>0);
+    h+='<div class="sub">Alle Spieler handeln am selben Marktplatz pro Region. Standort wechselt alle 24h.</div></div>';
+    // City + Resource filter (like inventory tab)
+    if(!G.sellCityFilter)G.sellCityFilter='all';
+    if(!G.sellGoodFilter)G.sellGoodFilter='all';
+    h+='<div style="display:flex;gap:6px;margin-bottom:8px;align-items:center;flex-wrap:wrap">';
+    h+='<select class="sl" style="font-size:12px;padding:4px 8px;min-width:150px" onchange="G.sellCityFilter=this.value;if(this.value!==\'all\')sel(this.value);renComp()">';
+    h+='<option value="all">🌍 Alle Standorte</option>';
+    cities.forEach(c=>{const s=G.stor[c.id]||{};const cnt=Object.values(s).filter(v=>v>0).length;
+      if(cnt)h+='<option value="'+c.id+'"'+(G.sellCityFilter===c.id?' selected':'')+'>📍 '+c.name+' ('+cnt+' Waren)</option>'});
+    h+='</select>';
+    h+='<select class="sl" style="font-size:12px;padding:4px 8px;min-width:120px" onchange="G.sellGoodFilter=this.value;renComp()">';
+    [['all','Alle Waren'],['roh','🌾 Rohstoffe'],['tier','🐄 Tierprodukte'],['ver','🏭 Verarbeitung'],['lux','💎 Luxus/Industrie']].forEach(([k,l])=>{
+      h+='<option value="'+k+'"'+(G.sellGoodFilter===k?' selected':'')+'>'+l+'</option>'});
+    h+='</select>';
+    if(G.sellCityFilter!=='all')h+='<button class="btn sm" onclick="G.sellCityFilter=\'all\';renComp()" style="font-size:10px">✕</button>';
+    h+='</div>';
+    const sellCities=G.sellCityFilter==='all'?cities:cities.filter(c=>c.id===G.sellCityFilter);
+    sellCities.forEach(c=>{const s=G.stor[c.id]||{};let items=Object.entries(s).filter(([,a])=>a>0);
+      // Apply resource filter
+      if(G.sellGoodFilter!=='all'){items=items.filter(([g])=>{const gd=GOODS[g];if(!gd)return false;
+        if(G.sellGoodFilter==='roh')return gd.cat==='roh';
+        if(G.sellGoodFilter==='tier')return gd.cat==='tier';
+        if(G.sellGoodFilter==='ver')return gd.cat==='ver';
+        if(G.sellGoodFilter==='lux')return(gd.tier||0)>=3||gd.cat==='lux'||gd.cat==='ind';
+        return true})}
+      if(!items.length)return;
       if(!items.length)return;
       const reg=getRegion((c.co||'').toUpperCase());const ri=REGIONS[reg];
       const market=getRegionalMarket(reg);
@@ -6667,9 +6776,9 @@ function compMarket(el){
   // ── SUPPLY/DEMAND STATISTICS ──
   if(G.marketSub==='supply'){
     h+='<div class="sec-label"><i class="ri-scales-3-line"></i> Angebot & Nachfrage</div>';
-    h+='<div class="sub" style="margin-bottom:8px">Preise passen sich an: Viel geliefert = niedrigerer Preis. Wenig geliefert = höherer Preis. Epoch-Wechsel alle ~8h.</div>';
-    const epoch=Math.floor((G.tick||0)/28800);
-    const nextReset=28800-(G.tick%28800);
+    h+='<div class="sub" style="margin-bottom:8px">Preise passen sich an: Viel geliefert = niedrigerer Preis. Wenig geliefert = höherer Preis. Epoch-Wechsel alle 24h.</div>';
+    const epoch=Math.floor((G.tick||0)/86400);
+    const nextReset=86400-(G.tick%86400);
     h+='<div class="crd" style="padding:6px 8px;margin-bottom:8px"><div class="rw"><span>📊 Aktuelle Epoche: <b>'+epoch+'</b></span><span class="sub">Nächster Wechsel: '+ftime(nextReset)+'</span></div></div>';
     // Current supply data
     const supply=G.supplyTrack||{};
@@ -7860,7 +7969,7 @@ function showWiki(section){
       <b>Ignoriert:</b> Dauerauftrag-Fahrzeuge (fest gebunden).</div>`},
     market:{t:'Marktplatz',c:`
       <div class="wk-h2">🏪 Regionaler Marktplatz</div>
-      <div class="wk-desc"><b>Gleicher Standort für alle Spieler</b> pro Region. Rotiert alle 8 Stunden. Timer im Markt-Tab sichtbar.</div>
+      <div class="wk-desc"><b>Gleicher Standort für alle Spieler</b> pro Region. Rotiert alle 24 Stunden. Timer im Markt-Tab sichtbar.</div>
       <div class="wk-h3">Preisbildung</div>
       <div class="wk-desc">Basispreis × Regionale Nachfrage × Event-Multiplikator ± 15% Schwankung</div>
       <div class="wk-h3">📍 Markt am eigenen Standort</div>
