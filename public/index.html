@@ -481,6 +481,11 @@ body{font-family:'Barlow',sans-serif;background:var(--bg);color:var(--t);overflo
   .dash-big{font-size:22px}
   .dash-card{padding:10px}
 
+  /* Dashboard tabs: horizontal scroll, not wrap */
+  .dash-body>[style*="flex-wrap"]{flex-wrap:nowrap!important;overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none;padding-bottom:6px}
+  .dash-body>[style*="flex-wrap"]::-webkit-scrollbar{display:none}
+  .dash-body>[style*="flex-wrap"]>button{flex-shrink:0;font-size:11px!important;padding:4px 8px!important}
+
   /* Top bar compact */
   .top-bar{height:48px;padding:0 8px}
   .logo{font-size:16px;letter-spacing:1.5px}
@@ -551,6 +556,17 @@ body{font-family:'Barlow',sans-serif;background:var(--bg);color:var(--t);overflo
   .hb-menu{top:44px!important;width:calc(100vw - 12px);right:6px}
   #dashPanel{top:44px}
   #map{top:44px!important}
+
+  /* Dashboard ultra-compact */
+  .dash-body{padding:8px}
+  .dash-big{font-size:20px}
+  .dash-card{padding:8px}
+  .crd{padding:6px 8px;margin-bottom:4px}
+  .sec-label{font-size:11px;padding:3px 0}
+  .btn.sm{padding:5px 8px;font-size:11px;min-height:30px}
+
+  /* Dashboard search compact */
+  .dash-search input[type="text"]{font-size:14px!important;padding:10px 12px!important}
 }
 
 /* Smooth scrolling everywhere */
@@ -2251,7 +2267,7 @@ function showMarketSellPopup(cid,good){
   h+='<div style="text-align:center;margin-bottom:12px"><span style="font-size:24px">💰</span>';
   h+='<div style="font-family:var(--mono);font-size:16px;font-weight:700;color:var(--a);margin-top:4px">Marktverkauf</div></div>';
   h+='<div class="crd"><div class="rw"><span>'+(GOODS[good]?.em||'')+' <b>'+(GOODS[good]?.name||good)+'</b></span>';
-  h+='<span style="font-family:var(--mono);color:var(--a)">'+price.toLocaleString('de-DE')+'/St.</span></div>';
+  h+='<span style="font-family:var(--mono);color:var(--a)">'+price.toLocaleString('de-DE')+'€/St.</span></div>';
   h+='<div class="sub">Bestand: '+stock+' · Max. Kapazität: '+maxAmt+'</div></div>';
   // Destination - Regional Market
   h+='<div class="crd" style="border-color:rgba(251,191,36,.15)"><div class="rw"><span>📍 '+c.name+' → 🏪 '+dest.name+'</span>';
@@ -3001,42 +3017,6 @@ function sendSelectedRemote(oid){
 }
 
 
-// ═══ CITY GROUP MANAGEMENT ═══
-function promptCityGroup(){
-  const name=prompt('Gruppenname:');if(!name||!name.trim())return;
-  if(!G.cityGroups)G.cityGroups=[];
-  G.cityGroups.push({name:name.trim(),ids:[]});
-  save();renComp();toast('📁 Gruppe "'+name.trim()+'" erstellt');
-}
-function removeCityGroup(idx){
-  if(!G.cityGroups||!G.cityGroups[idx])return;
-  if(!confirm('Gruppe "'+G.cityGroups[idx].name+'" löschen?'))return;
-  G.cityGroups.splice(idx,1);save();renComp();
-}
-function showCityGroupMenu(cid){
-  if(!G.cityGroups||!G.cityGroups.length){toast('Keine Gruppen — erstelle eine mit +Grp','var(--td)');return}
-  let existing=document.getElementById('grpMenu');if(existing)existing.remove();
-  const el=document.createElement('div');el.id='grpMenu';el.className='unlock-bg';
-  const cn=C(cid)?.name||'?';
-  let h='<div class="unlock-popup" style="width:300px"><div class="unlock-body">';
-  h+='<div style="font-weight:700;margin-bottom:8px">📁 '+cn+' zuordnen</div>';
-  G.cityGroups.forEach((grp,gi)=>{
-    const inGrp=grp.ids.includes(cid);
-    h+='<label class="veh-check" style="border-color:'+(inGrp?'var(--a)':'var(--bd)')+'"><input type="checkbox" '+(inGrp?'checked':'')+' onchange="toggleCityInGroup(\''+cid+'\','+gi+')"/>';
-    h+='<span>'+grp.name+(inGrp?' ✅':'')+'</span></label>';
-  });
-  h+='<button class="btn full" style="margin-top:8px" onclick="document.getElementById(\'grpMenu\').remove()">Fertig</button>';
-  h+='</div></div>';
-  el.innerHTML=h;el.addEventListener('click',e=>{if(e.target===el)el.remove()});
-  document.body.appendChild(el);
-}
-function toggleCityInGroup(cid,gi){
-  if(!G.cityGroups||!G.cityGroups[gi])return;
-  const grp=G.cityGroups[gi];
-  const idx=grp.ids.indexOf(cid);
-  if(idx>=0)grp.ids.splice(idx,1);else grp.ids.push(cid);
-  save();renComp();
-}
 // ALLIANCE SYSTEM v3 — Country-based territories
 const ALLIANCE_LEVELS=[
   {lvl:1,name:'Startup',maxMembers:10,slots:3,maxTerr:2},
@@ -6445,7 +6425,7 @@ function showOrderDetail(oid){
   h+='<div class="crd" style="background:rgba(61,214,140,.04);border-color:rgba(61,214,140,.2)">';
   h+='<div class="rw"><span style="font-size:16px;font-weight:700">'+(gd.em||'')+' '+o.amt+'× '+gd.name+'</span>';
   h+='<span style="font-family:var(--mono);font-size:18px;font-weight:700;color:var(--a)">'+fmt(o.rew)+'</span></div>';
-  h+='<div class="rw" style="margin-top:4px"><span class="sub">'+o.pricePerUnit+'/Stk · Marktref: '+o.mktRef+'</span></div></div>';
+  h+='<div class="rw" style="margin-top:4px"><span class="sub">'+fmt(o.pricePerUnit)+'/Stk · Marktref: '+fmt(o.mktRef)+'</span></div></div>';
   // Route
   h+='<div class="crd"><div style="font-weight:600;margin-bottom:6px">🗺️ Route</div>';
   h+='<div style="display:flex;align-items:center;gap:8px">';
@@ -6570,7 +6550,7 @@ function showOrderDetail(oid){
         const price=marketPrice(g,reg);
         const vHere=G.vehs.filter(v=>v.st==='idle'&&v.loc===c.id&&!isSOBound(v));
         h+='<div style="display:flex;align-items:center;gap:4px;padding:4px 0;font-size:12px;border-top:1px solid var(--bd)">';
-        h+='<span style="flex:1;min-width:0">'+(GOODS[g]?.em||'')+' '+(GOODS[g]?.name||'')+' <b>'+amt+'</b> <span class="sub">'+price.toLocaleString('de-DE')+'/St.</span></span>';
+        h+='<span style="flex:1;min-width:0">'+(GOODS[g]?.em||'')+' '+(GOODS[g]?.name||'')+' <b>'+amt+'</b> <span class="sub">'+price.toLocaleString('de-DE')+'€/St.</span></span>';
         if(vHere.length)h+='<button class="btn sm" style="background:rgba(251,191,36,.1);color:var(--go);border-color:rgba(251,191,36,.25)" onclick="showMarketSellPopup(\''+c.id+'\',\''+g+'\')">💰</button>';
         if(cities.length>1)h+='<button class="btn sm" onclick="showSendGoodsPopup(\''+c.id+'\',\''+g+'\','+amt+')">📦</button>';
         h+='</div>'});
@@ -6690,7 +6670,7 @@ function compMarket(el){
       items.sort((a,b)=>marketPrice(b[0],reg)*b[1]-marketPrice(a[0],reg)*a[1]).forEach(([g,amt])=>{
         const price=marketPrice(g,reg);const total=price*amt;
         h+='<div style="display:flex;align-items:center;gap:4px;padding:3px 0;font-size:11px;border-top:1px solid var(--bd)">';
-        h+='<span style="flex:1;min-width:0">'+(GOODS[g]?.em||'')+' '+(GOODS[g]?.name||'')+' <b>'+amt+'</b> × '+fmt(price)+'</span>';
+        h+='<span style="flex:1;min-width:0">'+(GOODS[g]?.em||'')+' '+(GOODS[g]?.name||'')+' <b>'+amt+'</b> × '+fmt(price)+'/St.</span>';
         h+='<span style="font-family:var(--mono);color:var(--a);min-width:50px;text-align:right">'+fmt(total)+'</span>';
         if(vHere3.length||vRemote.length)h+='<button class="btn sm" style="background:rgba(251,191,36,.1);color:var(--go);border-color:rgba(251,191,36,.25)" onclick="showMarketSellPopup(\''+c.id+'\',\''+g+'\')">💰 Verkaufen</button>';
         else h+='<span class="sub" style="color:var(--r)">🚛 fehlt</span>';
