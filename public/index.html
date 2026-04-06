@@ -2896,12 +2896,12 @@ function shAsgn(oid){if(!G)return;const o=G.orders.find(x=>x.id===oid);if(!o)ret
   document.getElementById('mT').textContent=(GOODS[o.good]?.em||'')+' '+o.amt+'× → '+tc.name;
   let h='<div class="crd"><div class="rw"><span>'+(GOODS[o.good]?.em||'')+' '+o.amt+'× '+(GOODS[o.good]?.name||'')+'</span><span style="color:var(--a);font-family:var(--mono);font-weight:600">'+fmt(o.rew)+'</span></div></div>';
   let anyVeh=false;
-  // Sort: hubs first, then by distance
   const sorted=[...cities].sort((a,b)=>{
     const aHub=_isHub(a.id,o.good)?0:1;const bHub=_isHub(b.id,o.good)?0:1;
     if(aHub!==bHub)return aHub-bHub;
     return hav(a.lat,a.lng,tc.lat,tc.lng)-hav(b.lat,b.lng,tc.lat,tc.lng);
   });
+  // Cities WITH stock + local vehicles
   sorted.forEach(c=>{
     const stock=_cityStock(c.id,o.good);if(stock<=0)return;
     const dist=Math.round(hav(c.lat,c.lng,tc.lat,tc.lng));
@@ -2914,8 +2914,44 @@ function shAsgn(oid){if(!G)return;const o=G.orders.find(x=>x.id===oid);if(!o)ret
     avl.forEach(v=>{const vt=VT[v.type];
       h+='<div class="crd active" style="cursor:pointer" onclick="asgn(\''+v.id+'\',\''+oid+'\')"><div class="rw"><span>'+vt.em+' '+vehName(v)+'</span><span class="sub">Kap: '+vehCap(v)+' · ⏱'+ftime(tripT(c,tc,vt.spd))+'</span></div></div>'});
   });
-  if(!anyVeh)h+='<div style="color:var(--r);font-size:12px;padding:10px;text-align:center">⚠️ Kein Fahrzeug mit passendem Bestand</div>';
+  // Remote vehicles: idle at cities WITHOUT stock, send to nearest stock city
+  const stockCities=sorted.filter(c=>_cityStock(c.id,o.good)>0);
+  if(stockCities.length){
+    const remoteVehs=G.vehs.filter(v=>v.st==='idle'&&!isSOBound(v)&&!v.followUpOrder&&canVehTravel(v,o.to)&&_cityStock(v.loc,o.good)<=0);
+    if(remoteVehs.length){
+      h+='<div class="sec-label" style="color:var(--a2)">📍 Von anderem Standort senden</div>';
+      h+='<div class="sub" style="margin-bottom:4px;color:var(--td)">Fahrzeug fährt zuerst zur nächsten Stadt mit Bestand</div>';
+      remoteVehs.forEach(v=>{const vt=VT[v.type];const vLoc=C(v.loc);
+        const nearest=stockCities.sort((a,b)=>hav(a.lat,a.lng,v.loc?C(v.loc)?.lat||0:0,v.loc?C(v.loc)?.lng||0:0)-hav(b.lat,b.lng,v.loc?C(v.loc)?.lat||0:0,v.loc?C(v.loc)?.lng||0:0))[0];
+        const pickupDist=vLoc&&nearest?Math.round(hav(vLoc.lat,vLoc.lng,nearest.lat,nearest.lng)):0;
+        const delivDist=nearest?Math.round(hav(nearest.lat,nearest.lng,tc.lat,tc.lng)):0;
+        h+='<div class="crd active" style="cursor:pointer;border-color:rgba(56,189,248,.2)" onclick="_sendRemote(\''+v.id+'\',\''+oid+'\')"><div class="rw"><span>'+vt.em+' '+vehName(v)+' <span class="sub">📍 '+(vLoc?.name||'?')+'</span></span>';
+        h+='<span class="sub">Kap: '+vehCap(v)+' · 🚛→'+pickupDist+'km + 📦→'+delivDist+'km</span></div></div>'});
+      anyVeh=true;
+    }
+  }
+  if(!anyVeh)h+='<div style="color:var(--r);font-size:12px;padding:10px;text-align:center">⚠️ Kein Fahrzeug verfügbar und kein Bestand</div>';
   document.getElementById('mB').innerHTML=h;document.getElementById('mBg').style.display='flex'}
+
+// Send remote vehicle to nearest stock city, then assign to order
+function _sendRemote(vid,oid){
+  const v=G.vehs.find(x=>x.id===vid);if(!v||v.st!=='idle')return;
+  const o=G.orders.find(x=>x.id===oid&&x.acc);if(!o)return;
+  const tgt=Cx(o.to);if(!tgt)return;
+  // Find nearest city with stock
+  const stockCities=cities.filter(c=>_availableForOrders(c.id,o.good)>0).sort((a,b)=>{
+    const aH=_isHub(a.id,o.good)?0:1,bH=_isHub(b.id,o.good)?0:1;
+    if(aH!==bH)return aH-bH;
+    return hav(a.lat,a.lng,tgt.lat,tgt.lng)-hav(b.lat,b.lng,tgt.lat,tgt.lng);
+  });
+  const dest=stockCities[0];if(!dest){addLog('❌ Kein Bestand verfügbar');return}
+  v.st='moving';v.rt={from:v.loc,to:dest.id};v.prog=0;
+  v.followUpOrder=oid;
+  if(typeof ensureRoute==='function')ensureRoute(v);
+  addLog('🚛 '+vehName(v)+' → '+(dest.name||'?')+' (Abholung für '+fmtOrd(o.num)+')');
+  if(typeof toast==='function')toast('🚛 '+vehName(v)+' unterwegs zur Abholung');
+  closeMdl();ua();
+}
 function closeMdl(){document.getElementById('mBg').style.display='none'}
 function asgn(vid,oid){if(!G)return;const o=G.orders.find(x=>x.id===oid),v=G.vehs.find(x=>x.id===vid);if(!o||!v)return;
   const cid=v.loc; // Load from vehicle's current city
@@ -2941,14 +2977,32 @@ function autoAssign(oid){
     if(aHub!==bHub)return aHub-bHub;
     return hav(a.lat,a.lng,tgt.lat,tgt.lng)-hav(b.lat,b.lng,tgt.lat,tgt.lng);
   });
+  // 1. Pick vehicles already at stock cities
   for(const c of sorted){
     if(cap>=remaining)break;
     if(_availableForOrders(c.id,o.good)<=0)continue;
     const avl=G.vehs.filter(v=>v.st==='idle'&&v.loc===c.id&&canVehTravel(v,o.to)&&!isSOBound(v)).sort((a,b)=>vehCap(b)-vehCap(a));
     for(const v of avl){if(cap>=remaining)break;picks.push(v.id);cap+=vehCap(v)}
   }
-  if(!picks.length){addLog('❌ Kein Fahrzeug mit verfügbarem Bestand');return}
-  _doMultiAssign(o,picks);
+  // 2. If not enough, send remote vehicles to nearest stock city
+  if(cap<remaining){
+    const stockCities=sorted.filter(c=>_availableForOrders(c.id,o.good)>0);
+    if(stockCities.length){
+      const remoteVehs=G.vehs.filter(v=>v.st==='idle'&&!isSOBound(v)&&!v.followUpOrder&&canVehTravel(v,o.to)&&_cityStock(v.loc,o.good)<=0).sort((a,b)=>vehCap(b)-vehCap(a));
+      for(const v of remoteVehs){
+        if(cap>=remaining)break;
+        const dest=stockCities.sort((a2,b2)=>hav(a2.lat,a2.lng,C(v.loc)?.lat||0,C(v.loc)?.lng||0)-hav(b2.lat,b2.lng,C(v.loc)?.lat||0,C(v.loc)?.lng||0))[0];
+        if(!dest)continue;
+        v.st='moving';v.rt={from:v.loc,to:dest.id};v.prog=0;
+        v.followUpOrder=oid;
+        if(typeof ensureRoute==='function')ensureRoute(v);
+        addLog('🚛 '+vehName(v)+' → '+(dest.name||'?')+' (Abholung)');
+        cap+=vehCap(v);
+      }
+    }
+  }
+  if(!picks.length&&cap<=0){addLog('❌ Kein Fahrzeug mit verfügbarem Bestand');return}
+  if(picks.length)_doMultiAssign(o,picks);
 }
 function _doMultiAssign(o,vids){
   if(!o.shipped)o.shipped=0;
@@ -3078,6 +3132,23 @@ function _routeOptimize(){
         if(!o.firstShipTs)o.firstShipTs=Date.now();
         if(typeof ensureRoute==='function')ensureRoute(v);
         usedVehs.add(v.id);assigned++;totalAmt+=canLoad;
+      }
+    }
+    // Remote: send idle vehicles from no-stock cities
+    if(loaded<remaining){
+      const stockCities2=sortedCities.filter(c=>_availableForOrders(c.id,o.good)>0);
+      if(stockCities2.length){
+        const remVehs=G.vehs.filter(v=>v.st==='idle'&&!usedVehs.has(v.id)&&!isSOBound(v)&&!v.followUpOrder&&canVehTravel(v,o.to)&&_cityStock(v.loc,o.good)<=0).sort((a,b)=>vehCap(b)-vehCap(a));
+        for(const v of remVehs){
+          if(loaded>=remaining)break;
+          const vLoc=C(v.loc);if(!vLoc)continue;
+          const dest=stockCities2.sort((a2,b2)=>hav(a2.lat,a2.lng,vLoc.lat,vLoc.lng)-hav(b2.lat,b2.lng,vLoc.lat,vLoc.lng))[0];
+          if(!dest)continue;
+          v.st='moving';v.rt={from:v.loc,to:dest.id};v.prog=0;
+          v.followUpOrder=o.id;
+          if(typeof ensureRoute==='function')ensureRoute(v);
+          usedVehs.add(v.id);assigned++;loaded+=vehCap(v);
+        }
       }
     }
   });
@@ -3619,6 +3690,23 @@ function tickCore(){
           if(!o.firstShipTs)o.firstShipTs=Date.now();
           if(typeof ensureRoute==='function')ensureRoute(v);
           markCompDirty();
+        }
+      }
+      // Remote dispatch: send idle vehicles from no-stock cities to nearest stock city
+      if(loaded<remaining){
+        const stockCities=sortedCities.filter(c=>_availableForOrders(c.id,o.good)>0);
+        if(stockCities.length){
+          const remVehs=G.vehs.filter(v=>v.st==='idle'&&!v.followUpOrder&&!v.pendingTransfer&&!isSOBound(v)&&canVehTravel(v,o.to)&&_cityStock(v.loc,o.good)<=0);
+          for(const v of remVehs){
+            if(loaded>=remaining)break;
+            const vLoc=C(v.loc);if(!vLoc)continue;
+            const dest=stockCities.sort((a2,b2)=>hav(a2.lat,a2.lng,vLoc.lat,vLoc.lng)-hav(b2.lat,b2.lng,vLoc.lat,vLoc.lng))[0];
+            if(!dest)continue;
+            v.st='moving';v.rt={from:v.loc,to:dest.id};v.prog=0;
+            v.followUpOrder=o.id;
+            if(typeof ensureRoute==='function')ensureRoute(v);
+            loaded+=vehCap(v);sentCount++;markCompDirty();
+          }
         }
       }
       if(sentCount>0)amSummary.push({good:o.good,amt:loaded,vehs:sentCount,to:tgt.name||'?'});
@@ -7335,13 +7423,15 @@ function compRoutes(el){
     unassigned.forEach(o=>{const t=Cx(o.to);if(!t)return;
       const shipped=o.shipped||0;const remaining=o.amt-shipped;
       const globalStock=_globalStock(o.good);
-      const avlAll=G.vehs.filter(x=>x.st==='idle'&&!x.followUpOrder&&!isSOBound(x)&&canVehTravel(x,o.to)&&_cityStock(x.loc,o.good)>0);
+      const avlLocal=G.vehs.filter(x=>x.st==='idle'&&!x.followUpOrder&&!isSOBound(x)&&canVehTravel(x,o.to)&&_cityStock(x.loc,o.good)>0);
+      const avlRemote=G.vehs.filter(x=>x.st==='idle'&&!x.followUpOrder&&!isSOBound(x)&&canVehTravel(x,o.to)&&_cityStock(x.loc,o.good)<=0);
+      const avlTotal=avlLocal.length+avlRemote.length;
       h+='<div class="crd"><div class="rw"><span>'+fmtOrd(o.num)+' '+(GOODS[o.good]?.em||'')+' '+o.amt+'×</span><span style="color:var(--a);font-family:var(--mono);font-size:14px;font-weight:700">'+fmt(o.rew)+'</span></div>';
       h+='<div class="sub">→ '+t.name+' · '+globalStock+'× vorrätig</div>';
       if(shipped>0)h+='<div class="sub" style="color:var(--go)">📦 Bereits verschickt: '+shipped+'/'+o.amt+'<div class="pb"><div class="pf" style="width:'+(shipped/o.amt*100)+'%"></div></div></div>';
       h+='<div style="display:flex;gap:4px;margin-top:6px">';
-      if(avlAll.length){
-        h+='<button class="btn full" onclick="autoAssign(\''+o.id+'\')">⚡ Auto (🚛'+avlAll.length+')</button>';
+      if(avlTotal>0){
+        h+='<button class="btn full" onclick="autoAssign(\''+o.id+'\')">⚡ Auto (🚛'+avlLocal.length+(avlRemote.length?'+'+avlRemote.length+'📍':'')+')</button>';
         h+='<button class="btn" onclick="shAsgn(\''+o.id+'\')">🚛 Zuweisen</button>';
       } else h+='<button class="btn full" onclick="shAsgn(\''+o.id+'\')">🚛 Zuweisen</button>';
       h+='</div></div>'})}
@@ -7387,7 +7477,7 @@ function compRoutes(el){
       // Remaining to ship
       const remaining=o.amt-shipped;
       if(remaining>0){
-        const avlAll2=G.vehs.filter(x=>x.st==='idle'&&!isSOBound(x)&&canVehTravel(x,o.to)&&_cityStock(x.loc,o.good)>0);
+        const avlAll2=G.vehs.filter(x=>x.st==='idle'&&!isSOBound(x)&&canVehTravel(x,o.to));
         if(avlAll2.length)h+='<div style="margin-top:4px"><button class="btn sm" style="background:rgba(251,191,36,.1);color:var(--go);border-color:rgba(251,191,36,.3)" onclick="autoAssign(\''+o.id+'\')">⚡ Nachsenden ('+remaining+'× · 🚛'+avlAll2.length+')</button></div>';
       }
       h+='</div>'})}
