@@ -615,6 +615,15 @@ body{font-family:'Barlow',sans-serif;background:var(--bg);color:var(--t);overflo
 /* Order panel responsive */
 @media(max-width:768px){#mapOrderPanel{width:200px!important;top:100px!important;left:8px!important;font-size:11px!important;max-height:40vh!important}}
 @media(max-width:480px){#mapOrderPanel{width:160px!important;top:50px!important;max-height:35vh!important;padding:6px!important}}
+
+/* Pulse hint for tutorial-skippers */
+@keyframes pulseHint{0%,100%{box-shadow:0 0 0 0 rgba(61,214,140,.4)}50%{box-shadow:0 0 0 6px rgba(61,214,140,0)}}
+.hint-pulse{animation:pulseHint 2s ease-in-out infinite;border-color:var(--a)!important}
+.empty-hint{padding:16px;text-align:center;border-radius:10px;border:1px dashed var(--bd);margin:8px 0;cursor:pointer;transition:.2s}
+.empty-hint:hover{border-color:var(--a);background:rgba(61,214,140,.04)}
+.empty-hint .eh-em{font-size:28px;margin-bottom:6px}
+.empty-hint .eh-title{font-weight:600;font-size:13px;color:var(--t);margin-bottom:4px}
+.empty-hint .eh-sub{font-size:11px;color:var(--td)}
 </style>
 </head>
 <body>
@@ -672,6 +681,23 @@ body{font-family:'Barlow',sans-serif;background:var(--bg);color:var(--t);overflo
 <div id="startScreen" style="display:none"><div class="start-box">
   <div class="slogo">LOGISTI<b>X</b></div>
   <div class="ssub" id="welcomeMsg">Willkommen!</div>
+  <div style="background:rgba(61,214,140,.06);border:1px solid rgba(61,214,140,.15);border-radius:10px;padding:12px 14px;margin:8px 0 12px;font-size:12px;line-height:1.6;text-align:left">
+    <div style="font-weight:700;color:var(--a);margin-bottom:4px">🏭 Baue dein Logistik-Imperium!</div>
+    <div style="color:var(--t)">Wähle eine Startstadt — am besten <b>deine Heimatstadt</b> oder eine Großstadt in deiner Nähe. Du bekommst <b>50.000 €</b> Startkapital.</div>
+    <div style="margin-top:6px;padding-top:6px;border-top:1px solid rgba(61,214,140,.1)">
+      <div style="font-weight:600;color:var(--go);font-size:11px;margin-bottom:2px">💡 Strategie-Tipps für den Start:</div>
+      <div style="color:var(--td);font-size:11px">• Kaufe zuerst einen <b>Kleintransporter</b> + <b>Bauernhof</b><br>• Baue zunächst ein <b>Netzwerk im kleinen Radius</b> — kurze Wege, schnelle Lieferungen, mehr €/h<br>• Aufträge werden automatisch zu Städten in deiner Nähe generiert<br>• Du brauchst nur <b>eine Stadt</b> um loszulegen!</div>
+    </div>
+    <div style="margin-top:4px;padding:8px 10px;border-radius:8px;background:rgba(168,85,247,.05);border:1px solid rgba(168,85,247,.1);font-size:11px;line-height:1.5;text-align:left">
+      <div style="font-weight:600;color:#a855f7;margin-bottom:2px">🚀 Ausblick — was dich erwartet:</div>
+      <div style="color:var(--td)">
+        <b>Lv 1-3:</b> Lokal starten — Bauernhof, Mühle, erste Lieferketten<br>
+        <b>Lv 4-6:</b> Expandieren — neue Städte, Verarbeitung, Daueraufträge<br>
+        <b>Lv 7-9:</b> Global — Züge, Schiffe, Allianzen, Spieler-Börse<br>
+        <b>Lv 10+:</b> Imperium — Containerschiffe, Frachtjets, Megafabriken
+      </div>
+    </div>
+  </div>
   <div class="slabel">Wähle deine Startstadt</div>
   <div class="start-sw"><span class="start-sico">🔍</span><input type="text" class="ssearch" id="startInput" placeholder="Stadtnamen eingeben..." autocomplete="off"/></div>
   <div id="startResults"></div>
@@ -1410,14 +1436,40 @@ function isSOBound(v){
   if(!G||!G.standingOrders)return false;
   return G.standingOrders.some(so=>so.active!==false&&(so.vehicleIds||[]).includes(v.id));
 }
+
+// Find nearest player city with stock or production of a good, relative to a target
+function _nearestSourceCity(good,target){
+  if(!G||!cities.length||!target)return null;
+  let best=null;
+  cities.forEach(c=>{
+    const stock=_cityStock(c.id,good);
+    let hasProduction=false;
+    if(stock<=0){
+      const bs=G.blds[c.id]||[];
+      hasProduction=bs.some(b=>{const d=BLD[b.type];if(!d||b.paused)return false;
+        if(d.prod===good)return true;
+        if(d.tp==='farm'&&good==='getreide')return true;
+        if(d.tp==='farm'&&b.animals)return Object.keys(b.animals).some(k=>{const an=ANIMALS[k];return an&&an.produces.some(p=>p.good===good)});
+        if(d.tp==='orchard'&&b.fruits)return Object.keys(b.fruits).some(fk=>{const fr=FRUITS[fk];return fr&&fr.good===good});
+        if(d.tp==='recipe'&&d.recipes){const pool=RECIPES[d.recipes];return pool&&pool.some(r=>r.out===good)}
+        return false;
+      });
+    }
+    if(stock>0||hasProduction){
+      const d=hav(c.lat,c.lng,target.lat,target.lng);
+      if(!best||d<best.d)best={c,d,stock,hasProduction};
+    }
+  });
+  return best;
+}
 const TF=2700;const routeCache={};
 
 const INFRA={
   lager_upgrade:{name:"Lagererweiterung",em:"📦",price:8000,desc:"Stadtlager +400 (einmalig)",req:null,effect:"+400 Lagerkapazität",storCap:400,stack:false},
   depot:{name:"Fahrzeug-Depot",em:"🏢",price:15000,desc:"Fahrzeugstellplätze (4, upgradbar bis 8)",req:null,effect:"Stellplätze für Fahrzeuge",depotCap:3,stack:false},
-  bahnhof:{name:"Bahnhof",em:"🚉",price:35000,desc:"Ermöglicht Züge",req:null,effect:"Züge nutzbar"},
-  flughafen:{name:"Flughafen",em:"✈️",price:200000,desc:"Ermöglicht Flüge",req:'airport',effect:"Flugzeuge nutzbar"},
-  hafen:{name:"Hafen",em:"⚓",price:150000,desc:"Ermöglicht Schiffe",req:'harbor',effect:"Schiffe nutzbar"},
+  bahnhof:{name:"Bahnhof",em:"🚉",price:35000,desc:"Ermöglicht Züge (ab Lv7)",req:null,effect:"Züge nutzbar",lvl:7},
+  flughafen:{name:"Flughafen",em:"✈️",price:200000,desc:"Ermöglicht Flüge (ab Lv8)",req:'airport',effect:"Flugzeuge nutzbar",lvl:8},
+  hafen:{name:"Hafen",em:"⚓",price:150000,desc:"Ermöglicht Schiffe (ab Lv8)",req:'harbor',effect:"Schiffe nutzbar",lvl:8},
   logistikzentrum:{name:"Logistikzentrum",em:"📦",price:80000,desc:"Markt-Bonus +15%",req:null,effect:"+15% Marktpreise"},
   tankstelle:{name:"Tankstelle",em:"⛽",price:8000,desc:"Speed +10%",req:null,effect:"+10% Speed"},
 };
@@ -1537,13 +1589,16 @@ function genExpressOrder(){
   const goods2=Object.entries(globalStock).filter(([,a])=>a>=3);if(!goods2.length)return;
   const [good,totalAmt]=goods2[Math.floor(Math.random()*goods2.length)];
   const lvl=playerLvl();
-  const fullDist=[25,35,50,100,200,500,1500,5000,12000,25000][Math.min(lvl-1,9)];
+  const fullDist=[30,45,70,110,180,350,700,1500,4000,10000][Math.min(lvl-1,9)];
   const maxDist=fullDist*0.5;
   const allDB=typeof DB!=='undefined'?DB:[];
-  // Targets within 50% level distance from ANY player city, min 3km
+  // Source cities: have stock of this good
+  const srcCities=cities.filter(c=>_cityStock(c.id,good)>0);
+  const refCities=srcCities.length?srcCities:cities;
+  // Targets within 50% level distance from SOURCE cities
   const dbPool=allDB.filter(x=>{
     const isOwn=cities.some(c=>c.name===x[0]);
-    return !isOwn&&cities.some(c=>{const d=hav(c.lat,c.lng,x[3],x[4]);return d>=3&&d<=maxDist});
+    return !isOwn&&refCities.some(c=>{const d=hav(c.lat,c.lng,x[3],x[4]);return d>=3&&d<=maxDist});
   });
   if(!dbPool.length)return null;
   const td=dbPool[Math.floor(Math.random()*dbPool.length)];
@@ -1551,7 +1606,7 @@ function genExpressOrder(){
   let tId,tName,tLat,tLng,tCo,tUnlocked;
   if(match){tId=match.id;tName=match.name;tLat=match.lat;tLng=match.lng;tCo=match.co;tUnlocked=true}
   else{tId='db_'+td[0].toLowerCase().replace(/[^a-z0-9]/g,'');tName=td[0];tLat=td[3];tLng=td[4];tCo=td[1];tUnlocked=false}
-  const nearestDist=Math.min(...cities.map(c=>hav(c.lat,c.lng,tLat,tLng)));
+  const nearestDist=Math.min(...refCities.map(c=>hav(c.lat,c.lng,tLat,tLng)));
   const exMinAmts=[2,3,5,8,10,15,20,30,40,60];
   const exMaxAmts=[10,15,25,35,45,60,80,100,150,250];
   const li=Math.min(lvl-1,9);
@@ -1929,7 +1984,7 @@ async function load(){
       if(o.acc&&(!o.deliverTl||isNaN(o.deliverTl)||o.deliverTl<3600)){
         const _f=Cx(o.from),_t=Cx(o.to);
         const _d=(_f&&_t)?hav(_f.lat,_f.lng,_t.lat,_t.lng):100;
-        o.deliverTl=Math.max(7200,Math.floor(7200+_d*30+(o.amt||10)*180));
+        o.deliverTl=Math.max(10800,Math.floor(10800+_d*50+(o.amt||10)*180));
       }
     });
     if(G.orders.length<preLen){repaired=true;addLog('🔧 '+(preLen-G.orders.length)+' fehlerhafte Aufträge entfernt')}
@@ -1946,6 +2001,8 @@ async function load(){
         if(typeof G.stor[cid][g]!=='number'||isNaN(G.stor[cid][g]))G.stor[cid][g]=0;
       });
     });
+    // Migrate: existing autoManager users get unlocked status
+    if(G.autoManager&&!G.amUnlocked){G.amUnlocked=true;if(G.amMaxDist===undefined)G.amMaxDist=50}
     if(repaired)addLog('🔧 Spielstand repariert');
     // Auto off-duty after 3 days (259200 seconds)
     if(G.lastLogin&&(Date.now()-G.lastLogin)>259200000&&G.onDuty!==false){
@@ -1992,12 +2049,30 @@ function genOrd(){
   if(!goods.length)return null;
   const [good,totalAmt]=goods[Math.random()*goods.length|0];
   const lvl=playerLvl();
-  const maxDist=[25,35,50,100,200,500,1500,5000,12000,25000][Math.min(lvl-1,9)];
+  const isEarlyGame=(G.dels||0)<3;
+  const maxDist=isEarlyGame?15:[30,45,70,110,180,350,700,1500,4000,10000][Math.min(lvl-1,9)];
   const allDB=typeof DB!=='undefined'?DB:[];
-  // Find targets within range from ANY player city
+  // Find cities that have stock or produce this good
+  const sourceCities=cities.filter(c=>{
+    if(_cityStock(c.id,good)>0)return true;
+    // Check if city has active production building for this good
+    const bs=G.blds[c.id]||[];
+    return bs.some(b=>{const d=BLD[b.type];if(!d||b.paused)return false;
+      if(d.prod===good)return true;
+      if(d.tp==='farm'&&good==='getreide')return true;
+      if(d.tp==='farm'&&b.animals){const ak=Object.keys(b.animals);return ak.some(k=>{const an=ANIMALS[k];return an&&an.produces.some(p=>p.good===good)})}
+      if(d.tp==='orchard'&&b.fruits){return Object.keys(b.fruits).some(fk=>{const fr=FRUITS[fk];return fr&&fr.good===good})}
+      if(d.tp==='recipe'&&d.recipes){const pool=RECIPES[d.recipes];return pool&&pool.some(r=>r.out===good)}
+      if(d.tp==='p'&&d.prod===good)return true;
+      return false;
+    });
+  });
+  // Fallback to all cities if no source found
+  const refCities=sourceCities.length?sourceCities:cities;
+  // Find targets within range from SOURCE cities (not any city)
   const dbPool=allDB.filter(x=>{
     const isOwn=cities.some(c=>c.name===x[0]);
-    return !isOwn&&cities.some(c=>hav(c.lat,c.lng,x[3],x[4])<maxDist);
+    return !isOwn&&refCities.some(c=>hav(c.lat,c.lng,x[3],x[4])<maxDist);
   });
   if(!dbPool.length)return null;
   const td=dbPool[Math.floor(Math.random()*dbPool.length)];
@@ -2009,23 +2084,28 @@ function genOrd(){
   const minAmts=[3,5,8,12,18,25,35,50,75,100];
   const maxAmts=[15,25,40,55,75,100,150,200,300,500];
   const li=Math.min(lvl-1,9);
-  const maxAmt=Math.min(totalAmt,maxAmts[li]);
-  const minAmt=minAmts[li];
+  const maxAmt=isEarlyGame?Math.min(5,totalAmt):Math.min(totalAmt,maxAmts[li]);
+  const minAmt=isEarlyGame?2:minAmts[li];
   const amt=Math.max(minAmt,Math.floor(Math.random()*(maxAmt-minAmt+1))+minAmt);
-  // Distance = nearest player city to target
-  const nearestDist=Math.min(...cities.map(c=>hav(c.lat,c.lng,tLat,tLng)));
+  // Distance = nearest SOURCE city (with stock/production) to target
+  const nearestSource=refCities.reduce((best,c)=>{const d=hav(c.lat,c.lng,tLat,tLng);return(!best||d<best.d)?{c,d}:best},null);
+  const nearestDist=nearestSource?nearestSource.d:100;
+  const srcCityName=nearestSource?nearestSource.c.name:'?';
+  const srcCityId=nearestSource?nearestSource.c.id:null;
+  const srcStock=srcCityId?_cityStock(srcCityId,good):0;
   const toReg=getRegion((tCo||'').toUpperCase());
   const mktPrice=typeof marketPrice==='function'?marketPrice(good,toReg):(g.bp||100);
   if(!mktPrice||isNaN(mktPrice))return null;
   const distFactor=Math.min(nearestDist/maxDist,1);
-  const orderMult=0.5+Math.random()*1.0+distFactor*0.15;
-  const rew=Math.round(mktPrice*amt*orderMult)||100;
+  const orderMult=(0.5+Math.random()*1.0+distFactor*0.40)*(isEarlyGame?2:1);
+  const rew=Math.max(Math.round(mktPrice*amt*orderMult),Math.round(mktPrice*amt*0.8))||100;
   const acceptTl=Math.max(1200,Math.floor(1800+Math.random()*1800));
-  const deliverTl=Math.max(7200,Math.floor(7200+nearestDist*30+amt*180+Math.random()*7200));
+  const deliverTl=Math.max(10800,Math.floor(10800+nearestDist*50+amt*180+Math.random()*7200));
   if(!G.orderNum)G.orderNum=0;G.orderNum++;
   return{id:uid(),num:G.orderNum,from:null,to:tId,good,amt,rew:rew,origRew:rew,
     tl:acceptTl,deliverTl,born:G.tick,bornTs:Date.now(),acc:false,
-    pricePerUnit:Math.round(rew/amt)||1,mktRef:mktPrice,toName:tName,toLat:tLat,toLng:tLng,toUnlocked:tUnlocked};
+    pricePerUnit:Math.round(rew/amt)||1,mktRef:mktPrice,toName:tName,toLat:tLat,toLng:tLng,toUnlocked:tUnlocked,
+    srcCity:srcCityName,srcCityId,srcStock:srcStock,srcDist:Math.round(nearestDist)};
 }
 // ══════════════════════════════════════════
 // CACHE SYSTEM – persistent route + search cache
@@ -2419,6 +2499,9 @@ function execMarketSell(cid,good,destName,destLat,destLng,price,dist){
     }
   }
   if(typeof toast==='function')toast('💰 Marktverkauf: '+(amt-remaining)+'× gestartet');
+  // First market sell bonus
+  if(!G._firstSell&&(amt-remaining)>0){G._firstSell=true;G.money+=3000;finLog('income',3000,'Bonus: Erster Marktverkauf');
+    addLog('🎉 Erster Marktverkauf! +3.000€ Bonus');if(typeof toast==='function')toast('🎉 +3.000€ Erstverkaufs-Bonus!','var(--a)')}
   document.getElementById('mktPopup')?.remove();ua();
 }
 // ═══ DUTY SYSTEM ═══
@@ -2567,12 +2650,65 @@ function _unbindFromSO(vid){
   });
 }
 
-// ═══ AUTO-MANAGER toggle (Level 5+) ═══
+// ═══ AUTO-MANAGER (Level 5+, unlock 25.000€) ═══
+const AM_UNLOCK_COST=25000;
+function unlockAutoManager(){
+  if(!G)return;
+  if(playerLvl()<5){addLog('❌ Auto-Manager erst ab Level 5 verfügbar');return}
+  if(G.amUnlocked){addLog('ℹ️ Auto-Manager bereits freigeschaltet');return}
+  if(G.money<AM_UNLOCK_COST){addLog('❌ Nicht genug Geld ('+fmt(AM_UNLOCK_COST)+' benötigt)');return}
+  G.money-=AM_UNLOCK_COST;finLog('expense',-AM_UNLOCK_COST,'Auto-Manager Freischaltung');
+  G.amUnlocked=true;G.autoManager=true;
+  if(G.amMaxDist===undefined)G.amMaxDist=50;
+  addLog('🤖 Auto-Manager freigeschaltet & aktiviert!');ua();
+}
 function toggleAutoManager(){
   if(!G)return;
   if(playerLvl()<5){addLog('❌ Auto-Manager erst ab Level 5 verfügbar');return}
+  if(!G.amUnlocked){showAMUnlockPopup();return}
   G.autoManager=!G.autoManager;
   addLog(G.autoManager?'🤖 Auto-Manager aktiviert':'🤖 Auto-Manager deaktiviert');ua();
+}
+function showAMUnlockPopup(){
+  const h='<div style="text-align:center;padding:12px">'
+    +'<div style="font-size:24px;margin-bottom:8px">🤖</div>'
+    +'<b>Auto-Manager freischalten</b><br><br>'
+    +'<span class="sub">Weist Fahrzeuge automatisch Aufträgen zu.<br>Einmalige Kosten:</span><br>'
+    +'<span style="font-size:18px;color:var(--go)">'+fmt(AM_UNLOCK_COST)+' €</span><br><br>'
+    +'<button class="btn" onclick="unlockAutoManager();closePopup()">🔓 Freischalten</button>'
+    +'</div>';
+  popup('🤖 Auto-Manager',h);
+}
+function showAMSettings(){
+  if(!G||!G.amUnlocked)return;
+  const d=G.amMaxDist??50;
+  const h='<div style="padding:8px">'
+    +'<div style="font-weight:600;margin-bottom:12px">🤖 Auto-Manager Einstellungen</div>'
+    +'<div style="margin-bottom:16px">'
+    +'<div style="font-weight:500">✏️ Max. Entfernung für Fahrzeug-Abruf</div>'
+    +'<div class="sub" style="margin:4px 0 8px">Wie weit darf der Auto-Manager idle Fahrzeuge von anderen Standorten holen?</div>'
+    +'<input type="range" id="amDistSlider" min="0" max="500" value="'+d+'" style="width:100%" oninput="document.getElementById(\'amDistVal\').textContent=this.value==0?\'Nur lokal\':this.value+\' km\'">'
+    +'<div style="text-align:center;font-size:14px;margin:4px 0" id="amDistVal">'+(d===0?'Nur lokal':d+' km')+'</div>'
+    +'<div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:8px">'
+    +[0,25,50,100,200,500].map(v=>'<button class="btn sm'+(d===v?' active':'')+'" onclick="document.getElementById(\'amDistSlider\').value='+v+';document.getElementById(\'amDistVal\').textContent='+(v===0?"'Nur lokal'":"'"+v+" km'")+'">'+(v===0?'Nur lokal':v+'km')+'</button>').join('')
+    +'</div></div>'
+    +'<div style="margin-bottom:16px">'
+    +'<label style="display:flex;align-items:center;gap:8px;cursor:pointer">'
+    +'<input type="checkbox" id="amMinLoad" '+(G.amMinLoad!==false?'checked':'')+'>'
+    +'<div><div style="font-weight:500">⏳ Mindest-Beladung</div>'
+    +'<div class="sub">Nur wenn mindestens 50% beladen.</div></div></label></div>'
+    +'<button class="btn" onclick="saveAMSettings();closePopup()">💾 Speichern</button>'
+    +'</div>';
+  popup('🤖 Auto-Manager Einstellungen',h);
+}
+function saveAMSettings(){
+  if(!G)return;
+  const slider=document.getElementById('amDistSlider');
+  const minLoad=document.getElementById('amMinLoad');
+  G.amMaxDist=slider?parseInt(slider.value):50;
+  G.amMinLoad=minLoad?minLoad.checked:true;
+  addLog('🤖 Einstellungen gespeichert: Max. '+(G.amMaxDist===0?'nur lokal':G.amMaxDist+'km')+', Min-Beladung '+(G.amMinLoad?'AN':'AUS'));
+  ua();
 }
 
 // Vehicle condition: based on km since last maintenance
@@ -2737,6 +2873,9 @@ function sendGoods(vid,good,amt,toCid){
   if(!s||(s[good]||0)<amt){addLog('❌ Nicht genug '+GOODS[good].name);return}
   const cap=vehCap(v);
   if(amt>cap){addLog('❌ Fahrzeug kann nur '+cap+' laden');return}
+  // Check destination capacity (including in-transit reservations)
+  const freeAtDest=_freeCapAtCity(toCid);
+  if(amt>freeAtDest){addLog('❌ Ziel-Lager hat nur '+freeAtDest+' Platz ('+amt+' benötigt)');return}
   // Deduct from storage
   s[good]-=amt;if(s[good]<=0)delete s[good];
   // Send vehicle
@@ -2745,6 +2884,21 @@ function sendGoods(vid,good,amt,toCid){
   ensureRoute(v);
   const vt=VT[v.type],f=C(fromCid),t=C(toCid);
   addLog('📦 '+vt.em+' '+amt+'× '+GOODS[good].em+' → '+t?.name);ua();
+}
+
+// Free capacity at a city: cap - used - in-transit internal cargo
+function _freeCapAtCity(cid){
+  const cap=cityCap(cid);
+  const used=Object.values(G.stor[cid]||{}).reduce((s,v)=>s+v,0);
+  // Count all internal cargo en route to this city
+  let inTransit=0;
+  G.vehs.forEach(v=>{
+    if(v.st==='moving'&&v.rt?.to===cid&&v.cargo?.internal){
+      const cl=v.cargo.goods||[{good:v.cargo.good,amt:v.cargo.amt}];
+      cl.forEach(c=>inTransit+=c.amt);
+    }
+  });
+  return Math.max(0,cap-used-inTransit);
 }
 
 // ── Infrastructure ──
@@ -2893,45 +3047,65 @@ function _takeFromCity(cid,good,amt){
 
 function shAsgn(oid){if(!G)return;const o=G.orders.find(x=>x.id===oid);if(!o)return;
   const tc=Cx(o.to);if(!tc)return;
-  document.getElementById('mT').textContent=(GOODS[o.good]?.em||'')+' '+o.amt+'× → '+tc.name;
-  let h='<div class="crd"><div class="rw"><span>'+(GOODS[o.good]?.em||'')+' '+o.amt+'× '+(GOODS[o.good]?.name||'')+'</span><span style="color:var(--a);font-family:var(--mono);font-weight:600">'+fmt(o.rew)+'</span></div></div>';
+  const remaining=o.amt-(o.shipped||0);
+  document.getElementById('mT').textContent=(GOODS[o.good]?.em||'')+' '+remaining+'× → '+tc.name;
+  window._asgnOid=oid;
+  let h='<div class="crd"><div class="rw"><span>'+(GOODS[o.good]?.em||'')+' '+remaining+'× '+(GOODS[o.good]?.name||'')+'</span><span style="color:var(--a);font-family:var(--mono);font-weight:600">'+fmt(o.rew)+'</span></div>';
+  h+='<div id="asgnStatus" style="font-size:11px;color:var(--td);margin-top:4px">Fahrzeuge auswählen...</div></div>';
   let anyVeh=false;
   const sorted=[...cities].sort((a,b)=>{
     const aHub=_isHub(a.id,o.good)?0:1;const bHub=_isHub(b.id,o.good)?0:1;
     if(aHub!==bHub)return aHub-bHub;
     return hav(a.lat,a.lng,tc.lat,tc.lng)-hav(b.lat,b.lng,tc.lat,tc.lng);
   });
-  // Cities WITH stock + local vehicles
   sorted.forEach(c=>{
     const stock=_cityStock(c.id,o.good);if(stock<=0)return;
     const dist=Math.round(hav(c.lat,c.lng,tc.lat,tc.lng));
     const avl=G.vehs.filter(v=>v.st==='idle'&&v.loc===c.id&&canVehTravel(v,o.to)&&!isSOBound(v));
     if(!avl.length)return;anyVeh=true;
-    const consume=_cityConsumption(c.id,o.good);
     const avForOrders=_availableForOrders(c.id,o.good);
-    const reserveInfo=consume>0?' · <span style="color:var(--go);font-size:10px">🏭 Reserve: '+(consume*PRODUCTION_RESERVE_CYCLES)+'×</span>':'';
-    h+='<div class="sec-label">📍 '+c.name+' · '+stock+'×'+(consume>0?' (frei: '+avForOrders+'×)':'')+' · '+dist+' km · ⏱~'+ftime(Math.round(dist/80*TF))+reserveInfo+'</div>';
+    h+='<div class="sec-label">📍 '+c.name+' · '+stock+'×'+(avForOrders<stock?' (frei: '+avForOrders+'×)':'')+' · '+dist+' km</div>';
     avl.forEach(v=>{const vt=VT[v.type];
-      h+='<div class="crd active" style="cursor:pointer" onclick="asgn(\''+v.id+'\',\''+oid+'\')"><div class="rw"><span>'+vt.em+' '+vehName(v)+'</span><span class="sub">Kap: '+vehCap(v)+' · ⏱'+ftime(tripT(c,tc,vt.spd))+'</span></div></div>'});
+      h+='<label class="crd" style="cursor:pointer;display:flex;align-items:center;gap:8px;padding:6px 8px"><input type="checkbox" data-vid="'+v.id+'" data-cap="'+vehCap(v)+'" data-type="local" onchange="_asgnUpdate()" style="width:16px;height:16px;accent-color:var(--a)"/><div style="flex:1"><div class="rw"><span>'+vt.em+' '+vehName(v)+'</span><span class="sub">Kap: '+vehCap(v)+' · ⏱'+ftime(tripT(c,tc,vt.spd))+'</span></div></div></label>'});
   });
-  // Remote vehicles: idle at cities WITHOUT stock, send to nearest stock city
   const stockCities=sorted.filter(c=>_cityStock(c.id,o.good)>0);
   if(stockCities.length){
     const remoteVehs=G.vehs.filter(v=>v.st==='idle'&&!isSOBound(v)&&!v.followUpOrder&&canVehTravel(v,o.to)&&_cityStock(v.loc,o.good)<=0);
     if(remoteVehs.length){
-      h+='<div class="sec-label" style="color:var(--a2)">📍 Von anderem Standort senden</div>';
-      h+='<div class="sub" style="margin-bottom:4px;color:var(--td)">Fahrzeug fährt zuerst zur nächsten Stadt mit Bestand</div>';
-      remoteVehs.forEach(v=>{const vt=VT[v.type];const vLoc=C(v.loc);
-        const nearest=stockCities.sort((a,b)=>hav(a.lat,a.lng,v.loc?C(v.loc)?.lat||0:0,v.loc?C(v.loc)?.lng||0:0)-hav(b.lat,b.lng,v.loc?C(v.loc)?.lat||0:0,v.loc?C(v.loc)?.lng||0:0))[0];
-        const pickupDist=vLoc&&nearest?Math.round(hav(vLoc.lat,vLoc.lng,nearest.lat,nearest.lng)):0;
-        const delivDist=nearest?Math.round(hav(nearest.lat,nearest.lng,tc.lat,tc.lng)):0;
-        h+='<div class="crd active" style="cursor:pointer;border-color:rgba(56,189,248,.2)" onclick="_sendRemote(\''+v.id+'\',\''+oid+'\')"><div class="rw"><span>'+vt.em+' '+vehName(v)+' <span class="sub">📍 '+(vLoc?.name||'?')+'</span></span>';
-        h+='<span class="sub">Kap: '+vehCap(v)+' · 🚛→'+pickupDist+'km + 📦→'+delivDist+'km</span></div></div>'});
+      h+='<div class="sec-label" style="color:var(--a2)">📍 Von anderem Standort</div>';
+      remoteVehs.slice(0,8).forEach(v=>{const vt=VT[v.type];const vLoc=C(v.loc);
+        h+='<label class="crd" style="cursor:pointer;display:flex;align-items:center;gap:8px;padding:6px 8px;border-color:rgba(56,189,248,.15)"><input type="checkbox" data-vid="'+v.id+'" data-cap="'+vehCap(v)+'" data-type="remote" onchange="_asgnUpdate()" style="width:16px;height:16px;accent-color:var(--a2)"/><div style="flex:1"><div class="rw"><span>'+vt.em+' '+vehName(v)+' <span class="sub">📍 '+(vLoc?.name||'?')+'</span></span><span class="sub">Kap: '+vehCap(v)+'</span></div></div></label>'});
       anyVeh=true;
     }
   }
-  if(!anyVeh)h+='<div style="color:var(--r);font-size:12px;padding:10px;text-align:center">⚠️ Kein Fahrzeug verfügbar und kein Bestand</div>';
+  if(!anyVeh)h+='<div style="color:var(--r);font-size:12px;padding:10px;text-align:center">⚠️ Kein Fahrzeug verfügbar</div>';
+  h+='<div style="display:flex;gap:6px;margin-top:8px;position:sticky;bottom:0;background:var(--bg);padding:6px 0">';
+  h+='<button class="btn full" style="background:var(--a);color:var(--bg);border-color:var(--a);opacity:.4" id="asgnGoBtn" onclick="_asgnExec()" disabled>🚛 Zuweisen</button>';
+  if(anyVeh)h+='<button class="btn" onclick="_asgnAll()">Alle</button>';
+  h+='</div>';
   document.getElementById('mB').innerHTML=h;document.getElementById('mBg').style.display='flex'}
+
+function _asgnUpdate(){
+  const o=G.orders.find(x=>x.id===window._asgnOid);if(!o)return;
+  const remaining=o.amt-(o.shipped||0);
+  let totalCap=0,count=0;
+  document.querySelectorAll('#mB input[type=checkbox]:checked').forEach(cb=>{totalCap+=parseInt(cb.dataset.cap,10)||0;count++});
+  const st=document.getElementById('asgnStatus');
+  if(st)st.innerHTML=count?'<span style="color:var(--a)">✅ '+count+' Fzg · '+totalCap+'× Kapazität '+(totalCap>=remaining?'':'<span style="color:var(--go)">('+remaining+'× nötig)</span>')+'</span>':'Fahrzeuge auswählen...';
+  const btn=document.getElementById('asgnGoBtn');
+  if(btn){btn.disabled=!count;btn.style.opacity=count?'1':'.4';btn.textContent='🚛 '+count+' Fzg zuweisen ('+totalCap+'×)'}
+}
+function _asgnAll(){document.querySelectorAll('#mB input[type=checkbox]').forEach(cb=>{cb.checked=true});_asgnUpdate()}
+function _asgnExec(){
+  const oid=window._asgnOid;if(!oid)return;
+  const o=G.orders.find(x=>x.id===oid);if(!o)return;
+  const locals=[],remotes=[];
+  document.querySelectorAll('#mB input[type=checkbox]:checked').forEach(cb=>{
+    if(cb.dataset.type==='remote')remotes.push(cb.dataset.vid);else locals.push(cb.dataset.vid)});
+  if(locals.length)_doMultiAssign(o,locals);
+  remotes.forEach(vid=>_sendRemote(vid,oid));
+  closeMdl();ua();
+}
 
 // Send remote vehicle to nearest stock city, then assign to order
 function _sendRemote(vid,oid){
@@ -2949,8 +3123,6 @@ function _sendRemote(vid,oid){
   v.followUpOrder=oid;
   if(typeof ensureRoute==='function')ensureRoute(v);
   addLog('🚛 '+vehName(v)+' → '+(dest.name||'?')+' (Abholung für '+fmtOrd(o.num)+')');
-  if(typeof toast==='function')toast('🚛 '+vehName(v)+' unterwegs zur Abholung');
-  closeMdl();ua();
 }
 function closeMdl(){document.getElementById('mBg').style.display='none'}
 function asgn(vid,oid){if(!G)return;const o=G.orders.find(x=>x.id===oid),v=G.vehs.find(x=>x.id===vid);if(!o||!v)return;
@@ -3001,7 +3173,7 @@ function autoAssign(oid){
       }
     }
   }
-  if(!picks.length&&cap<=0){addLog('❌ Kein Fahrzeug mit verfügbarem Bestand');return}
+  if(!picks.length&&cap<=0){addLog('❌ Kein Fahrzeug verfügbar');return}
   if(picks.length)_doMultiAssign(o,picks);
 }
 function _doMultiAssign(o,vids){
@@ -3039,29 +3211,135 @@ function goCity(id){sr.classList.remove('open');si.value='';sel(id)}
 // ── Sell/close a city ──
 function sellCity(cid){
   if(!G)return;const c=C(cid);if(!c)return;
-  if(cities.length<=1){addLog('❌ Letzten Standort kann man nicht verkaufen');return}
-  // Check no vehicles here
-  const vHere=G.vehs.filter(v=>v.loc===cid&&v.st==='idle');
-  if(vHere.length){addLog('❌ Erst Fahrzeuge woanders hinschicken!');return}
-  if(!confirm(c.name+' schließen? Gebäude werden verkauft (30% Rückerstattung).'))return;
-  // Refund buildings
+  if(cities.length<=1){if(typeof toast==='function')toast('❌ Letzten Standort kann man nicht verkaufen','var(--r)');return}
+  _showSellCityPopup(cid);
+}
+
+function _showSellCityPopup(cid,stage){
+  if(!stage)stage=1;
+  let ex=document.getElementById('sellCityPopup');if(ex)ex.remove();
+  const c=C(cid);if(!c)return;
+  const popup=document.createElement('div');popup.id='sellCityPopup';popup.className='unlock-bg';popup.style.zIndex='9999';
+  const bs=G.blds[cid]||[];const inf=G.infra&&G.infra[cid]||[];const stor=G.stor[cid]||{};
+  // Affected items
+  let bldRefund=0;bs.forEach(b=>{const d=BLD[b.type];if(d)bldRefund+=Math.floor(d.price*0.3)});
+  let infraRefund=0;inf.forEach(i=>{const d=INFRA[i.type];if(d)infraRefund+=Math.floor(d.price*0.3)});
+  const totalRefund=bldRefund+infraRefund;
+  const storItems=Object.entries(stor).filter(([,a])=>a>0);
+  // Affected vehicles: idle here + depot here (moving)
+  const vIdle=G.vehs.filter(v=>v.st==='idle'&&v.loc===cid);
+  const vDepot=G.vehs.filter(v=>v.depot===cid&&v.st==='moving');
+  const allVehs=[...vIdle,...vDepot];
+  // Affected standing orders
+  const affectedSO=(G.standingOrders||[]).filter(so=>so.from===cid||so.to===cid);
+  // Available destinations with free depot space
+  const destCities=cities.filter(ci=>ci.id!==cid).map(ci=>{
+    const used=G.vehs.filter(v=>(v.depot||v.loc)===ci.id).length;
+    const cap=depotCap(ci.id);return{...ci,free:cap-used}}).filter(d=>d.free>0);
+
+  let h='<div class="unlock-popup" style="width:520px;max-height:85vh;overflow-y:auto"><div class="unlock-body">';
+
+  if(stage===1){
+    h+='<div style="text-align:center;margin-bottom:12px"><span style="font-size:28px">🏙️</span>';
+    h+='<div style="font-family:var(--mono);font-size:18px;font-weight:700;color:var(--r);margin-top:4px">'+c.name+' schließen?</div></div>';
+    // What's lost
+    h+='<div class="sec-label" style="color:var(--r)">⚠️ Geht verloren</div>';
+    if(bs.length){h+='<div class="crd" style="border-color:rgba(248,113,113,.2)"><div style="font-size:12px">';
+      const bc={};bs.forEach(b=>{const d=BLD[b.type];if(d){bc[d.name]=(bc[d.name]||0)+1}});
+      h+='🏭 '+Object.entries(bc).map(([n,c2])=>n+(c2>1?' ×'+c2:'')).join(', ');
+      h+='</div></div>';}
+    if(inf.length){h+='<div class="crd" style="border-color:rgba(248,113,113,.2)"><div style="font-size:12px">🏢 '+inf.map(i=>INFRA[i.type]?.name||i.type).join(', ')+'</div></div>';}
+    if(storItems.length){h+='<div class="crd" style="border-color:rgba(248,113,113,.2)"><div style="font-size:12px;color:var(--r)">📦 Waren werden vernichtet: '+storItems.map(([g,a])=>(GOODS[g]?.em||'')+a+'×').join(' ')+'</div></div>';}
+    // Refund
+    h+='<div class="crd" style="border-color:rgba(61,214,140,.2);background:rgba(61,214,140,.03)"><div class="rw"><span style="font-size:12px">💰 Rückerstattung (30% Gebäude + Infra)</span><span style="font-family:var(--mono);color:var(--a);font-weight:700">+'+fmt(totalRefund)+'</span></div></div>';
+    // Vehicles
+    if(allVehs.length){
+      h+='<div class="sec-label" style="color:var(--go)">🚛 '+allVehs.length+' Fahrzeug'+(allVehs.length>1?'e':'')+' betroffen</div>';
+      allVehs.forEach(v=>{const vt=VT[v.type];
+        h+='<div class="crd" style="font-size:12px"><span>'+vt.em+' '+vehName(v)+' <span class="sub">'+vt.name+'</span></span>'+(v.st==='moving'?' <span class="tg y" style="font-size:9px">unterwegs, Depot hier</span>':' <span class="tg" style="font-size:9px">vor Ort</span>')+'</div>'});
+      if(!destCities.length)h+='<div style="padding:8px;color:var(--r);font-size:12px;text-align:center">⛔ Kein anderer Standort mit freien Depotplätzen! Erst Depot ausbauen.</div>';
+    }
+    // Standing orders
+    if(affectedSO.length){
+      h+='<div class="sec-label" style="color:var(--go)">🔄 '+affectedSO.length+' Dauerauftrag wird gelöscht</div>';
+      affectedSO.forEach(so=>{const gl=so.goods||(so.good?[{good:so.good}]:[]);
+        h+='<div class="crd" style="font-size:12px">'+gl.map(g=>(GOODS[g.good]?.em||'')).join('')+' '+(C(so.from)?.name||'?')+' → '+(C(so.to)?.name||'?')+'</div>'});}
+    h+='<div style="display:flex;gap:8px;margin-top:14px">';
+    h+='<button class="btn full" onclick="document.getElementById(\'sellCityPopup\').remove()">Abbrechen</button>';
+    if(allVehs.length&&destCities.length)h+='<button class="btn full" style="background:rgba(251,191,36,.1);color:var(--go);border-color:rgba(251,191,36,.3)" onclick="_showSellCityPopup(\''+cid+'\',2)">🚛 Fahrzeuge umstationieren →</button>';
+    else if(!allVehs.length)h+='<button class="btn full" style="background:rgba(248,113,113,.1);color:var(--r);border-color:rgba(248,113,113,.3)" onclick="_execSellCity(\''+cid+'\')">🏙️ Endgültig schließen</button>';
+    h+='</div>';
+
+  } else if(stage===2){
+    h+='<div style="text-align:center;margin-bottom:12px"><span style="font-size:28px">🚛</span>';
+    h+='<div style="font-family:var(--mono);font-size:16px;font-weight:700;color:var(--go);margin-top:4px">Fahrzeuge umstationieren</div>';
+    h+='<div class="sub">Wähle neue Standorte für jedes Fahrzeug</div></div>';
+    allVehs.forEach(v=>{const vt=VT[v.type];
+      h+='<div class="crd" style="padding:8px"><div class="rw"><span>'+vt.em+' <b>'+vehName(v)+'</b> <span class="sub">'+vt.name+' · Kap: '+vehCap(v)+'</span></span></div>';
+      h+='<select class="sl" id="reloc_'+v.id+'" style="margin-top:4px;width:100%;font-size:12px;padding:4px 8px">';
+      destCities.forEach((dc,i)=>{h+='<option value="'+dc.id+'"'+(i===0?' selected':'')+'>📍 '+dc.name+' ('+dc.free+' Plätze frei)</option>'});
+      h+='</select></div>'});
+    h+='<div style="display:flex;gap:8px;margin-top:14px">';
+    h+='<button class="btn full" onclick="_showSellCityPopup(\''+cid+'\',1)">← Zurück</button>';
+    h+='<button class="btn full" style="background:rgba(248,113,113,.1);color:var(--r);border-color:rgba(248,113,113,.3)" onclick="_execSellCity(\''+cid+'\',true)">🏙️ Umstationieren & Schließen</button>';
+    h+='</div>';
+  }
+
+  h+='</div></div>';
+  popup.innerHTML=h;
+  popup.addEventListener('click',e=>{if(e.target===popup)popup.remove()});
+  document.body.appendChild(popup);
+}
+
+function _execSellCity(cid,relocate){
+  const c=C(cid);if(!c)return;
+  // 1. Relocate vehicles
+  if(relocate){
+    const allVehs=[...G.vehs.filter(v=>v.st==='idle'&&v.loc===cid),...G.vehs.filter(v=>v.depot===cid&&v.st==='moving')];
+    allVehs.forEach(v=>{
+      const sel=document.getElementById('reloc_'+v.id);
+      const destId=sel?sel.value:cities.find(ci=>ci.id!==cid)?.id;
+      if(!destId)return;
+      const destCity=C(destId);
+      v.depot=destId;
+      if(v.st==='idle'){v.loc=destId}
+      // Rename vehicle to new region
+      if(destCity){
+        const reg2=getRegion((destCity.co||'').toUpperCase());
+        const abbr=({europa:'EU',nordamerika:'NA',suedamerika:'SA',asien:'AS',afrika:'AF',ozeanien:'OZ'})[reg2]||'XX';
+        const cityAbbr=destCity.name.substring(0,3).toUpperCase();
+        const num=String(G.vehs.indexOf(v)+1).padStart(2,'0');
+        v.customName=abbr+'/'+cityAbbr+'-'+num;
+      }
+      addLog('🚛 '+vehName(v)+' → '+(destCity?.name||'?'));
+    });
+  }
+  // 2. Delete standing orders
+  if(G.standingOrders){
+    const before=G.standingOrders.length;
+    G.standingOrders=G.standingOrders.filter(so=>so.from!==cid&&so.to!==cid);
+    const del=before-G.standingOrders.length;
+    if(del)addLog('🗑️ '+del+' Dauerauftrag gelöscht');
+  }
+  // 3. Refund buildings + infra (30%), NO goods refund
   let refund=0;
   (G.blds[cid]||[]).forEach(b=>{const d=BLD[b.type];if(d)refund+=Math.floor(d.price*0.3)});
   (G.infra&&G.infra[cid]||[]).forEach(i=>{const d=INFRA[i.type];if(d)refund+=Math.floor(d.price*0.3)});
-  // Sell stored goods at 50% base price
-  Object.entries(G.stor[cid]||{}).forEach(([g,a])=>{if(GOODS[g])refund+=Math.floor(a*GOODS[g].bp*0.5)});
-  G.money+=refund;finLog('refund',refund,'Standort aufgegeben');
+  G.money+=refund;finLog('refund',refund,'Standort geschlossen: '+c.name);
+  // 4. Delete city data
   delete G.blds[cid];delete G.stor[cid];if(G.infra)delete G.infra[cid];
-  // Remove from cities
   const idx=cities.findIndex(x=>x.id===cid);if(idx>=0)cities.splice(idx,1);
   G.unlockedCities=G.unlockedCities.filter(x=>x.id!==cid);
-  // Remove map markers
+  // 5. Remove map markers
   if(MP){if(cMk[cid]){MP.removeLayer(cMk[cid]);delete cMk[cid]}
   if(cLb[cid]){MP.removeLayer(cLb[cid]);delete cLb[cid]}
   (bMk[cid]||[]).forEach(m=>MP.removeLayer(m));delete bMk[cid]}
-  // Select another city
+  // 6. Select another city
   if(G.sel===cid)G.sel=cities[0]?.id||null;
-  addLog('🏙️ '+c.name+' geschlossen → +'+fmt(refund));updCnt();ua();
+  document.getElementById('sellCityPopup')?.remove();
+  addLog('🏙️ '+c.name+' geschlossen → +'+fmt(refund));
+  if(typeof toast==='function')toast('🏙️ '+c.name+' geschlossen','var(--r)');
+  updCnt();ua();
 }
 
 // ── Standing orders (recurring transport between cities) ──
@@ -3678,7 +3956,7 @@ function tickCore(){
         const avl=G.vehs.filter(v=>v.st==='idle'&&v.loc===city.id&&!v.followUpOrder&&!v.pendingTransfer&&!isSOBound(v)&&canVehTravel(v,o.to));
         for(const v of avl){
           if(loaded>=remaining)break;
-          const minLoad=Math.max(1,Math.floor(vehCap(v)*0.5));
+          const minLoad=(G.amMinLoad!==false)?Math.max(1,Math.floor(vehCap(v)*0.5)):1;
           const curAvail=_availableForOrders(city.id,o.good);
           const canLoad=Math.min(remaining-loaded,curAvail,vehCap(v));
           if(canLoad<minLoad&&canLoad<(remaining-loaded))continue;
@@ -3694,6 +3972,8 @@ function tickCore(){
       }
       // Remote dispatch: send idle vehicles from no-stock cities to nearest stock city
       if(loaded<remaining){
+        const amMaxDist=G.amMaxDist??50;
+        if(amMaxDist>0){
         const stockCities=sortedCities.filter(c=>_availableForOrders(c.id,o.good)>0);
         if(stockCities.length){
           const remVehs=G.vehs.filter(v=>v.st==='idle'&&!v.followUpOrder&&!v.pendingTransfer&&!isSOBound(v)&&canVehTravel(v,o.to)&&_cityStock(v.loc,o.good)<=0);
@@ -3702,11 +3982,14 @@ function tickCore(){
             const vLoc=C(v.loc);if(!vLoc)continue;
             const dest=stockCities.sort((a2,b2)=>hav(a2.lat,a2.lng,vLoc.lat,vLoc.lng)-hav(b2.lat,b2.lng,vLoc.lat,vLoc.lng))[0];
             if(!dest)continue;
+            const fetchDist=hav(vLoc.lat,vLoc.lng,dest.lat,dest.lng);
+            if(fetchDist>amMaxDist)continue;
             v.st='moving';v.rt={from:v.loc,to:dest.id};v.prog=0;
             v.followUpOrder=o.id;
             if(typeof ensureRoute==='function')ensureRoute(v);
             loaded+=vehCap(v);sentCount++;markCompDirty();
           }
+        }
         }
       }
       if(sentCount>0)amSummary.push({good:o.good,amt:loaded,vehs:sentCount,to:tgt.name||'?'});
@@ -4178,8 +4461,17 @@ function tickCore(){
         so.emptyTicks=0;
         const vids=so.vehicleIds||(so.vehicleId?[so.vehicleId]:[]);
         if(!vids.length)return;
-        const candidates=G.vehs.filter(x=>vids.includes(x.id)&&x.st==='idle'&&x.loc===so.from);
-        candidates.forEach(v=>{
+        // Track SO stats
+        if(!so.stats)so.stats={trips:0,totalAmt:0,lastTrip:0};
+        // Vehicles AT source: load and send
+        const atSource=G.vehs.filter(x=>vids.includes(x.id)&&x.st==='idle'&&x.loc===so.from);
+        // Vehicles idle elsewhere: send TO source
+        const elsewhere=G.vehs.filter(x=>vids.includes(x.id)&&x.st==='idle'&&x.loc!==so.from&&!x.postDelivery&&!x.followUpOrder);
+        elsewhere.forEach(v=>{
+          v.st='moving';v.rt={from:v.loc,to:so.from};v.prog=0;
+          if(typeof ensureRoute==='function')ensureRoute(v);
+        });
+        atSource.forEach(v=>{
           let capLeft=vehCap(v);
           const loaded=[];
           for(const gl of goodsList){
@@ -4200,6 +4492,7 @@ function tickCore(){
           v.prog=0;v.postDelivery=so.from;
           if(typeof ensureRoute==='function')ensureRoute(v);
           const desc=loaded.map(l=>(GOODS[l.good]?.em||'')+l.amt+'×').join(' ');
+          so.stats.trips++;so.stats.totalAmt+=loaded.reduce((s,l)=>s+l.amt,0);so.stats.lastTrip=G.tick;
           addLog('🔄 '+vehName(v)+': '+desc+' → '+(C(so.to)?.name||'?'));markCompDirty();
         });
       });
@@ -4308,6 +4601,8 @@ function tick(){
   if(tc%30===0)try{markDirty()}catch(e){}
   // Check for admin-triggered reload every 30s
   if(tc%30===0&&currentUser)checkAdminReload();
+  // Check for admin money messages every 30s (offset by 15)
+  if(tc%30===15&&currentUser&&typeof _checkAdminMsg==='function')_checkAdminMsg();
 }
 
 async function checkAdminReload(){
@@ -4930,6 +5225,32 @@ function renDash(){
   if(tab==='finance')try{updateFinLog()}catch(e){}
 }
 
+// ═══ CONTEXTUAL NEXT ACTION HINT ═══
+function _getNextActionHint(){
+  if(!G)return null;
+  const blds=Object.values(G.blds).flat();
+  const hasStock=Object.values(G.stor).some(s=>Object.values(s).some(a=>a>=2));
+  const openOrds=G.orders.filter(o=>!o.acc);
+  const accOrds=G.orders.filter(o=>o.acc);
+  const unshipped=accOrds.filter(o=>(o.amt-(o.shipped||0))>0&&!G.vehs.find(v=>v.cargo?.oid===o.id&&v.st==='moving'));
+  const dels=G.dels||0;
+  // Early game priority
+  if(!G.vehs.length)return{em:'🚛',text:'Kaufe dein erstes Fahrzeug im Händler',act:"openComputer();setCompTab('dealer')"};
+  if(!blds.length)return{em:'🏭',text:'Baue dein erstes Gebäude (Bauernhof empfohlen)',act:"openComputer();setCompTab('buildings');bldSub='build'"};
+  if(!hasStock&&blds.length)return{em:'⏳',text:'Warte auf Produktion — deine Gebäude produzieren automatisch',act:''};
+  if(unshipped.length)return{em:'🚛',text:unshipped.length+' Auftrag wartet auf Fahrzeug-Zuweisung',act:"openComputer();setCompTab('logistics');G.logSub='routes'"};
+  if(openOrds.length)return{em:'📋',text:openOrds.length+' offene Aufträge — annehmen!',act:"openComputer();setCompTab('logistics')"};
+  if(hasStock&&!accOrds.length&&!openOrds.length)return{em:'📦',text:'Waren vorrätig! Warte auf neue Aufträge oder verkaufe am Markt',act:"openComputer();setCompTab('market');G.marketSub='sell'"};
+  if(blds.length===1&&dels>=1)return{em:'💡',text:'Tipp: Baue ein zweites Gebäude oder eine Verarbeitungsfabrik',act:"openComputer();setCompTab('buildings');bldSub='build'"};
+  // Advanced tips
+  if(dels>=3&&cities.length===1)return{em:'🏙️',text:'Zweite Stadt freischalten → mehr Produktionsvielfalt',act:'toggleView()'};
+  if(dels>=5&&!(G.standingOrders||[]).length&&cities.length>=2)return{em:'🔄',text:'Richte Daueraufträge ein für automatischen Transport',act:"openComputer();setCompTab('logistics');G.logSub='standing'"};
+  if(dels>=8&&blds.length>=2&&!blds.some(b=>BLD[b.type]?.tp==='recipe'))return{em:'🔗',text:'Baue eine Verarbeitungsfabrik (Mühle, Bäckerei) für wertvollere Waren',act:"openComputer();setCompTab('buildings');bldSub='build'"};
+  if(playerLvl()>=5&&!G.amUnlocked)return{em:'🤖',text:'Auto-Manager freischalten! (25.000€, Logistik-Tab)',act:''};
+  if(playerLvl()>=5&&G.amUnlocked&&!G.autoManager)return{em:'🤖',text:'Auto-Manager ist deaktiviert – einschalten im Logistik-Tab',act:''};
+  return null;
+}
+
 // ═══ HQ DASHBOARD ═══
 function dashHQ(){
   let h='<div class="dash-grid">';
@@ -4994,6 +5315,29 @@ function dashHQ(){
   alerts.slice(0,5).forEach(a=>{
     h+='<div style="padding:4px 0;font-size:12px;cursor:pointer;border-bottom:1px solid var(--bd)" onclick="'+a.act+'"><span>'+a.em+' '+a.text+' <span style="color:var(--a)">→</span></span></div>'});
   h+='</div>';
+
+  // ── Next Action Hint (always visible — adapts to progress) ──
+  {
+    const hint=_getNextActionHint();
+    if(hint){
+      h+='<div class="dash-card" style="border-color:rgba(56,189,248,.2);background:rgba(56,189,248,.03)">';
+      h+='<div class="dash-card-title" style="color:var(--a2)">💡 Nächster Schritt</div>';
+      h+='<div style="font-size:12px;padding:4px 0;cursor:pointer" onclick="'+hint.act+'">'+hint.em+' '+hint.text+' <span style="color:var(--a)">→</span></div>';
+      h+='</div>';
+    }
+  }
+
+  // ── Production Timer ──
+  if(Object.values(G.blds).flat().length>0){
+    const prodCycles=cities.map(c=>{const bs=G.blds[c.id]||[];return bs.filter(b=>b.active!==false&&!b.paused).map(b=>{const d=BLD[b.type];if(!d||d.tp==='s'||d.tp==='d')return null;const interval=bldTickInterval(b);const pt=b._pt||0;const ticksLeft=Math.max(1,interval-pt);return{name:d.em+' '+d.name,city:c.name,secs:ticksLeft}}).filter(Boolean)}).flat().sort((a,b)=>a.secs-b.secs);
+    if(prodCycles.length){
+      h+='<div class="dash-card"><div class="dash-card-title">⏳ Nächste Produktion</div>';
+      prodCycles.slice(0,3).forEach(p=>{
+        const clr=p.secs<10?'var(--a)':p.secs<30?'var(--go)':'var(--td)';
+        h+='<div style="display:flex;justify-content:space-between;padding:2px 0;font-size:12px;border-bottom:1px solid var(--bd)"><span>'+p.name+' · '+p.city+'</span><span style="font-family:var(--mono);color:'+clr+'">'+p.secs+'s</span></div>'});
+      h+='</div>';
+    }
+  }
 
   // Orders + Vehicles summary
   h+='<div class="dash-card"><div class="dash-card-title">📋 Aufträge</div>';
@@ -5466,7 +5810,7 @@ function openComputer(){computerOpen=true;document.getElementById('computer').st
 function closeComputer(){computerOpen=false;document.getElementById('computer').style.display='none';
   const tb=document.getElementById('topBar');if(tb)tb.style.display='flex';
   markDirty();applyView()}
-function selectLocation(cid){G.sel=cid;routesShowAll=false;routesSub='city';try{udots()}catch(e){}if(computerOpen){updateMinimap();renComp()}else{const c=C(cid);if(c&&MP)MP.flyTo([c.lat,c.lng],Math.max(MP.getZoom(),9),{duration:.5});markDirty();ren()}}
+function selectLocation(cid){G.sel=cid;G._invFilter=cid;G.sellCityFilter=cid;G._orderFilter=cid;G._transferFilter=cid;routesShowAll=false;routesSub='city';try{udots()}catch(e){}if(computerOpen){updateMinimap();renComp()}else{const c=C(cid);if(c&&MP)MP.flyTo([c.lat,c.lng],Math.max(MP.getZoom(),9),{duration:.5});markDirty();ren()}}
 function toggleBuildCity(cid){buildExpanded[cid]=!buildExpanded[cid];ren()}
 function toggleMinimap(){minimapOpen=!minimapOpen;document.getElementById('minimap-wrap').style.display=minimapOpen?'block':'none';
   const btn=document.getElementById('mmToggle');if(btn){btn.innerHTML=minimapOpen?'🗺️ Karte ✓':'🗺️ Karte';btn.style.borderColor=minimapOpen?'var(--a)':'var(--bd)'}
@@ -5638,19 +5982,16 @@ const TUT_STEPS=[
   {title:'② Baue ein Gebäude',text:'Wechsle zu <b>🏭 Gebäude → Bauen</b>.<br><br>Baue einen <b>Bauernhof</b> oder eine <b>Forstwirtschaft</b>. Gebäude produzieren automatisch Waren alle ~30 Sekunden.<br><br><span style="color:var(--go)">🎯 Aufgabe: 1 Gebäude bauen</span>',
     btn:'Zu Gebäude',action:"openComputer();setCompTab('buildings');bldSub='build'",
     check:()=>Object.values(G.blds).flat().length>=1,reward:'🏭 Erstes Gebäude! +6.000€ Bonus'},
-  {title:'③ Kaufe eine zweite Stadt',text:'Du brauchst mindestens 2 Städte, damit Transportaufträge erscheinen!<br><br>Nutze die <b>🔍 Suchleiste</b> auf der Karte oder im Terminal (oben rechts) und suche eine nahegelegene Stadt. Klicke darauf und kaufe sie frei!<br><br><span style="color:var(--go)">🎯 Aufgabe: 2 Standorte besitzen</span>',
-    btn:'Zur Karte',action:'closeComputer()',
-    check:()=>cities.length>=2,reward:'🏙️ Zweiter Standort! +8.000€ Bonus'},
-  {title:'④ Warte auf Produktion',text:'Deine Gebäude produzieren jetzt automatisch!<br><br>Schau im <b>📦 Lager</b> Tab nach, ob schon Waren angekommen sind. Du brauchst mindestens 2 Einheiten für einen Auftrag.<br><br><span style="color:var(--go)">🎯 Aufgabe: Mindestens 2 Waren im Lager</span>',
+  {title:'③ Warte auf Produktion',text:'Deine Gebäude produzieren jetzt automatisch!<br><br>Schau im <b>📦 Lager</b> Tab nach, ob schon Waren angekommen sind. Du brauchst mindestens 2 Einheiten für einen Auftrag.<br><br>💡 <b>Tipp:</b> Aufträge werden zu Städten in deiner Nähe generiert — du brauchst <b>keine zweite Stadt</b>!<br><br><span style="color:var(--go)">🎯 Aufgabe: Mindestens 2 Waren im Lager</span>',
     btn:'Zum Lager',action:"openComputer();setCompTab('inventory')",
     check:()=>{const s=G.stor;return Object.values(s).some(c=>Object.values(c).some(a=>a>=2))},reward:'📦 Erste Waren produziert!'},
-  {title:'⑤ Nimm einen Auftrag an',text:'Unter <b>📋 Logistik → Aufträge</b> erscheinen jetzt Transportaufträge.<br><br>Aufträge haben nur ein <b>Ziel</b> — du lieferst von einem beliebigen Standort mit Bestand! Grüne Prozente = über Marktpreis. ⚡ Express zahlt extra!<br><br><span style="color:var(--go)">🎯 Aufgabe: 1 Auftrag annehmen</span>',
+  {title:'④ Nimm einen Auftrag an',text:'Unter <b>📋 Logistik → Aufträge</b> erscheinen jetzt Transportaufträge.<br><br>Aufträge haben nur ein <b>Ziel</b> — du lieferst von deinem Standort dorthin! Grüne Prozente = über Marktpreis. ⚡ Express zahlt extra!<br><br><span style="color:var(--go)">🎯 Aufgabe: 1 Auftrag annehmen</span>',
     btn:'Zu Aufträgen',action:"openComputer();setCompTab('logistics');G.logSub='orders'",
     check:()=>G.orders.some(o=>o.acc)||G.dels>=1,reward:'📋 Erster Auftrag! +4.000€ Bonus'},
-  {title:'⑥ Liefere den Auftrag aus',text:'Wechsle zu <b>Logistik → Routenplaner</b> und klicke <b>🚛 Zuweisen</b> — es zeigt dir alle Standorte mit Bestand, sortiert nach Distanz.<br><br>Oder nutze <b>⚡ Auto</b> — dann wählt das System die beste Route!<br><br><span style="color:var(--go)">🎯 Aufgabe: Fahrzeug losschicken oder Lieferung abschließen</span>',
+  {title:'⑤ Liefere den Auftrag aus',text:'Wechsle zu <b>Logistik → Routenplaner</b> und klicke <b>🚛 Zuweisen</b> — es zeigt dir Standorte mit Bestand.<br><br>Oder nutze <b>⚡ Auto</b> — dann wählt das System die beste Route! Fahrzeuge werden auch von anderen Standorten geschickt.<br><br><span style="color:var(--go)">🎯 Aufgabe: Fahrzeug losschicken oder Lieferung abschließen</span>',
     btn:'Zum Routenplaner',action:"openComputer();setCompTab('logistics');G.logSub='routes'",
     check:()=>G.dels>=1||G.vehs.some(v=>v.st==='moving'&&v.cargo?.oid),reward:'🎉 Erste Lieferung gestartet! +12.000€ Bonus'},
-  {title:'Tutorial abgeschlossen! 🎉',text:'Du kennst die Grundlagen! Hier sind deine nächsten Ziele:<br><br>• Baue <b>Verarbeitungsfabriken</b> (Mühle, Bäckerei) für wertvollere Waren<br>• Erweitere dein <b>Lager</b> und <b>Depot</b> unter Infrastruktur<br>• Richte <b>🔄 Daueraufträge</b> für automatischen Pendeltransport ein<br>• Ab Lv5: <b>🤖 Auto-Manager</b> liefert automatisch (schützt Produktions-Reserve!)<br>• Ab Lv8: <b>🏢 Verteilerzentrum</b> als zentrales Lager + Depot<br>• Schau ins <b>📖 Wiki</b> (☰ Menü) für alle Details<br><br>💡 <b>Tipp:</b> Bleib anfangs regional! Kurze Wege = schnelle Lieferungen = mehr Aufträge/h.',
+  {title:'Tutorial abgeschlossen! 🎉',text:'Du kennst die Grundlagen! Hier sind deine nächsten Ziele:<br><br>• <b>Zweite Stadt</b> freischalten → mehr Aufträge + Produktionsvielfalt<br>• <b>Verarbeitungsfabriken</b> bauen (Mühle, Bäckerei) → wertvollere Waren<br>• <b>🔄 Daueraufträge</b> für automatischen Pendeltransport zwischen Städten<br>• Ab Lv5: <b>🤖 Auto-Manager</b> liefert automatisch<br>• 🔗 <b>Lieferketten-Planer</b> im Baumenü zeigt Erweiterungsmöglichkeiten<br>• Schau ins <b>📖 Wiki</b> (☰ Menü) für alle Details<br><br>💡 <b>Tipp:</b> Bleib anfangs regional! Kurze Wege = schnelle Lieferungen = mehr €/h.',
     btn:'🚀 Starten!',action:"openComputer();setCompTab('missions')",instant:true},
 ];
 
@@ -5760,6 +6101,15 @@ const CHANGELOG=[
     '💰 NEU: Finanzen-Tab — Einnahmen, Ausgaben und Bilanz (Logistik → Finanzen)',
     '💡 NEU: Gebäude-Empfehlungen im Baumenü (basierend auf vorhandenen Rohstoffen)',
     '🌧️ 7 neue Events: Regen, Nebel, Express-Welle, Luxus-Boom, Bauboom, Nahrungskrise, Billig-Benzin',
+    '📏 BALANCING: Sanftere Distanzkurve (30→10000km statt 25→25000km), Reward +40% für weite Strecken, Mindest-Reward 80% Marktpreis',
+    '⏳ BALANCING: Liefer-Timer +50% großzügiger (3h Basis + mehr Distanz-Zeit)',
+    '🆕 Erste 3 Aufträge: näher (15km), kleiner (2-5×), doppelte Belohnung',
+    '💡 Dashboard: "Nächster Schritt" Hinweis für neue Spieler',
+    '⏳ Dashboard: Produktions-Timer zeigt nächste Ernte/Produktion',
+    '🎉 Erster Marktverkauf: +3.000€ Bonus',
+    '🔍 Wiki-Suche: Keyword-basiert über alle Sektionen',
+    '📖 Tutorial gekürzt: "Zweite Stadt kaufen" entfernt (nicht mehr nötig)',
+    '🏭 Startscreen: Willkommenstext, Strategietipps und Ausblick',
     '⚡ Express-Aufträge: goldgelb im Karten-Overlay + Dashboard',
     '🌳 Obstplantage: Max 8 Bäume/Sorte, 20 gesamt',
     '🏢 NEU: Verteilerzentrum (Lv8) — Lager +2000 & Depot +6, belegt 2 Plätze, upgradbar',
@@ -5857,7 +6207,12 @@ function renComp(){
     if(body)body.innerHTML='<div style="display:flex;flex-direction:column;align-items:center;justify-content:center;height:60vh;text-align:center;gap:12px"><div style="font-size:48px">🔴</div><div style="font-family:var(--mono);font-size:20px;font-weight:700;color:var(--r)">Off Duty</div><div style="color:var(--td);max-width:300px;line-height:1.6">Dein Unternehmen ist eingefroren.<br>Keine Produktion, keine Kosten.<br><br>Schalte auf <b style="color:var(--a)">🟢 On Duty</b> um weiterzuspielen.</div><button class="btn full" style="max-width:200px;background:rgba(61,214,140,.1);color:var(--a);border-color:var(--a)" onclick="toggleDuty()">🟢 On Duty schalten</button></div>';
     return;
   }
-  document.querySelectorAll('.ctab').forEach(t=>{t.classList.toggle('on',t.dataset.ct===compTab);t.onclick=()=>setCompTab(t.dataset.ct)});
+  document.querySelectorAll('.ctab').forEach(t=>{t.classList.toggle('on',t.dataset.ct===compTab);t.onclick=()=>setCompTab(t.dataset.ct);t.classList.remove('hint-pulse')});
+  // Pulse hint on next-action tab for new players
+  if(G&&(!G.tutDone||(G.dels||0)<5)){
+    const _ph=!G.vehs.length?'dealer':!Object.values(G.blds).flat().length?'buildings':G.orders.some(o=>o.acc&&(o.amt-(o.shipped||0))>0&&!G.vehs.find(v=>v.cargo?.oid===o.id&&v.st==='moving'))?'logistics':null;
+    if(_ph){const pt=document.querySelector('.ctab[data-ct="'+_ph+'"]');if(pt&&compTab!==_ph)pt.classList.add('hint-pulse')}
+  }
   const locEl=document.getElementById('compLoc');if(locEl){const c=G.sel?C(G.sel):null;locEl.textContent=c?'📍 '+c.name:'📍 —'}
 
   // Explorer: group by continent
@@ -5876,6 +6231,7 @@ function renComp(){
     const needsM=G.vehs.filter(v=>vehCondition(v)<50).length;
     eh+='<div class="ex-city'+(G.fleetSub==='overview'?' sel':'')+'" onclick="G.fleetSub=\'overview\';renComp()" style="font-weight:600;color:'+(G.fleetSub==='overview'?'var(--a)':'var(--td)')+'"><i class="ri-truck-line"></i> Übersicht</div>';
     eh+='<div class="ex-city'+(G.fleetSub==='maint'?' sel':'')+'" onclick="G.fleetSub=\'maint\';renComp()" style="font-weight:600;color:'+(G.fleetSub==='maint'?'var(--r)':'var(--td)')+'"><i class="ri-tools-line"></i> Wartung'+(needsM?' <span style="background:var(--r);color:#fff;border-radius:8px;padding:0 5px;font-size:9px">'+needsM+'</span>':'')+'</div>';
+    eh+='<div class="ex-city'+(G.fleetSub==='relocate'?' sel':'')+'" onclick="G.fleetSub=\'relocate\';renComp()" style="font-weight:600;color:'+(G.fleetSub==='relocate'?'var(--a2)':'var(--td)')+'"><i class="ri-send-plane-line"></i> Umstationieren</div>';
     eh+='<div style="height:1px;background:var(--bd);margin:4px 6px"></div>';
   }
   // Logistics tab: combined sub-tabs
@@ -5993,10 +6349,17 @@ function renComp(){
     if(['logistics','inventory'].includes(compTab)){
       const canAuto=playerLvl()>=5;
       if(canAuto){
-        const on=G.autoManager;
+        const unlocked=G.amUnlocked;
+        const on=G.autoManager&&unlocked;
         pre+='<div style="display:flex;justify-content:flex-end;align-items:center;gap:8px;margin-bottom:4px">';
-        if(on)pre+='<span class="sub" style="color:var(--a)">🤖 Weist Fahrzeuge automatisch zu</span>';
-        pre+='<button class="btn sm" onclick="toggleAutoManager()" style="'+(on?'background:rgba(61,214,140,.2);color:var(--a);border-color:var(--a)':'background:rgba(248,113,113,.08);color:var(--r);border-color:rgba(248,113,113,.3)')+'">🤖 '+(on?'AN ✅':'AUS ❌')+'</button></div>';
+        if(on){const d=G.amMaxDist??50;pre+='<span class="sub" style="color:var(--a)">🤖 Aktiv · max '+(d===0?'lokal':d+'km')+'</span>'}
+        if(unlocked){
+          pre+='<button class="btn sm" onclick="showAMSettings()" title="Einstellungen">⚙️</button>';
+          pre+='<button class="btn sm" onclick="toggleAutoManager()" style="'+(on?'background:rgba(61,214,140,.2);color:var(--a);border-color:var(--a)':'background:rgba(248,113,113,.08);color:var(--r);border-color:rgba(248,113,113,.3)')+'">🤖 '+(on?'AN ✅':'AUS ❌')+'</button>';
+        } else {
+          pre+='<button class="btn sm" onclick="showAMUnlockPopup()" style="background:rgba(251,191,36,.1);color:var(--go);border-color:rgba(251,191,36,.3)">🔓 Freischalten ('+fmt(25000)+')</button>';
+        }
+        pre+='</div>';
       } else pre+='<div style="display:flex;justify-content:flex-end;margin-bottom:4px"><span class="tg" style="opacity:.4">🤖 Auto-Manager ab Level 5</span></div>';}
     if(pre)el.innerHTML=pre+el.innerHTML;
   }
@@ -6345,11 +6708,16 @@ function compDealer(el){
         // Actions
         h+='<div style="display:flex;gap:4px;margin-top:4px;flex-wrap:wrap">';
         if(atHome)h+='<button class="btn red sm" onclick="sellVehicle(\''+v.id+'\')">Verkaufen +'+fmt(sellPrice)+'</button>';
-        else if(isIdle)h+='<button class="btn sm" onclick="quickRecall(\''+v.id+'\')">🔙 An Depot '+(depot?.name||'')+'</button>';
+        else if(isIdle){
+          h+='<div style="width:100%;padding:4px 8px;border-radius:6px;background:rgba(248,113,113,.06);border:1px solid rgba(248,113,113,.15);font-size:11px;margin-bottom:4px">';
+          h+='<span style="color:var(--r)">⚠️ Kann nicht verkauft werden</span> — Fahrzeug steht in <b>'+(loc?.name||'?')+'</b>, Depot ist <b>'+(depot?.name||'?')+'</b>';
+          h+='</div>';
+          h+='<button class="btn sm" style="background:rgba(251,191,36,.1);color:var(--go);border-color:rgba(251,191,36,.3)" onclick="quickRecall(\''+v.id+'\')">🔙 Zum Depot rückrufen ('+(depot?.name||'?')+')</button>';
+        }
         if(isMoving&&!v.recallToDepot)h+='<button class="btn sm" style="color:var(--go);border-color:rgba(251,191,36,.3)" onclick="G.vehs.find(x=>x.id===\''+v.id+'\').recallToDepot=true;addLog(\'🔙 Rückruf nach Auftragsende geplant\');renComp()">🔙 Nach Auftrag → Depot</button>';
         if(isMoving&&v.recallToDepot)h+='<span class="tg" style="color:var(--go)">🔙 Rückruf geplant</span>';
         if(isMoving)h+='<button class="btn sm" onclick="recallVehicle(\''+v.id+'\')">⚡ Sofort rückrufen</button>';
-        if(!atHome&&isIdle)h+='<span class="sub" style="color:var(--td)">Nicht im Depot – erst rückrufen</span>';
+        if(isMoving)h+='<span class="sub" style="color:var(--td)">Erst nach Ankunft im Depot verkaufbar</span>';
         h+='</div></div>'});
     });
     el.innerHTML=h;return;
@@ -6418,6 +6786,32 @@ function compFleet(el){
   if(!G.fleetSub)G.fleetSub='overview';
   const sc=G.sel?C(G.sel):null;
 
+  // ── RELOCATE SUB-TAB ──
+  if(G.fleetSub==='relocate'){
+    let h=tabHead('fleet','📍 Umstationieren','Fahrzeuge zwischen Standorten verschieben');
+    const idleVehs=G.vehs.filter(v=>v.st==='idle');
+    if(!idleVehs.length){el.innerHTML=h+'<div class="sub" style="padding:20px;text-align:center">Keine idle Fahrzeuge zum Umstationieren</div>';return}
+    h+='<div class="sub" style="margin-bottom:8px">Wähle ein neues Depot für idle Fahrzeuge. Das Fahrzeug wird sofort umgesetzt und automatisch umbenannt.</div>';
+    // Group by city
+    const byCityR={};idleVehs.forEach(v=>{const k=v.loc||v.depot||'?';if(!byCityR[k])byCityR[k]=[];byCityR[k].push(v)});
+    Object.entries(byCityR).forEach(([cid2,vehs])=>{const city2=C(cid2);
+      h+='<div class="sec-label">📍 '+(city2?.name||'?')+' · '+vehs.length+' Fahrzeuge</div>';
+      vehs.forEach(v=>{const vt=VT[v.type];
+        const destOptions=cities.filter(ci=>ci.id!==cid2).map(ci=>{
+          const used=G.vehs.filter(x=>(x.depot||x.loc)===ci.id).length;const cap=depotCap(ci.id);
+          return{id:ci.id,name:ci.name,free:cap-used}}).filter(d=>d.free>0);
+        h+='<div class="crd" style="padding:6px 8px"><div class="rw"><span>'+vt.em+' <b>'+vehName(v)+'</b> <span class="sub">'+vt.name+' · Kap: '+vehCap(v)+'</span></span>';
+        if(destOptions.length){
+          h+='<select class="sl" style="font-size:11px;padding:2px 6px;max-width:160px" onchange="if(this.value)_relocateVehicle(\''+v.id+'\',this.value)">';
+          h+='<option value="">Verschieben nach...</option>';
+          destOptions.forEach(d=>{h+='<option value="'+d.id+'">'+d.name+' ('+d.free+' frei)</option>'});
+          h+='</select>';
+        } else h+='<span class="sub" style="color:var(--r)">Kein Platz</span>';
+        h+='</div></div>'});
+    });
+    el.innerHTML=h;return;
+  }
+
   // ── MAINTENANCE SUB-TAB ──
   if(G.fleetSub==='maint'){
     let h=tabHead('fleet','🔧 Wartungsübersicht','Fahrzeugzustand und Wartung');
@@ -6480,6 +6874,8 @@ function compFleet(el){
   }
 
   if(!sc){
+    if(!G.vehs.length){
+      el.innerHTML=h+'<div class="empty-hint" onclick="setCompTab(\'dealer\')"><div class="eh-em">🚛</div><div class="eh-title">Noch keine Fahrzeuge</div><div class="eh-sub">Kaufe im Händler dein erstes Fahrzeug um Waren zu transportieren</div><div style="margin-top:8px"><button class="btn sm" style="background:var(--a);color:var(--bg);border-color:var(--a)">🛒 Zum Händler →</button></div></div>';return}
     // Global view: show maintenance warnings prominently
     const needsMaint2=G.vehs.filter(v=>v.needsMaint&&v.st==='idle');
     if(needsMaint2.length){
@@ -6625,9 +7021,10 @@ function showSendGoodsPopup(fromCid,good,maxAmt){
 
   // Step 2: Destination
   h+='<div style="margin:12px 0"><div style="font-family:var(--mono);font-size:15px;color:var(--a);font-weight:700;margin-bottom:4px">② Zielort wählen</div>';
-  h+='<select id="sgDest" class="sl-action" style="width:100%;padding:8px" onfocus="renderBlocked=true" onblur="renderBlocked=false"><option value="">Ziel auswählen…</option>';
-  targets.forEach(t=>{h+='<option value="'+t.id+'">'+cSzIcon(t.pop)+' '+t.name+' · '+fdist(fc,t)+' km</option>'});
-  h+='</select></div>';
+  h+='<select id="sgDest" class="sl-action" style="width:100%;padding:8px" onchange="updateSgInfo()" onfocus="renderBlocked=true" onblur="renderBlocked=false"><option value="">Ziel auswählen…</option>';
+  targets.forEach(t=>{const free=_freeCapAtCity(t.id);h+='<option value="'+t.id+'"'+(free<=0?' style="color:var(--r)"':'')+'>'+cSzIcon(t.pop)+' '+t.name+' · '+fdist(fc,t)+' km · '+(free>0?free+' frei':'⛔ voll')+'</option>'});
+  h+='</select>';
+  h+='<div id="sgCapWarn" style="display:none;padding:4px 8px;margin-top:4px;border-radius:6px;background:rgba(248,113,113,.06);border:1px solid rgba(248,113,113,.15);font-size:11px;color:var(--r)"></div></div>';
 
   // Step 3: Vehicles
   h+='<div style="margin:12px 0"><div style="font-family:var(--mono);font-size:15px;color:var(--a);font-weight:700;margin-bottom:4px">③ Fahrzeuge auswählen ('+idleHere.length+' vor Ort)</div>';
@@ -6671,12 +7068,23 @@ function updateSgInfo(){
   checks.forEach(cb=>{totalCap+=parseInt(cb.dataset.cap,10)||0;count++});
   const enough=totalCap>=amt;
   el.innerHTML='<span style="font-family:var(--mono);font-size:11px;font-weight:700;color:'+(enough?'var(--a)':'var(--go)')+'">'+count+' Fahrzeug'+(count>1?'e':'')+' · Kapazität: '+totalCap+'/'+amt+(enough?' ✅':' ⚠️ reicht nicht')+'</span>';
+  // Capacity warning
+  const warn=document.getElementById('sgCapWarn');
+  const destSel=document.getElementById('sgDest');
+  if(warn&&destSel&&destSel.value){
+    const free=_freeCapAtCity(destSel.value);const destName=C(destSel.value)?.name||'?';
+    if(amt>free){warn.style.display='block';warn.textContent='⚠️ '+destName+' hat nur '+free+' Platz frei ('+amt+' gewählt) — Überschuss geht verloren!'}
+    else{warn.style.display='block';warn.style.background='rgba(61,214,140,.06)';warn.style.borderColor='rgba(61,214,140,.15)';warn.style.color='var(--a)';warn.textContent='✅ '+destName+': '+free+' frei — '+amt+' passen'}
+  } else if(warn)warn.style.display='none';
 }
 
 function execSendGoods(fromCid,good){
   const amt=parseInt(document.getElementById('sgAmt',10)?.value)||0;
   const dest=document.getElementById('sgDest')?.value;
   if(!amt||!dest){addLog('❌ Menge und Ziel wählen');return}
+  // Capacity check
+  const free=_freeCapAtCity(dest);
+  if(amt>free&&!confirm('⚠️ Ziel-Lager hat nur '+free+' freie Plätze. '+Math.max(0,amt-free)+'× gehen verloren. Trotzdem senden?'))return;
   const s=G.stor[fromCid];if(!s||(s[good]||0)<amt){addLog('❌ Nicht genug Vorrat');return}
   const checks=document.querySelectorAll('.sg-vc:checked');
   if(!checks.length){addLog('❌ Kein Fahrzeug ausgewählt');return}
@@ -6726,6 +7134,21 @@ function _assignVehGroup(vid,gid){
   const v=G.vehs.find(x=>x.id===vid);if(!v)return;
   if(gid==='_remove')delete v.group;
   else v.group=gid;
+  save();renComp();
+}
+function _relocateVehicle(vid,destCid){
+  const v=G.vehs.find(x=>x.id===vid);if(!v||v.st!=='idle')return;
+  const dest=C(destCid);if(!dest)return;
+  const oldLoc=C(v.loc);
+  v.loc=destCid;v.depot=destCid;
+  // Auto-rename to new region
+  const reg2=getRegion((dest.co||'').toUpperCase());
+  const abbr=({europa:'EU',nordamerika:'NA',suedamerika:'SA',asien:'AS',afrika:'AF',ozeanien:'OZ'})[reg2]||'XX';
+  const cityAbbr=dest.name.substring(0,3).toUpperCase();
+  const num=String(G.vehs.indexOf(v)+1).padStart(2,'0');
+  v.customName=abbr+'/'+cityAbbr+'-'+num;
+  addLog('📍 '+vehName(v)+' umstationiert: '+(oldLoc?.name||'?')+' → '+dest.name);
+  if(typeof toast==='function')toast('📍 '+vehName(v)+' → '+dest.name);
   save();renComp();
 }
 
@@ -6804,7 +7227,7 @@ function compOrders(el){
         const avlAll=G.vehs.filter(v=>v.st==='idle'&&!v.followUpOrder&&!v.pendingTransfer&&!isSOBound(v)&&canVehTravel(v,o.to)&&_cityStock(v.loc,o.good)>0);
         if(avlAll.length)h+='<button class="btn sm" style="background:rgba(251,191,36,.1);color:var(--go);border-color:rgba(251,191,36,.3)" onclick="autoAssign(\''+o.id+'\')">⚡ Senden (🚛'+avlAll.length+')</button>';
         h+='<button class="btn sm" onclick="shAsgn(\''+o.id+'\')">🚛 Zuweisen</button>';
-        if(!avlAll.length&&!approaching.length)h+='<span class="sub" style="color:var(--r);padding:3px 0">⏳ Kein Fzg mit Bestand</span>';
+        if(!avlAll.length&&!approaching.length)h+='<span class="sub" style="color:var(--r);padding:3px 0">⏳ Kein Fzg verfügbar</span>';
       }
       const _penAge=o.accTick?(G.tick-o.accTick):0;const _penPct=o.deliverTl?Math.min(_penAge/o.deliverTl,1):0;
       const _penAmt=Math.floor((o.origRew||o.rew)*(0.2+_penPct*0.3));
@@ -6814,20 +7237,23 @@ function compOrders(el){
 
     // Available
     h+='<div class="sec-label">📬 Verfügbar · '+open.length+'</div>';
-    if(!open.length)h+='<div class="sub" style="padding:12px;text-align:center;color:var(--td)">Keine Aufträge — produziere Waren!</div>';
+    if((G.dels||0)<3&&open.length)h+='<div style="padding:4px 8px;margin-bottom:6px;font-size:11px;color:var(--a2);border-radius:6px;background:rgba(56,189,248,.05);border:1px solid rgba(56,189,248,.15)">💡 Annehmen → Fahrzeug zuweisen → Liefern = Geld!</div>';
+    if(!open.length)h+='<div class="empty-hint" onclick="openComputer();setCompTab(\'buildings\');bldSub=\'build\'"><div class="eh-em">📋</div><div class="eh-title">Keine Aufträge verfügbar</div><div class="eh-sub">Aufträge erscheinen wenn du Waren produzierst (min. 3 Stück). Baue ein Gebäude!</div></div>';
     open.forEach(o=>{const t=Cx(o.to);if(!t)return;
       const globalStock=_globalStock(o.good);
-      const avlAll=G.vehs.filter(v=>v.st==='idle'&&!v.followUpOrder&&!isSOBound(v)&&canVehTravel(v,o.to)&&_cityStock(v.loc,o.good)>0);
+      const avlAll=G.vehs.filter(v=>v.st==='idle'&&!v.followUpOrder&&!isSOBound(v)&&canVehTravel(v,o.to));
       const canAcc=globalStock>=1;
       const isE=o.type==='express';const tl=Math.max(0,o.tl-(G.tick-o.born));
       const ppu=o.pricePerUnit||Math.round(o.rew/o.amt);
       const mktP=o.mktRef||BASE_PRICES[o.good]||100;
       const prem=Math.round((ppu/mktP-1)*100);
-      const nearestDist=Math.round(Math.min(...cities.map(c=>hav(c.lat,c.lng,t.lat,t.lng))));
+      // Find nearest source city with stock/production
+      const src=_nearestSourceCity(o.good,t);
+      const srcDist=src?Math.round(src.d):0;const srcName=src?src.c.name:'?';const srcStk=src?_cityStock(src.c.id,o.good):0;
       h+='<div class="crd" style="'+(isE?'border-left:3px solid var(--go);background:rgba(251,191,36,.02)':'')+'">';
       h+='<div class="rw"><span style="font-weight:600">'+(isE?'⚡ ':'')+(GOODS[o.good]?.em||'')+' '+o.amt+'× '+(GOODS[o.good]?.name||'')+'</span>';
       h+='<span style="color:var(--a);font-family:var(--mono);font-weight:700">'+fmt(o.rew)+'</span></div>';
-      h+='<div class="rw"><span class="sub">→ '+t.name+(o.toUnlocked===false?' 🔓':'')+' · ~'+nearestDist+' km · ⏱~'+ftime(Math.round(nearestDist/80*TF))+'</span>';
+      h+='<div class="rw"><span class="sub">→ '+t.name+(o.toUnlocked===false?' 🔓':'')+' · <span style="color:var(--a2)" title="Ab nächstem Bestand">📍 '+srcName+' ('+srcStk+'×) · '+srcDist+' km</span> · ⏱~'+ftime(Math.round(srcDist/80*TF))+'</span>';
       h+='<span data-atimer="'+o.id+'" class="sub" style="font-family:var(--mono);'+(tl<120?'color:var(--r)':'')+'">⏱ '+ftime(tl)+'</span></div>';
       h+='<div style="display:flex;gap:8px;margin-top:3px;font-size:12px;color:var(--td)">';
       h+='<span>'+fmt(ppu)+'/St.</span><span style="color:'+(prem>=0?'var(--a)':'var(--r)')+'">'+(prem>=0?'+':'')+prem+'%</span><span>📦 '+globalStock+' vorrätig</span>';
@@ -7010,10 +7436,10 @@ function compFinance(el){
 
   // City filter dropdown
   h+='<div style="display:flex;gap:6px;margin-bottom:6px;align-items:center;flex-wrap:wrap">';
-  h+='<select class="sl" style="font-size:12px;padding:4px 8px;min-width:150px" onchange="if(this.value){G._invFilter=this.value;sel(this.value)}else{G._invFilter=null}renComp()">';
-  h+='<option value="">🌍 Alle Standorte</option>';
-  cityData.filter(d=>d.used>0||Object.keys(d.bldStock).length>0).forEach(d=>{
-    h+='<option value="'+d.c.id+'"'+(fc===d.c.id?' selected':'')+'>📍 '+d.c.name+' ('+d.used+'/'+d.cap+')</option>'});
+  h+='<select class="sl" style="font-size:12px;padding:4px 8px;min-width:150px" onchange="if(this.value){G._invFilter=this.value;selectLocation(this.value)}else{G._invFilter=null}renComp()">';
+  h+='<option value=""'+(fc?'':' selected')+'>🌍 Alle Standorte</option>';
+  cityData.forEach(d=>{
+    h+='<option value="'+d.c.id+'"'+(fc===d.c.id?' selected':'')+(d.used>0||Object.keys(d.bldStock).length>0?'':' style="color:var(--td)"')+'>📍 '+d.c.name+' ('+d.used+'/'+d.cap+')</option>'});
   h+='</select>';
   // Category filter
   h+='<select class="sl" style="font-size:12px;padding:4px 8px;min-width:120px" onchange="G._invCat=this.value;renComp()">';
@@ -7070,7 +7496,7 @@ function compFinance(el){
         h+='<div style="display:flex;align-items:center;gap:4px;padding:4px 0;font-size:12px;border-top:1px solid var(--bd)">';
         h+='<span style="flex:1;min-width:0">'+(GOODS[g]?.em||'')+' '+(GOODS[g]?.name||'')+' <b>'+amt+'</b> <span class="sub">'+price.toLocaleString('de-DE')+'€/St.</span></span>';
         if(vHere.length)h+='<button class="btn sm" style="background:rgba(251,191,36,.1);color:var(--go);border-color:rgba(251,191,36,.25)" onclick="showMarketSellPopup(\''+c.id+'\',\''+g+'\')">💰</button>';
-        if(cities.length>1)h+='<button class="btn sm" onclick="showSendGoodsPopup(\''+c.id+'\',\''+g+'\','+amt+')">📦</button>';
+        if(cities.length>1)h+='<button class="btn sm" onclick="showSendGoodsPopup(\''+c.id+'\',\''+g+'\','+amt+')" title="An anderen Standort versenden">📦 Senden</button>';
         h+='</div>'});
     } else h+='<div class="sub" style="text-align:center;padding:8px;opacity:.5">Leer'+(G._invCat!=='all'?' (Filter aktiv)':'')+'</div>';
   }
@@ -7154,10 +7580,10 @@ function compMarket(el){
     if(!G.sellCityFilter)G.sellCityFilter='all';
     if(!G.sellGoodFilter)G.sellGoodFilter='all';
     h+='<div style="display:flex;gap:6px;margin-bottom:8px;align-items:center;flex-wrap:wrap">';
-    h+='<select class="sl" style="font-size:12px;padding:4px 8px;min-width:150px" onchange="if(this.value!==\'all\'){G.sellCityFilter=this.value;sel(this.value)}else{G.sellCityFilter=\'all\'}renComp()">';
-    h+='<option value="all">🌍 Alle Standorte</option>';
+    h+='<select class="sl" style="font-size:12px;padding:4px 8px;min-width:150px" onchange="if(this.value!==\'all\'){G.sellCityFilter=this.value;selectLocation(this.value)}else{G.sellCityFilter=\'all\';G.sel=null}renComp()">';
+    h+='<option value="all"'+(G.sellCityFilter==='all'?' selected':'')+'>🌍 Alle Standorte</option>';
     cities.forEach(c=>{const s=G.stor[c.id]||{};const cnt=Object.values(s).filter(v=>v>0).length;
-      if(cnt)h+='<option value="'+c.id+'"'+(G.sellCityFilter===c.id?' selected':'')+'>📍 '+c.name+' ('+cnt+' Waren)</option>'});
+      h+='<option value="'+c.id+'"'+(G.sellCityFilter===c.id?' selected':'')+(cnt?'':' style="color:var(--td)"')+'>📍 '+c.name+' ('+cnt+' Waren)</option>'});
     h+='</select>';
     h+='<select class="sl" style="font-size:12px;padding:4px 8px;min-width:120px" onchange="G.sellGoodFilter=this.value;renComp()">';
     [['all','Alle Waren'],['roh','🌾 Rohstoffe'],['tier','🐄 Tierprodukte'],['ver','🏭 Verarbeitung'],['lux','💎 Luxus/Industrie']].forEach(([k,l])=>{
@@ -7427,7 +7853,8 @@ function compRoutes(el){
       const avlRemote=G.vehs.filter(x=>x.st==='idle'&&!x.followUpOrder&&!isSOBound(x)&&canVehTravel(x,o.to)&&_cityStock(x.loc,o.good)<=0);
       const avlTotal=avlLocal.length+avlRemote.length;
       h+='<div class="crd"><div class="rw"><span>'+fmtOrd(o.num)+' '+(GOODS[o.good]?.em||'')+' '+o.amt+'×</span><span style="color:var(--a);font-family:var(--mono);font-size:14px;font-weight:700">'+fmt(o.rew)+'</span></div>';
-      h+='<div class="sub">→ '+t.name+' · '+globalStock+'× vorrätig</div>';
+      const src=_nearestSourceCity(o.good,t);
+      h+='<div class="sub">→ '+t.name+(src?' · <span style="color:var(--a2)">📍 '+src.c.name+' ('+_cityStock(src.c.id,o.good)+'×) · '+Math.round(src.d)+' km</span>':' · '+globalStock+'× vorrätig')+'</div>';
       if(shipped>0)h+='<div class="sub" style="color:var(--go)">📦 Bereits verschickt: '+shipped+'/'+o.amt+'<div class="pb"><div class="pf" style="width:'+(shipped/o.amt*100)+'%"></div></div></div>';
       h+='<div style="display:flex;gap:4px;margin-top:6px">';
       if(avlTotal>0){
@@ -7593,18 +8020,34 @@ function compStanding(el){
     h+='<div style="display:flex;gap:8px;margin-top:4px;font-size:12px;color:var(--td);flex-wrap:wrap">';
     gl.forEach(g=>{const stock=_cityStock(so.from,g.good);h+='<span>'+(GOODS[g.good]?.em||'')+' '+stock+'×</span>'});
     h+='<span>🏭 Ziel: '+destUsed+'/'+destCap+'</span>';
-    h+='<span>🚛 '+vids.length+' zugewiesen</span>';
-    if(activeVehs.length)h+='<span style="color:var(--go)">🔶 '+activeVehs.length+' unterwegs</span>';
-    if(idleAssigned.length)h+='<span style="color:var(--a)">🟢 '+idleAssigned.length+' bereit</span>';
+    if(so.stats)h+='<span>📊 '+so.stats.trips+' Fahrten · '+(so.stats.totalAmt||0)+'× gesamt</span>';
     h+='</div>';
-    // Active vehicle tracking
-    if(activeVehs.length){activeVehs.forEach(v=>{const vt=VT[v.type];const f2=C(v.rt?.from),t2=C(v.rt?.to);
-      if(!f2||!t2)return;const tn=tripT(f2,t2,vt.spd),pct=Math.min(v.prog/(tn||1),1);
-      h+='<div style="display:flex;align-items:center;gap:6px;margin-top:3px;padding:3px 6px;border-radius:4px;background:rgba(255,255,255,.02);font-size:12px">';
-      h+=vt.em+' <b>'+vehName(v)+'</b> · '+(v.cargo?.amt||0)+'×';
-      h+='<div class="pb" style="flex:1;height:4px"><div class="pf" style="width:'+pct*100+'%"></div></div>';
-      h+='<span style="color:var(--a);font-family:var(--mono)">'+Math.floor(pct*100)+'%</span> '+ftime(Math.max(0,tn-v.prog));
-      h+='</div>'})}
+    // Vehicle status with detailed location
+    h+='<div style="margin-top:6px">';
+    vids.forEach(vid=>{const v=G.vehs.find(x=>x.id===vid);if(!v)return;const vt=VT[v.type];
+      let status='',clr='var(--td)';
+      if(v.st==='moving'&&v.rt?.to===so.to){
+        const f2=C(v.rt.from),t2=C(v.rt.to);const tn=f2&&t2?tripT(f2,t2,vt.spd):300;const pct=Math.min(v.prog/(tn||1),1);
+        status='<span style="color:var(--go)">🔶 Hinfahrt '+Math.floor(pct*100)+'% · '+ftime(Math.max(0,tn-v.prog))+'</span>';
+        h+='<div style="display:flex;align-items:center;gap:6px;padding:3px 6px;border-radius:4px;background:rgba(255,255,255,.02);font-size:11px;margin-bottom:2px">';
+        h+=vt.em+' '+vehName(v)+' · '+(v.cargo?.amt||0)+'× · '+status;
+        h+='<div class="pb" style="flex:1;height:3px"><div class="pf" style="width:'+pct*100+'%"></div></div></div>';
+      } else if(v.st==='moving'&&v.rt?.to===so.from){
+        status='🔙 Rückfahrt';clr='var(--a2)';
+        h+='<div style="padding:3px 6px;font-size:11px;color:'+clr+';margin-bottom:2px">'+vt.em+' '+vehName(v)+' · '+status+'</div>';
+      } else if(v.st==='moving'){
+        status='🔶 unterwegs ('+((C(v.rt?.to))?.name||'?')+')';clr='var(--go)';
+        h+='<div style="padding:3px 6px;font-size:11px;color:'+clr+';margin-bottom:2px">'+vt.em+' '+vehName(v)+' · '+status+'</div>';
+      } else if(v.st==='idle'&&v.loc===so.from){
+        const hasStock=gl.some(g=>_cityStock(so.from,g.good)>=1);
+        status=hasStock?'<span style="color:var(--a)">🟢 Bereit (laden...)</span>':'<span style="color:var(--go)">⏳ Wartet auf Nachschub</span>';
+        h+='<div style="padding:3px 6px;font-size:11px;margin-bottom:2px">'+vt.em+' '+vehName(v)+' · 📍 '+(fc?.name||'?')+' · '+status+'</div>';
+      } else if(v.st==='idle'){
+        status='<span style="color:var(--a2)">📍 '+(C(v.loc)?.name||'?')+' → wird geholt</span>';
+        h+='<div style="padding:3px 6px;font-size:11px;margin-bottom:2px">'+vt.em+' '+vehName(v)+' · '+status+'</div>';
+      }
+    });
+    h+='</div>';
     if(!vids.length)h+='<div class="sub" style="margin-top:4px;color:var(--r)">⚠️ Keine Fahrzeuge zugewiesen — <span style="cursor:pointer;color:var(--a);text-decoration:underline" onclick="showEditSOPopup(\''+so.id+'\')">Bearbeiten</span></div>';
     h+='</div>'});
   el.innerHTML=h}
@@ -7613,102 +8056,133 @@ function showNewSOPopup(){
   let ex=document.getElementById('soPopup');if(ex)ex.remove();
   const popup=document.createElement('div');popup.id='soPopup';popup.className='unlock-bg';
   popup.style.zIndex='9999';
-  popup._state={step:1,good:'',from:'',to:'',amt:5};
+  popup._state={step:1,from:G.sel||'',to:'',vehIds:[],goods:[]};
   _soPopupRender(popup);
   popup.addEventListener('click',e=>{if(e.target===popup)popup.remove()});
   document.body.appendChild(popup);
 }
 function _soPopupRender(popup){
-  const state=popup._state;
-  let h='<div class="unlock-popup" style="width:460px;max-height:85vh;overflow-y:auto"><div class="unlock-body">';
-  h+='<div style="text-align:center;margin-bottom:12px"><span style="font-size:24px">🔄</span>';
+  const st=popup._state;
+  let h='<div class="unlock-popup" style="width:480px;max-height:85vh;overflow-y:auto"><div class="unlock-body">';
+  h+='<div style="text-align:center;margin-bottom:10px"><span style="font-size:24px">🔄</span>';
   h+='<div style="font-family:var(--mono);font-size:18px;font-weight:700;color:var(--a);margin-top:4px">Neuer Dauerauftrag</div></div>';
   h+='<div style="display:flex;gap:4px;justify-content:center;margin-bottom:14px">';
-  [1,2,3].forEach(s=>{h+='<div style="width:60px;height:4px;border-radius:2px;background:'+(s<=state.step?'var(--a)':'var(--bd)')+'"></div>'});
+  ['Route','Fahrzeuge','Waren'].forEach((l,i)=>{h+='<div style="padding:3px 12px;border-radius:8px;font-size:11px;font-weight:600;background:'+(i+1<=st.step?'rgba(61,214,140,.15);color:var(--a)':'rgba(255,255,255,.05);color:var(--td)')+'">'+l+'</div>'});
   h+='</div>';
-  if(state.step===1){
-    h+='<div style="font-weight:600;margin-bottom:8px;font-size:14px">① Ware auswählen</div>';
-    // Multi-goods option for distribution center strategy
-    h+='<div class="crd" style="padding:8px 10px;cursor:pointer;border-color:rgba(56,189,248,.3);background:rgba(56,189,248,.04)" onclick="const p=document.getElementById(\'soPopup\');p._state.good=\'_all\';p._state.step=2;_soPopupRender(p)">';
-    h+='<div class="rw"><span>📦 <b>Alle Waren</b></span><span class="tg" style="font-size:10px;color:var(--a2)">Multi</span></div>';
-    h+='<div class="sub">Lädt alle verfügbaren Waren ins Fahrzeug — ideal für Verteilerzentren</div></div>';
-    const goodsWithStock={};
-    cities.forEach(c=>{Object.entries(G.stor[c.id]||{}).forEach(([g,a])=>{if(a>0){if(!goodsWithStock[g])goodsWithStock[g]={total:0,cities:[]};goodsWithStock[g].total+=a;goodsWithStock[g].cities.push({name:c.name,amt:a})}})});
-    const producedGoods=new Set();
-    cities.forEach(c=>{(G.blds[c.id]||[]).forEach(b=>{const d=BLD[b.type];if(d&&d.out)Object.keys(d.out).forEach(g=>producedGoods.add(g))})});
-    const allGoods=Object.entries(GOODS).filter(([k])=>goodsWithStock[k]||producedGoods.has(k));
-    if(!allGoods.length)h+='<div class="sub" style="padding:12px;text-align:center">Keine Waren — baue zuerst Gebäude!</div>';
-    allGoods.sort((a,b)=>(goodsWithStock[b[0]]?.total||0)-(goodsWithStock[a[0]]?.total||0)).forEach(([k,g])=>{
-      const s=goodsWithStock[k];
-      h+='<div class="crd" style="padding:6px 10px;cursor:pointer" onclick="const p=document.getElementById(\'soPopup\');p._state.good=\''+k+'\';p._state.step=2;_soPopupRender(p)">';
-      h+='<div class="rw"><span>'+g.em+' <b>'+g.name+'</b></span>';
-      h+='<span style="font-family:var(--mono);color:'+(s?'var(--a)':'var(--td)')+'">'+( s?s.total+'× Lager':'produziert')+'</span></div>';
-      if(s)h+='<div class="sub">'+s.cities.map(c=>c.name+': '+c.amt+'×').join(' · ')+'</div>';
+
+  // ═══ STEP 1: Route ═══
+  if(st.step===1){
+    h+='<div style="font-weight:600;margin-bottom:6px">① Von (Quelle):</div>';
+    cities.forEach(c=>{const stock=Object.values(G.stor[c.id]||{}).reduce((s2,v)=>s2+v,0);const blds=(G.blds[c.id]||[]).length;
+      const sel=st.from===c.id;
+      h+='<div class="crd" style="padding:5px 10px;cursor:pointer;'+(sel?'border-color:var(--a);background:rgba(61,214,140,.06)':'')+'" onclick="const p=document.getElementById(\'soPopup\');p._state.from=\''+c.id+'\';p._state.to=\'\';_soPopupRender(p)">';
+      h+='<div class="rw"><span>'+(sel?'✅ ':'')+'📍 '+c.name+'</span><span style="font-size:12px">📦 '+stock+'× · 🏭 '+blds+'</span></div></div>'});
+    if(st.from){
+      h+='<div style="font-weight:600;margin-top:10px;margin-bottom:6px">Nach (Ziel):</div>';
+      cities.filter(c=>c.id!==st.from).forEach(c=>{const cap=cityCap(c.id);const used=Object.values(G.stor[c.id]||{}).reduce((s2,v)=>s2+v,0);
+        const sel=st.to===c.id;const fc=C(st.from);const dist=fc?fdist(fc,c):0;
+        h+='<div class="crd" style="padding:5px 10px;cursor:pointer;'+(sel?'border-color:var(--a);background:rgba(61,214,140,.06)':'')+'" onclick="const p=document.getElementById(\'soPopup\');p._state.to=\''+c.id+'\';_soPopupRender(p)">';
+        h+='<div class="rw"><span>'+(sel?'✅ ':'')+'📍 '+c.name+' <span class="sub">'+dist+' km</span></span><span style="font-size:12px">📦 '+used+'/'+cap+'</span></div></div>'});
+      if(st.to)h+='<button class="btn full" style="margin-top:10px;background:var(--a);color:var(--bg);border-color:var(--a)" onclick="const p=document.getElementById(\'soPopup\');p._state.step=2;_soPopupRender(p)">Weiter → Fahrzeuge</button>';
+    }
+  }
+
+  // ═══ STEP 2: Vehicles ═══
+  if(st.step===2){
+    const fc=C(st.from);const tc=C(st.to);
+    h+='<button class="btn sm" style="margin-bottom:8px" onclick="const p=document.getElementById(\'soPopup\');p._state.step=1;_soPopupRender(p)">← Route ändern</button>';
+    h+='<div class="crd" style="background:rgba(61,214,140,.04);border-color:rgba(61,214,140,.2);margin-bottom:8px"><div style="font-size:13px">'+(fc?.name||'?')+' → '+(tc?.name||'?')+'</div></div>';
+    h+='<div style="font-weight:600;margin-bottom:6px">② Fahrzeuge auswählen</div>';
+    h+='<div class="sub" style="margin-bottom:6px;color:var(--td)">Diese Fahrzeuge pendeln FEST zwischen den Standorten. Sie sind für andere Aufträge gesperrt.</div>';
+    // All idle vehicles (not already SO-bound to OTHER orders)
+    const allIdle=G.vehs.filter(v=>v.st==='idle'&&!isSOBound(v));
+    const atFrom=allIdle.filter(v=>v.loc===st.from);
+    const elsewhere=allIdle.filter(v=>v.loc!==st.from);
+    const totalCap=st.vehIds.reduce((s2,vid)=>{const v=G.vehs.find(x=>x.id===vid);return s2+(v?vehCap(v):0)},0);
+    h+='<div id="soCapInfo" style="padding:6px 10px;border-radius:8px;background:rgba(61,214,140,.06);border:1px solid rgba(61,214,140,.15);font-size:12px;margin-bottom:8px">';
+    h+='🚛 <b>'+st.vehIds.length+'</b> Fahrzeuge · Kapazität: <b>'+totalCap+'×</b> pro Fahrt</div>';
+    if(atFrom.length){h+='<div class="sub" style="font-weight:600;margin-bottom:3px">📍 '+(fc?.name||'?')+'</div>';
+      atFrom.forEach(v=>{const vt=VT[v.type];const checked=st.vehIds.includes(v.id);
+        h+='<label class="crd" style="cursor:pointer;display:flex;align-items:center;gap:8px;padding:5px 8px"><input type="checkbox" '+(checked?'checked':'')+' onchange="_soToggleVeh(\''+v.id+'\',this.checked)" style="width:16px;height:16px;accent-color:var(--a)"/><span style="flex:1">'+vt.em+' <b>'+vehName(v)+'</b> · Kap: '+vehCap(v)+'</span></label>'});}
+    if(elsewhere.length){h+='<div class="sub" style="font-weight:600;margin-top:6px;margin-bottom:3px;color:var(--a2)">📍 Andere Standorte <span style="font-weight:400">(werden automatisch geholt)</span></div>';
+      elsewhere.forEach(v=>{const vt=VT[v.type];const loc=C(v.loc);const checked=st.vehIds.includes(v.id);
+        h+='<label class="crd" style="cursor:pointer;display:flex;align-items:center;gap:8px;padding:5px 8px;border-color:rgba(56,189,248,.15)"><input type="checkbox" '+(checked?'checked':'')+' onchange="_soToggleVeh(\''+v.id+'\',this.checked)" style="width:16px;height:16px;accent-color:var(--a2)"/><span style="flex:1">'+vt.em+' <b>'+vehName(v)+'</b> · Kap: '+vehCap(v)+' · 📍 '+(loc?.name||'?')+'</span></label>'});}
+    if(!allIdle.length)h+='<div class="sub" style="text-align:center;padding:12px;color:var(--r)">Keine freien Fahrzeuge verfügbar</div>';
+    if(st.vehIds.length)h+='<button class="btn full" style="margin-top:10px;background:var(--a);color:var(--bg);border-color:var(--a)" onclick="const p=document.getElementById(\'soPopup\');p._state.step=3;_soPopupRender(p)">Weiter → Waren ('+totalCap+'× Kapazität)</button>';
+  }
+
+  // ═══ STEP 3: Goods with capacity slider ═══
+  if(st.step===3){
+    const fc=C(st.from);const tc=C(st.to);
+    const totalCap=st.vehIds.reduce((s2,vid)=>{const v=G.vehs.find(x=>x.id===vid);return s2+(v?vehCap(v):0)},0);
+    h+='<button class="btn sm" style="margin-bottom:8px" onclick="const p=document.getElementById(\'soPopup\');p._state.step=2;_soPopupRender(p)">← Fahrzeuge ändern</button>';
+    h+='<div class="crd" style="background:rgba(61,214,140,.04);border-color:rgba(61,214,140,.2);margin-bottom:8px">';
+    h+='<div style="font-size:13px">'+(fc?.name||'?')+' → '+(tc?.name||'?')+' · 🚛 '+st.vehIds.length+' Fzg · Kap: '+totalCap+'×</div></div>';
+    h+='<div style="font-weight:600;margin-bottom:6px">③ Waren & Mengen</div>';
+    h+='<div class="sub" style="margin-bottom:8px;color:var(--td)">Wähle Waren und Mengen. Gesamtmenge darf Fahrzeugkapazität ('+totalCap+'×) nicht überschreiten.</div>';
+    // Current goods in state
+    let usedCap=st.goods.reduce((s2,g)=>s2+g.amt,0);
+    // Available goods at source
+    const srcGoods=Object.entries(G.stor[st.from]||{}).filter(([,a])=>a>0);
+    // Also check building local storage
+    const bldGoods={};(G.blds[st.from]||[]).forEach(b=>{if(b.localStor)Object.entries(b.localStor).forEach(([g,a])=>{if(a>0)bldGoods[g]=(bldGoods[g]||0)+a})});
+    const allAvail={};srcGoods.forEach(([g,a])=>{allAvail[g]=(allAvail[g]||0)+a});Object.entries(bldGoods).forEach(([g,a])=>{allAvail[g]=(allAvail[g]||0)+a});
+    // Also show goods that are produced here
+    (G.blds[st.from]||[]).forEach(b=>{const d=BLD[b.type];if(!d||b.paused)return;
+      if(d.prod&&!allAvail[d.prod])allAvail[d.prod]=0;
+      if(d.tp==='farm')allAvail['getreide']=allAvail['getreide']||0;
+    });
+    // Render existing goods
+    st.goods.forEach((g,i)=>{const gd=GOODS[g.good];const maxForThis=Math.min(totalCap-usedCap+g.amt,allAvail[g.good]||999);
+      h+='<div style="display:flex;gap:6px;align-items:center;padding:6px 8px;margin:4px 0;border-radius:8px;background:rgba(255,255,255,.03);border:1px solid var(--bd)">';
+      h+='<span style="font-size:14px">'+(gd?.em||'')+'</span>';
+      h+='<span style="flex:1;font-size:12px;font-weight:600">'+(gd?.name||g.good)+'</span>';
+      h+='<input type="range" min="1" max="'+maxForThis+'" value="'+g.amt+'" style="flex:2;accent-color:var(--a)" oninput="const p=document.getElementById(\'soPopup\');p._state.goods['+i+'].amt=parseInt(this.value,10);this.nextElementSibling.textContent=this.value+\'×\';_soUpdateCap()"/>';
+      h+='<span style="font-family:var(--mono);font-size:13px;min-width:40px;text-align:right">'+g.amt+'×</span>';
+      h+='<button class="btn sm" style="color:var(--r);padding:2px 6px" onclick="const p=document.getElementById(\'soPopup\');p._state.goods.splice('+i+',1);_soPopupRender(p)">✕</button>';
       h+='</div>'});
+    // Capacity bar
+    h+='<div style="margin:8px 0"><div class="rw" style="font-size:11px"><span>Beladen: '+usedCap+'/'+totalCap+'×</span><span style="color:'+(usedCap>totalCap?'var(--r)':'var(--a)')+'">'+Math.round(usedCap/totalCap*100)+'%</span></div>';
+    h+='<div class="pb" style="height:5px"><div class="pf" style="width:'+Math.min(100,usedCap/totalCap*100)+'%;background:'+(usedCap>totalCap?'var(--r)':'var(--a)')+'"></div></div></div>';
+    // Add goods dropdown
+    const unselected=Object.entries(allAvail).filter(([g])=>!st.goods.find(x=>x.good===g)&&GOODS[g]);
+    if(unselected.length){
+      h+='<select class="sl" style="width:100%;font-size:12px;padding:4px 8px;margin-top:4px" onchange="if(this.value){const p=document.getElementById(\'soPopup\');const rem='+totalCap+'-p._state.goods.reduce((s,g)=>s+g.amt,0);p._state.goods.push({good:this.value,amt:Math.max(1,Math.min(rem,10))});_soPopupRender(p)}">';
+      h+='<option value="">+ Ware hinzufügen...</option>';
+      unselected.sort((a,b)=>b[1]-a[1]).forEach(([g,a])=>{const gd=GOODS[g];h+='<option value="'+g+'">'+(gd?.em||'')+' '+gd?.name+' ('+a+'× verfügbar)</option>'});
+      h+='</select>';}
+    // Create button
+    if(st.goods.length&&usedCap<=totalCap)h+='<button class="btn full" style="margin-top:14px;padding:10px;font-size:14px;background:var(--a);color:var(--bg);border-color:var(--a)" onclick="_soCreate()">🔄 Dauerauftrag anlegen</button>';
+    else if(st.goods.length)h+='<div style="padding:8px;text-align:center;color:var(--r);font-size:12px">⚠️ Kapazität überschritten! Reduziere Mengen.</div>';
+    else h+='<div style="padding:8px;text-align:center;color:var(--td);font-size:12px">Wähle mindestens eine Ware</div>';
   }
-  if(state.step===2){
-    const gd=state.good==='_all'?{em:'📦',name:'Alle Waren'}:GOODS[state.good];
-    h+='<div style="font-weight:600;margin-bottom:4px;font-size:14px">② Route für '+(gd?.em||'')+' '+(gd?.name||'')+'</div>';
-    h+='<button class="btn sm" style="margin-bottom:8px" onclick="const p=document.getElementById(\'soPopup\');p._state.step=1;_soPopupRender(p)">← Zurück</button>';
-    h+='<div class="sub" style="font-weight:600;margin-bottom:4px">Von (Quelle):</div>';
-    cities.forEach(c=>{const stock=state.good==='_all'?Object.values(G.stor[c.id]||{}).reduce((s2,v)=>s2+v,0):(G.stor[c.id]?.[state.good]||0);const vehs=G.vehs.filter(v=>v.st==='idle'&&v.loc===c.id).length;
-      const sel=state.from===c.id;
-      h+='<div class="crd" style="padding:5px 10px;cursor:pointer;'+(sel?'border-color:var(--a);background:rgba(61,214,140,.06)':'')+'" onclick="const p=document.getElementById(\'soPopup\');p._state.from=\''+c.id+'\';_soPopupRender(p)">';
-      h+='<div class="rw"><span>'+(sel?'✅ ':'')+'📍 '+c.name+'</span>';
-      h+='<span style="font-size:12px">📦 '+stock+'× · 🚛 '+vehs+'</span></div></div>'});
-    if(state.from){
-      h+='<div class="sub" style="font-weight:600;margin-top:10px;margin-bottom:4px">Nach (Ziel):</div>';
-      cities.filter(c=>c.id!==state.from).forEach(c=>{const cap=cityCap(c.id);const used=Object.values(G.stor[c.id]||{}).reduce((s2,v)=>s2+v,0);
-        const sel=state.to===c.id;const fc=C(state.from);const dist=fc?fdist(fc,c):0;
-        h+='<div class="crd" style="padding:5px 10px;cursor:pointer;'+(sel?'border-color:var(--a);background:rgba(61,214,140,.06)':'')+'" onclick="const p=document.getElementById(\'soPopup\');p._state.to=\''+c.id+'\';p._state.step=3;_soPopupRender(p)">';
-        h+='<div class="rw"><span>'+(sel?'✅ ':'')+'📍 '+c.name+' <span class="sub">'+dist+' km</span></span>';
-        h+='<span style="font-size:12px">📦 '+used+'/'+cap+'</span></div></div>'});}
-  }
-  if(state.step===3){
-    const gd=state.good==='_all'?{em:'📦',name:'Alle Waren'}:GOODS[state.good];const fc=C(state.from);const tc=C(state.to);
-    h+='<div style="font-weight:600;margin-bottom:4px;font-size:14px">③ Fahrzeuge & Bestätigen</div>';
-    h+='<button class="btn sm" style="margin-bottom:8px" onclick="const p=document.getElementById(\'soPopup\');p._state.step=2;_soPopupRender(p)">← Zurück</button>';
-    // Summary card
-    h+='<div class="crd" style="background:rgba(61,214,140,.04);border-color:rgba(61,214,140,.2)">';
-    h+='<div style="font-size:15px;font-weight:700;color:var(--a)">'+(gd?.em||'')+' '+(gd?.name||'')+'</div>';
-    h+='<div style="font-size:14px;margin-top:4px">'+(fc?.name||'?')+' → '+(tc?.name||'?')+'</div>';
-    h+='<div class="sub" style="margin-top:3px">Lager: <b>'+(G.stor[state.from]?.[state.good]||0)+'×</b></div></div>';
-    // Amount
-    h+='<div style="margin-top:10px"><div class="sub" style="font-weight:600;margin-bottom:4px">Menge pro Fahrt:</div>';
-    h+='<div style="display:flex;gap:8px;align-items:center">';
-    h+='<input type="number" id="soNewAmt" value="'+state.amt+'" min="1" max="500" class="auth-input" style="width:80px;text-align:center;font-size:16px" onchange="document.getElementById(\'soPopup\')._state.amt=parseInt(this.value,10)||5"/>';
-    h+='</div></div>';
-    // Vehicle selection
-    const vehs=G.vehs.filter(v=>v.st==='idle'&&v.loc===state.from);
-    const remVehs=G.vehs.filter(v=>v.st==='idle'&&v.loc!==state.from);
-    h+='<div style="margin-top:10px"><div class="sub" style="font-weight:600;margin-bottom:4px">🚛 Fahrzeuge zuweisen — '+(fc?.name||'?')+' ('+vehs.length+')</div>';
-    h+='<div class="sub" style="margin-bottom:6px;color:var(--td)">Zugewiesene Fahrzeuge fahren automatisch bis das Ziellager voll ist.</div>';
-    if(!vehs.length&&!remVehs.length)h+='<div class="sub" style="color:var(--r)">Keine Fahrzeuge verfügbar</div>';
-    vehs.forEach(v=>{const vt=VT[v.type];
-      h+='<label class="veh-check" style="padding:5px 8px;margin:2px 0"><input type="checkbox" class="soNewVeh" data-vid="'+v.id+'">';
-      h+='<span>'+vt.em+' <b>'+vehName(v)+'</b> · Kap: '+vehCap(v)+'</span></label>'});
-    if(remVehs.length){
-      h+='<div class="sub" style="font-weight:600;margin-top:6px;margin-bottom:3px;color:var(--a2)">📍 Andere Standorte</div>';
-      remVehs.slice(0,5).forEach(v=>{const vt=VT[v.type];const loc=C(v.loc);
-        h+='<label class="veh-check" style="padding:5px 8px;margin:2px 0;border-color:rgba(56,189,248,.2)"><input type="checkbox" class="soNewVeh" data-vid="'+v.id+'">';
-        h+='<span>'+vt.em+' <b>'+vehName(v)+'</b> · Kap: '+vehCap(v)+' · 📍 '+(loc?.name||'?')+'</span></label>'});}
-    h+='</div>';
-    h+='<button class="btn full" style="margin-top:14px;padding:10px;font-size:14px;background:var(--a);color:var(--bg);border-color:var(--a)" onclick="_soCreate()">🔄 Dauerauftrag anlegen</button>';
-  }
-  h+='<button class="btn full red" style="margin-top:8px" onclick="document.getElementById(\'soPopup\').remove()">Abbrechen</button>';
+
+  h+='<button class="btn full" style="margin-top:8px;color:var(--td)" onclick="document.getElementById(\'soPopup\').remove()">Abbrechen</button>';
   h+='</div></div>';
   popup.innerHTML=h;
 }
+function _soToggleVeh(vid,checked){
+  const p=document.getElementById('soPopup');if(!p)return;
+  if(checked&&!p._state.vehIds.includes(vid))p._state.vehIds.push(vid);
+  else p._state.vehIds=p._state.vehIds.filter(x=>x!==vid);
+  _soPopupRender(p);
+}
+function _soUpdateCap(){
+  // Called by slider oninput — just update the capacity bar without full re-render
+  const p=document.getElementById('soPopup');if(!p)return;
+  const totalCap=p._state.vehIds.reduce((s2,vid)=>{const v=G.vehs.find(x=>x.id===vid);return s2+(v?vehCap(v):0)},0);
+  const usedCap=p._state.goods.reduce((s2,g)=>s2+g.amt,0);
+  // Re-render is needed for button state — but only do it occasionally
+}
 function _soCreate(){
   const p=document.getElementById('soPopup');if(!p||!p._state)return;
-  const s=p._state;const amt=parseInt(document.getElementById('soNewAmt',10)?.value)||5;
-  if(!s.good||!s.from||!s.to){if(typeof toast==='function')toast('Bitte alle Felder ausfüllen','var(--r)');return}
-  const vehChecks=document.querySelectorAll('.soNewVeh');
-  const vids=[];vehChecks.forEach(cb=>{if(cb.checked)vids.push(cb.dataset.vid)});
+  const st=p._state;
+  if(!st.from||!st.to||!st.goods.length){if(typeof toast==='function')toast('Bitte alle Felder ausfüllen','var(--r)');return}
   if(!G.standingOrders)G.standingOrders=[];
-  G.standingOrders.push({id:uid(),good:s.good,from:s.from,to:s.to,amt:Math.max(1,amt),active:true,vehicleIds:vids});
-  addLog('🔄 Dauerauftrag: '+(GOODS[s.good]?.em||'')+' '+(C(s.from)?.name||'?')+' → '+(C(s.to)?.name||'?')+' · '+vids.length+' Fzg');
-  if(typeof toast==='function')toast('🔄 Angelegt mit '+vids.length+' Fahrzeugen','var(--a)');
+  G.standingOrders.push({id:uid(),from:st.from,to:st.to,goods:st.goods,active:true,vehicleIds:st.vehIds,stats:{trips:0,totalAmt:0,lastTrip:0}});
+  const desc=st.goods.map(g=>(GOODS[g.good]?.em||'')+g.amt+'×').join(' ');
+  addLog('🔄 DA: '+desc+' · '+(C(st.from)?.name||'?')+' → '+(C(st.to)?.name||'?')+' · '+st.vehIds.length+' Fzg');
+  if(typeof toast==='function')toast('🔄 Angelegt','var(--a)');
   p.remove();ua();
 }
 function showEditSOPopup(soId){
@@ -7829,7 +8303,7 @@ function compBuildings(el){if(!G.sel&&cities.length)G.sel=cities[0].id;const c=G
     else h+='<div class="sub">Leer</div>';
     h+='</div>';
     if(bs.length){bs.forEach(b=>{h+='<div class="crd" style="margin-bottom:6px">'+renderBldDetail(b,c.id,true)+'</div>'});}
-    else h+='<div class="sub" style="padding:12px;text-align:center">Noch keine Gebäude. Wechsel zu 🏗️ Bauen!</div>';
+    else h+='<div class="empty-hint" onclick="bldSub=\'build\';renComp()"><div class="eh-em">🏭</div><div class="eh-title">Noch keine Gebäude</div><div class="eh-sub">Baue Fabriken um automatisch Waren zu produzieren</div><div style="margin-top:8px"><button class="btn sm" style="background:var(--a);color:var(--bg);border-color:var(--a)">🏗️ Jetzt bauen →</button></div></div>';
   }
 
   // ── SUB: BUILD ──
@@ -8141,7 +8615,9 @@ function compInfra(el){if(!G.infra)G.infra={};const c=G.sel?C(G.sel):null;if(!c)
     h+='<div class="crd"><div class="rw"><span>'+d2.em+' '+d2.name+'</span><span class="tg g">✅ Aktiv</span></div><div class="sub">'+d2.effect+'</div></div>'})}
 
   // Available infra (non-storage, non-stacking, non-depot)
-  const availOther=Object.entries(INFRA).filter(([k,d2])=>!d2.storCap&&k!=='depot'&&!existing.find(x=>x.type===k));
+  const lvl=playerLvl();
+  const availOther=Object.entries(INFRA).filter(([k,d2])=>!d2.storCap&&k!=='depot'&&!existing.find(x=>x.type===k)&&(!d2.lvl||d2.lvl<=lvl));
+  const lockedOther=Object.entries(INFRA).filter(([k,d2])=>!d2.storCap&&k!=='depot'&&!existing.find(x=>x.type===k)&&d2.lvl&&d2.lvl>lvl);
   if(availOther.length){h+='<div class="sec-label">Verfügbar</div>';
     availOther.forEach(([k,d2])=>{
       const blocked=(d2.req==='airport'&&!c.airport)||(d2.req==='harbor'&&!c.harbor);const dis=blocked||G.money<d2.price;
@@ -8149,6 +8625,10 @@ function compInfra(el){if(!G.infra)G.infra={};const c=G.sel?C(G.sel):null;if(!c)
       h+='<div class="rw"><span>'+d2.em+' '+d2.name+'</span><span class="p">'+fmt(d2.price)+'</span></div>';
       if(blocked)h+='<div class="sub" style="color:var(--r)">Benötigt '+(d2.req==='airport'?'Flughafen':'Hafen')+'-Standort</div>';
       else h+='<div class="sub">'+d2.desc+'</div>';h+='</div>'});}
+  if(lockedOther.length){h+='<div class="sec-label" style="opacity:.6">🔒 Höheres Level nötig</div>';
+    lockedOther.forEach(([k,d2])=>{
+      h+='<div class="crd off" style="opacity:.4"><div class="rw"><span>'+d2.em+' '+d2.name+'</span><span class="sub">Ab Level '+d2.lvl+'</span></div>';
+      h+='<div class="sub" style="color:var(--td)">'+d2.desc+'</div></div>'});}
   el.innerHTML=h}
 
 
@@ -8823,7 +9303,9 @@ function showWiki(section){
   let h='<div style="width:720px;max-width:95vw;height:82vh;display:flex;overflow:hidden;border-radius:14px;border:1px solid var(--bd2);background:var(--bg);box-shadow:0 20px 60px rgba(0,0,0,.5)">';
   // Sidebar
   h+='<div style="width:175px;min-width:175px;background:rgba(0,0,0,.25);border-right:1px solid var(--bd);overflow-y:auto;padding:10px 6px">';
-  h+='<div style="font-family:var(--mono);font-size:14px;font-weight:700;color:var(--a);padding:10px 8px 12px;display:flex;align-items:center;gap:6px"><i class="ri-book-open-line"></i> Wiki</div>';
+  h+='<div style="font-family:var(--mono);font-size:14px;font-weight:700;color:var(--a);padding:10px 8px 8px;display:flex;align-items:center;gap:6px"><i class="ri-book-open-line"></i> Wiki</div>';
+  h+='<input id="wikiSearch" type="text" class="auth-input" placeholder="🔍 Suche..." style="margin:0 6px 8px;width:calc(100% - 12px);font-size:11px;padding:5px 8px" oninput="_wikiSearch(this.value)" onfocus="renderBlocked=true" onblur="setTimeout(()=>{renderBlocked=false},200)"/>';
+  h+='<div id="wikiSearchRes" style="display:none;padding:0 6px 8px"></div>';
   sections2.forEach(s=>{const w=W[s];const active=section===s;
     h+='<div style="padding:7px 10px;border-radius:8px;cursor:pointer;font-size:12px;margin:1px 0;transition:.15s;'+(active?'background:rgba(61,214,140,.1);color:var(--a);font-weight:600':'color:var(--td);font-weight:400')+'" onclick="showWiki(\''+s+'\')">';
     h+='<i class="'+(ic[s]||'ri-file-text-line')+'" style="margin-right:6px"></i>'+w.t+'</div>'});
@@ -8841,6 +9323,65 @@ function showWiki(section){
   document.body.appendChild(popup);
   // Dynamic content: production chains
   if(section==='chains'){const el=document.getElementById('chainVis');if(el)_renderChains(el)}
+}
+
+// Wiki search
+function _wikiSearch(q){
+  const el=document.getElementById('wikiSearchRes');if(!el)return;
+  if(!q||q.length<2){el.style.display='none';return}
+  const lq=q.toLowerCase();
+  // Get all wiki sections (need to reconstruct W — store globally)
+  if(!window._wikiSections){
+    // Cache on first search
+    window._wikiSections={};
+    const popup=document.getElementById('wikiPopup');
+    if(!popup)return;
+  }
+  // Search through all section content by re-calling showWiki logic
+  const results=[];
+  const ic={overview:'ri-compass-3-line',buildings_list:'ri-list-check',chains:'ri-links-line',duty:'ri-toggle-line',alliance:'ri-team-line',levels:'ri-bar-chart-box-line',vehicles:'ri-truck-line',orders:'ri-file-list-3-line',market:'ri-line-chart-line',production:'ri-building-line',infra:'ri-community-line',events:'ri-flashlight-line',tips:'ri-lightbulb-line'};
+  // Parse visible sidebar items for titles
+  const nav=el.parentElement?.querySelectorAll('[onclick^="showWiki"]');
+  if(nav)nav.forEach(n=>{
+    const m=n.getAttribute('onclick')?.match(/showWiki\('([^']+)'\)/);
+    if(!m)return;
+    const sec=m[1];const title=n.textContent.trim();
+    // Search in the content panel if this section is active
+    const content=document.querySelector('#wikiPopup [style*="flex:1"]');
+    // For now, search titles
+    if(title.toLowerCase().includes(lq))results.push({sec,title,match:'Titel'});
+  });
+  // Also search in rendered content (current section)
+  const content=document.querySelector('#wikiPopup [style*="flex:1"]');
+  if(content){
+    const text=content.textContent.toLowerCase();
+    if(text.includes(lq)){
+      const idx=text.indexOf(lq);
+      const snippet=content.textContent.substring(Math.max(0,idx-30),idx+q.length+30).replace(/\n/g,' ');
+      results.push({sec:'_current',title:'Aktuelle Seite',match:'...'+snippet+'...'});
+    }
+  }
+  // Search ALL section HTML content
+  const allSections=document.querySelectorAll('#wikiPopup [onclick^="showWiki"]');
+  const checked=new Set(results.map(r=>r.sec));
+  allSections.forEach(n=>{
+    const m=n.getAttribute('onclick')?.match(/showWiki\('([^']+)'\)/);if(!m)return;
+    const sec=m[1];if(checked.has(sec))return;
+    const title=n.textContent.trim();
+    // Can't search unloaded content easily — but search title + known keywords
+    const keywords={production:'Gebäude Farm Mühle Bäckerei Produktion Rohstoffe Verarbeitung',orders:'Auftrag Express Lieferung Ziel Timer Stornierung Auto-Manager',
+      vehicles:'Fahrzeug LKW Zug Schiff Flugzeug Kapazität Wartung',market:'Preis Markt Verkauf Trend Event Börse',tips:'Strategie Tipp Regional Dauerauftrag',
+      chains:'Kette Brot Pizza Schokolade Möbel Elektronik Wein',buildings_list:'Lagerhalle Depot Verteilerzentrum Mine Bauernhof',
+      duty:'On Duty Off Duty Kosten Pause',alliance:'Allianz Team Gebiet',levels:'Level Erfahrung XP Rang',infra:'Infrastruktur Bahnhof Hafen Flughafen',events:'Event Sturm Streik Boom Rezession'};
+    if(keywords[sec]&&keywords[sec].toLowerCase().includes(lq))results.push({sec,title,match:'Inhalt'});
+  });
+  if(!results.length){el.innerHTML='<div style="font-size:10px;color:var(--td);padding:4px">Nichts gefunden</div>';el.style.display='block';return}
+  let rh='';
+  results.slice(0,6).forEach(r=>{
+    if(r.sec==='_current')rh+='<div style="font-size:10px;color:var(--go);padding:3px 4px;border-bottom:1px solid var(--bd)">📍 '+r.match+'</div>';
+    else rh+='<div style="font-size:11px;padding:5px 6px;cursor:pointer;border-radius:4px;border-bottom:1px solid var(--bd)" onclick="showWiki(\''+r.sec+'\');setTimeout(()=>{const si=document.getElementById(\'wikiSearch\');if(si)si.value=\''+q.replace(/'/g,'')+'\'})"><i class="'+(ic[r.sec]||'ri-file-text-line')+'" style="margin-right:4px;color:var(--a)"></i>'+r.title+'</div>';
+  });
+  el.innerHTML=rh;el.style.display='block';
 }
 
 function _renderChains(el){
@@ -9407,14 +9948,23 @@ async function renderAdmin(){
     h+='<div class="admin-section" style="margin:0">Aktivitäts-Log · '+_adminLog.length+'</div>';
     h+='<div style="display:flex;gap:4px"><button class="btn sm" onclick="exportAdminLog()">📥 Export</button>';
     h+='<button class="btn red sm" onclick="clearAdminLog()">🗑️ Leeren</button></div></div>';
-    // Filter
-    h+='<div style="display:flex;gap:4px;margin-bottom:8px">';
+    // Type filter
+    h+='<div style="display:flex;gap:4px;margin-bottom:6px;flex-wrap:wrap">';
     ['alle','admin','auth','game'].forEach(f=>{
       h+='<button class="btn sm" style="'+((!window._adminLogFilter&&f==='alle')||(window._adminLogFilter===f)?'background:rgba(61,214,140,.1);color:var(--a);border-color:rgba(61,214,140,.3)':'')+'" onclick="window._adminLogFilter=\''+f+'\';renderAdmin()">'+f+'</button>'});
     h+='</div>';
+    // User filter
+    const logUsers=[...new Set(_adminLog.map(l=>l.user))].sort();
+    h+='<div style="display:flex;gap:4px;align-items:center;margin-bottom:8px">';
+    h+='<span class="sub" style="font-size:11px">Spieler:</span>';
+    h+='<select style="background:var(--bg2);color:var(--t);border:1px solid var(--bd);border-radius:6px;padding:3px 8px;font-size:12px;font-family:var(--mono)" onchange="window._adminLogUserFilter=this.value;renderAdmin()">';
+    h+='<option value="">Alle</option>';
+    logUsers.forEach(u=>{h+='<option value="'+sanitize(u)+'"'+(window._adminLogUserFilter===u?' selected':'')+'>'+sanitize(u)+'</option>'});
+    h+='</select></div>';
     h+='<div class="admin-log">';
     const filter=window._adminLogFilter||'alle';
-    _adminLog.filter(l=>filter==='alle'||l.type===filter).slice(0,80).forEach(l=>{
+    const userFilter=window._adminLogUserFilter||'';
+    _adminLog.filter(l=>(filter==='alle'||l.type===filter)&&(!userFilter||l.user===userFilter)).slice(0,100).forEach(l=>{
       const d=new Date(l.ts);
       const ts=d.toLocaleString('de-DE',{hour:'2-digit',minute:'2-digit',second:'2-digit',day:'2-digit',month:'2-digit'});
       const typeC={game:'var(--a)',auth:'var(--go)',admin:'var(--bl)',error:'var(--r)'}[l.type]||'var(--td)';
@@ -9442,6 +9992,10 @@ async function renderAdmin(){
     h+='<button class="btn sm" onclick="adminRepairAll()">NaN fixen + Werte neu berechnen</button></div></div>';
     h+='<div class="crd"><div class="rw"><span>🔁 Alle Spieler neu laden erzwingen</span>';
     h+='<button class="btn red sm" onclick="adminForceReloginAll()">Reload erzwingen</button></div></div>';
+    h+='<div class="crd" style="padding:8px 10px"><div style="font-weight:600;margin-bottom:6px">💰 Geld an alle Spieler senden</div>';
+    h+='<div style="display:flex;gap:4px;margin-bottom:4px"><input type="number" class="sl" id="adminAllMoney" value="50000" style="width:100px"/>';
+    h+='<button class="btn sm" onclick="adminGiveAllMoney()">An alle senden</button></div>';
+    h+='<input type="text" class="sl" id="adminAllMsg" placeholder="💬 Nachricht (optional)" style="width:100%;font-size:11px"/></div>';
     h+='</div></div>';
   }
 
@@ -9469,23 +10023,34 @@ async function renderAdminPlayer(userKey,userData){
     return h;
   }
 
-  // Stats grid
+  // ── Editable Stats ──
   const vehCount=(save.vehs||[]).length;
   const bldCount=Object.values(save.blds||{}).flat().length;
   const cityCount=(save.unlockedCities||[]).length;
   const lvl=save.level||1;
+
+  h+='<div class="sec-label">📊 Spielwerte <span class="sub">(klick ✏️ zum Bearbeiten)</span></div>';
   h+='<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-bottom:12px">';
-  [['💰',fmt(save.money||0),'Kontostand'],
-   ['📊',fmt(save.earned||0),'Verdient'],
-   ['🏆',LEVELS[lvl-1]?.em+' Lvl '+lvl,LEVELS[lvl-1]?.name||''],
-   ['📦',save.dels||0,'Lieferungen'],
-   ['🏙️',cityCount,'Standorte'],
-   ['🏭',bldCount,'Gebäude'],
-   ['🚛',vehCount,'Fahrzeuge'],
-   ['⏱',save.tick||0,'Ticks'],
-   ['💎',fmt(Math.round((save.earned||0)-(save.money||0))),'Investiert']
-  ].forEach(([em,val,lbl])=>{
-    h+='<div class="crd" style="text-align:center;padding:6px"><div style="font-size:10px">'+em+'</div><div style="font-family:var(--mono);color:var(--a);font-weight:700;font-size:13px">'+val+'</div><div style="font-size:10px;color:var(--td)">'+lbl+'</div></div>'});
+
+  // Editable fields: key, emoji, value, label, editable?
+  const editFields=[
+    ['money','💰',fmt(save.money||0),'Kontostand',true],
+    ['earned','📊',fmt(save.earned||0),'Verdient',true],
+    ['level','🏆',(LEVELS[lvl-1]?.em||'')+' Lvl '+lvl,'Level',true],
+    ['dels','📦',save.dels||0,'Lieferungen',true],
+    ['cities','🏙️',cityCount,'Standorte',false],
+    ['blds','🏭',bldCount,'Gebäude',false],
+    ['vehs','🚛',vehCount,'Fahrzeuge',false],
+    ['tick','⏱',save.tick||0,'Ticks',true],
+    ['invested','💎',fmt(Math.round((save.earned||0)-(save.money||0))),'Investiert',false]
+  ];
+  editFields.forEach(([key,em,val,lbl,editable])=>{
+    h+='<div class="crd" style="text-align:center;padding:6px;position:relative">';
+    h+='<div style="font-size:10px">'+em+'</div>';
+    h+='<div style="font-family:var(--mono);color:var(--a);font-weight:700;font-size:13px">'+val+'</div>';
+    h+='<div style="font-size:10px;color:var(--td)">'+lbl+'</div>';
+    if(editable)h+='<button style="position:absolute;top:2px;right:4px;background:none;border:none;cursor:pointer;font-size:11px;opacity:.5" onclick="adminEditField(\''+userKey+'\',\''+key+'\','+JSON.stringify(key==='money'?(save.money||0):key==='earned'?(save.earned||0):key==='level'?lvl:key==='dels'?(save.dels||0):key==='tick'?(save.tick||0):0)+')">✏️</button>';
+    h+='</div>'});
   h+='</div>';
 
   // Duty status
@@ -9503,43 +10068,53 @@ async function renderAdminPlayer(userKey,userData){
     h+='</div>';
   }
 
-  // Vehicles
+  // ── Vehicles (collapsible + searchable) ──
   if(save.vehs?.length){
-    h+='<div class="sec-label">🚛 Fahrzeuge · '+vehCount+'</div>';
-    save.vehs.forEach((v,vi)=>{const vt=VT[v.type];if(!vt)return;
-      const isMoving=v.st==='moving';
-      const isCurrent=userKey===currentUser;
-      // Build vehicle name
-      let vName='?';
-      if(isCurrent&&G){const liveV=G.vehs.find(x=>x.id===v.id);if(liveV)vName=vehName(liveV)}
-      else{
-        const depotCity=save.unlockedCities?.find(c=>c.id===(v.depot||v.loc));
-        const cAbbr=depotCity?(depotCity.name||'?').substring(0,3).toUpperCase():'???';
-        const regKey=depotCity?getRegion((depotCity.co||'').toUpperCase()):'europa';
-        const rAbbr=REG_ABBR[regKey]||'??';
-        const abbr=VEH_ABBR[v.type]||v.type.substring(0,2).toUpperCase();
-        const sameType=save.vehs.filter(x=>(x.depot||x.loc)===(v.depot||v.loc)&&x.type===v.type);
-        const num=Math.max(1,sameType.indexOf(v)+1);
-        vName=rAbbr+'/'+cAbbr+'-'+abbr+(num<10?'0':'')+num;
-      }
-      const depotName=save.unlockedCities?.find(c=>c.id===(v.depot||v.loc))?.name||v.depot||'?';
-      const locName=save.unlockedCities?.find(c=>c.id===v.loc)?.name||v.loc||'?';
-      h+='<div class="crd" style="padding:5px 10px;margin-bottom:3px;'+(isMoving?'border-left:3px solid var(--go)':'')+'">';
-      h+='<div class="rw"><span style="font-weight:600">'+vt.em+' '+vName+'</span>';
-      h+='<span style="font-size:11px">'+(isMoving?'🔶 unterwegs':'🟢 idle')+'</span></div>';
-      h+='<div style="display:flex;justify-content:space-between;font-size:11px;color:var(--td)">';
-      h+='<span>'+vt.name+' · Kap: '+vehCap(v)+' · '+(v.km||0).toLocaleString('de-DE')+' km</span>';
-      h+='<span>🏠 '+depotName+(v.loc!==v.depot?' · 📍 '+locName:'')+'</span></div>';
-      h+='<button class="btn sm" style="margin-top:3px;font-size:10px" onclick="adminRecallVehFor(\''+userKey+'\',\''+v.id+'\')">🔙 Ins Depot ('+depotName+')</button>';
-      h+='</div>'});
+    const isOpen=window._adminVehOpen===userKey;
+    h+='<div style="cursor:pointer;display:flex;align-items:center;gap:6px;margin-bottom:4px" onclick="window._adminVehOpen=window._adminVehOpen===\''+userKey+'\'?null:\''+userKey+'\';renderAdmin()">';
+    h+='<span style="font-size:11px;color:var(--td)">'+(isOpen?'▼':'▶')+'</span>';
+    h+='<span class="sec-label" style="margin:0">🚛 Fahrzeuge · '+vehCount+'</span></div>';
+    if(isOpen){
+      h+='<input type="text" class="sl" id="adminVehSearch" placeholder="🔍 Fahrzeug suchen…" style="width:100%;margin-bottom:6px;font-size:12px" oninput="window._adminVehFilter=this.value.toLowerCase();renderAdmin()">';
+      const filter=(window._adminVehFilter||'').toLowerCase();
+      save.vehs.forEach((v,vi)=>{const vt=VT[v.type];if(!vt)return;
+        const isMoving=v.st==='moving';
+        const isCurrent=userKey===currentUser;
+        let vName='?';
+        if(isCurrent&&G){const liveV=G.vehs.find(x=>x.id===v.id);if(liveV)vName=vehName(liveV)}
+        else{
+          const depotCity=save.unlockedCities?.find(c=>c.id===(v.depot||v.loc));
+          const cAbbr=depotCity?(depotCity.name||'?').substring(0,3).toUpperCase():'???';
+          const regKey=depotCity?getRegion((depotCity.co||'').toUpperCase()):'europa';
+          const rAbbr=REG_ABBR[regKey]||'??';
+          const abbr=VEH_ABBR[v.type]||v.type.substring(0,2).toUpperCase();
+          const sameType=save.vehs.filter(x=>(x.depot||x.loc)===(v.depot||v.loc)&&x.type===v.type);
+          const num=Math.max(1,sameType.indexOf(v)+1);
+          vName=rAbbr+'/'+cAbbr+'-'+abbr+(num<10?'0':'')+num;
+        }
+        const depotName=save.unlockedCities?.find(c=>c.id===(v.depot||v.loc))?.name||v.depot||'?';
+        const locName=save.unlockedCities?.find(c=>c.id===v.loc)?.name||v.loc||'?';
+        // Filter
+        const searchStr=(vName+' '+vt.name+' '+depotName+' '+locName+' '+(isMoving?'unterwegs':'idle')).toLowerCase();
+        if(filter&&!searchStr.includes(filter))return;
+        h+='<div class="crd" style="padding:5px 10px;margin-bottom:3px;'+(isMoving?'border-left:3px solid var(--go)':'')+'">';
+        h+='<div class="rw"><span style="font-weight:600">'+vt.em+' '+vName+'</span>';
+        h+='<span style="font-size:11px">'+(isMoving?'🔶 unterwegs':'🟢 idle')+'</span></div>';
+        h+='<div style="display:flex;justify-content:space-between;font-size:11px;color:var(--td)">';
+        h+='<span>'+vt.name+' · Kap: '+vehCap(v)+' · '+(v.km||0).toLocaleString('de-DE')+' km</span>';
+        h+='<span>🏠 '+depotName+(v.loc!==v.depot?' · 📍 '+locName:'')+'</span></div>';
+        h+='<button class="btn sm" style="margin-top:3px;font-size:10px" onclick="adminRecallVehFor(\''+userKey+'\',\''+v.id+'\')">🔙 Ins Depot ('+depotName+')</button>';
+        h+='</div>'});
+    }
   }
 
-  // Admin actions for this player
+  // ── Admin actions for this player ──
   h+='<div class="sec-label" style="margin-top:8px">⚙️ Aktionen</div>';
   h+='<div style="display:flex;flex-direction:column;gap:6px">';
-  h+='<div class="crd" style="padding:6px 10px"><div class="rw"><span>💰 Geld senden</span>';
+  h+='<div class="crd" style="padding:6px 10px"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px"><span>💰 Geld senden</span>';
   h+='<div style="display:flex;gap:4px"><input type="number" class="sl" id="adminPlayerMoney" value="50000" style="width:90px"/>';
-  h+='<button class="btn sm" onclick="adminGivePlayerMoney(\''+userKey+'\')">+</button></div></div></div>';
+  h+='<button class="btn sm" onclick="adminGivePlayerMoney(\''+userKey+'\')">Senden</button></div></div>';
+  h+='<input type="text" class="sl" id="adminPlayerMsg" placeholder="💬 Nachricht (optional)" style="width:100%;font-size:11px;margin-top:2px"/></div>';
   if(save.vehs?.some(v=>v.st==='moving')){
     h+='<div class="crd" style="padding:6px 10px"><div class="rw"><span>🔙 Alle Fahrzeuge ins Depot</span>';
     h+='<button class="btn sm" style="color:var(--go);border-color:rgba(251,191,36,.3)" onclick="adminRecallAllVehs(\''+userKey+'\')">Alle zurücksetzen</button></div></div>';
@@ -9548,13 +10123,15 @@ async function renderAdminPlayer(userKey,userData){
   h+='<button class="btn sm" onclick="adminRepairSave(\''+userKey+'\')">NaN/Fehler fixen</button></div></div>';
   h+='</div>';
 
-  // Player's game log (last entries)
-  const playerLogs=_adminLog.filter(l=>l.user===userKey).slice(0,20);
-  if(playerLogs.length){
-    h+='<div class="sec-label" style="margin-top:8px">📋 Letzte Aktivitäten · '+playerLogs.length+'</div>';
-    playerLogs.forEach(l=>{const d=new Date(l.ts);
+  // ── Player logs: _adminLog + finLog from save ──
+  const adminLogs=_adminLog.filter(l=>l.user===userKey).slice(0,30);
+  const finLogs=(save.finLog||[]).slice(0,20).map(f=>({ts:f.ts||0,type:'fin',msg:(f.amt>=0?'💰 +':'💸 ')+fmt(Math.abs(f.amt||0))+' '+sanitize(f.desc||''),user:userKey}));
+  const allLogs=[...adminLogs,...finLogs].sort((a,b)=>b.ts-a.ts).slice(0,30);
+  if(allLogs.length){
+    h+='<div class="sec-label" style="margin-top:8px">📋 Letzte Aktivitäten · '+allLogs.length+'</div>';
+    allLogs.forEach(l=>{const d=new Date(l.ts);
       const ts=d.toLocaleString('de-DE',{hour:'2-digit',minute:'2-digit',day:'2-digit',month:'2-digit'});
-      const typeC={game:'var(--a)',auth:'var(--go)',admin:'var(--bl)'}[l.type]||'var(--td)';
+      const typeC={game:'var(--a)',auth:'var(--go)',admin:'var(--bl)',fin:'var(--go)'}[l.type]||'var(--td)';
       h+='<div style="padding:2px 0;font-size:11px;border-bottom:1px solid var(--bd)"><span style="color:var(--td);margin-right:6px">'+ts+'</span><span style="color:'+typeC+'">'+sanitize(l.msg)+'</span></div>'});
   }
   return h;
@@ -9567,25 +10144,91 @@ function adminAddMoney(){
 }
 async function adminGivePlayerMoney(userKey){
   const amt=parseInt(document.getElementById('adminPlayerMoney',10)?.value)||0;if(!amt)return;
+  const msgEl=document.getElementById('adminPlayerMsg');
+  const msg=msgEl?msgEl.value.trim():'';
   if(userKey===currentUser&&G){
-    G.money+=amt;finLog('admin',amt,'Admin: Geld erhalten');uhud();save();
+    G.money+=amt;finLog('admin',amt,'Admin: '+(msg||'Geld erhalten'));uhud();save();
+    // Show popup to self
+    _showAdminMoneyPopup(amt,msg);
   } else {
-    // For other players: modify their save + set reload flag
     try{
       const raw=await storeGet('lx_save_'+userKey);
       if(raw){
         const d=JSON.parse(raw);
         d.money=(d.money||0)+amt;
-        d._adminModified=Date.now(); // Signal that save was externally modified
+        d._adminModified=Date.now();
         await storeSet('lx_save_'+userKey,JSON.stringify(d));
       }
     }catch(e){}
-    // Also set a reload signal for that user
+    // Store message signal for the player to pick up
+    try{await storeSet('lx_adminmsg_'+userKey,JSON.stringify({amt,msg,ts:Date.now()}))}catch(e){}
     try{await storeSet('lx_reload_'+userKey,Date.now().toString())}catch(e){}
   }
-  adminLog('admin','💰 +'+fmt(amt)+' an '+userKey);
+  adminLog('admin','💰 +'+fmt(amt)+' an '+userKey+(msg?' ('+msg+')':''));
   if(typeof toast==='function')toast('💰 +'+fmt(amt)+' an '+userKey);
   renderAdmin();
+}
+
+// Send money to ALL players
+async function adminGiveAllMoney(){
+  const amt=parseInt(document.getElementById('adminAllMoney')?.value)||0;if(!amt)return;
+  const msgEl=document.getElementById('adminAllMsg');
+  const msg=msgEl?msgEl.value.trim():'';
+  const users=await getUsers();
+  const keys=Object.keys(users);
+  let count=0;
+  for(const k of keys){
+    if(k===currentUser&&G){
+      G.money+=amt;finLog('admin',amt,'Admin: '+(msg||'Geld an alle'));uhud();save();
+      _showAdminMoneyPopup(amt,msg);
+      count++;
+    } else {
+      try{
+        const raw=await storeGet('lx_save_'+k);
+        if(raw){
+          const d=JSON.parse(raw);
+          d.money=(d.money||0)+amt;
+          d._adminModified=Date.now();
+          await storeSet('lx_save_'+k,JSON.stringify(d));
+          count++;
+        }
+      }catch(e){}
+      try{await storeSet('lx_adminmsg_'+k,JSON.stringify({amt,msg,ts:Date.now()}))}catch(e){}
+      try{await storeSet('lx_reload_'+k,Date.now().toString())}catch(e){}
+    }
+  }
+  adminLog('admin','💰 +'+fmt(amt)+' an alle '+count+' Spieler'+(msg?' ('+msg+')':''));
+  if(typeof toast==='function')toast('💰 +'+fmt(amt)+' an '+count+' Spieler gesendet');
+  renderAdmin();
+}
+
+// Popup shown to receiving player
+function _showAdminMoneyPopup(amt,msg){
+  const h='<div style="text-align:center;padding:16px">'
+    +'<div style="font-size:32px;margin-bottom:8px">💰</div>'
+    +'<div style="font-size:20px;font-weight:700;color:var(--a);margin-bottom:4px">+'+fmt(amt)+' €</div>'
+    +'<div class="sub" style="margin-bottom:8px">Vom Admin erhalten</div>'
+    +(msg?'<div style="padding:8px 12px;background:rgba(61,214,140,.06);border:1px solid rgba(61,214,140,.2);border-radius:8px;font-style:italic;color:var(--t)">„'+sanitize(msg)+'"</div>':'')
+    +'<button class="btn" style="margin-top:12px" onclick="closePopup()">OK</button></div>';
+  popup('💰 Geld erhalten',h);
+}
+
+// Poll for admin messages (called from tick)
+async function _checkAdminMsg(){
+  if(!currentUser)return;
+  try{
+    const raw=await storeGet('lx_adminmsg_'+currentUser);
+    if(!raw)return;
+    const d=JSON.parse(raw);
+    if(d&&d.amt){
+      _showAdminMoneyPopup(d.amt,d.msg||'');
+      // Reload save to pick up money change
+      if(G){
+        try{const sr=await storeGet('lx_save_'+currentUser);if(sr){const sd=JSON.parse(sr);G.money=sd.money||G.money;uhud()}}catch(e){}
+      }
+    }
+    await storeDel('lx_adminmsg_'+currentUser);
+  }catch(e){}
 }
 async function adminRecallVehFor(userKey,vid){
   if(userKey===currentUser&&G){
@@ -9643,11 +10286,43 @@ function exportAdminLog(){
   const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='logistix-admin-log.json';a.click();
 }
 async function adminDeleteUser(userKey){
-  if(!confirm('Spieler "'+userKey+'" wirklich löschen? Spielstand wird ebenfalls gelöscht!'))return;
+  if(!confirm('⚠️ Spieler "'+userKey+'" wirklich löschen?\nSpieler + Spielstand werden komplett entfernt!'))return;
+  if(!confirm('🔴 LETZTE WARNUNG!\n\n"'+userKey+'" wird unwiderruflich gelöscht.\nWirklich fortfahren?'))return;
   const users=await getUsers();delete users[userKey];await saveUsers(users);
   try{await storeDel('lx_save_'+userKey)}catch(e){}
   adminLog('admin','🗑️ Spieler gelöscht: '+userKey);
   adminSelPlayer=null;renderAdmin();
+}
+
+// ── Edit player fields inline ──
+function adminEditField(userKey,field,currentVal){
+  const labels={money:'Kontostand (€)',earned:'Verdient (€)',level:'Level',dels:'Lieferungen',tick:'Ticks'};
+  const newVal=prompt(labels[field]+' für "'+userKey+'" ändern:\n\nAktuell: '+currentVal,currentVal);
+  if(newVal===null)return;
+  const num=parseInt(newVal);if(isNaN(num)){alert('Ungültige Zahl');return}
+  if(field==='level'&&(num<1||num>30)){alert('Level muss 1-30 sein');return}
+  adminSetField(userKey,field,num);
+}
+async function adminSetField(userKey,field,val){
+  if(userKey===currentUser&&G){
+    if(field==='money')G.money=val;
+    else if(field==='earned')G.earned=val;
+    else if(field==='level')G.level=val;
+    else if(field==='dels')G.dels=val;
+    else if(field==='tick')G.tick=val;
+    uhud();save();
+  } else {
+    try{
+      const raw=await storeGet('lx_save_'+userKey);if(!raw)return;
+      const d=JSON.parse(raw);
+      d[field]=val;
+      await storeSet('lx_save_'+userKey,JSON.stringify(d));
+      await storeSet('lx_reload_'+userKey,Date.now().toString());
+    }catch(e){adminLog('admin','❌ Fehler: '+e.message)}
+  }
+  adminLog('admin','✏️ '+field+'='+val+' für '+userKey);
+  if(typeof toast==='function')toast('✏️ '+field+' → '+val+' ('+userKey+')');
+  renderAdmin();
 }
 
 async function adminRecallAllVehs(userKey){
