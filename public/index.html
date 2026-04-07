@@ -8085,7 +8085,7 @@ function compFinance(el){
 
   // City filter dropdown
   h+='<div style="display:flex;gap:6px;margin-bottom:6px;align-items:center;flex-wrap:wrap">';
-  h+='<select class="sl" style="font-size:12px;padding:4px 8px;min-width:150px" onchange="if(this.value){G._invFilter=this.value;selectLocation(this.value)}else{G._invFilter=null}renComp()">';
+  h+='<select class="sl" style="font-size:12px;padding:4px 8px;min-width:150px" onchange="G._invFilter=this.value||null;if(this.value)G.sel=this.value;renComp()">';
   h+='<option value=""'+(fc?'':' selected')+'>🌍 Alle Standorte</option>';
   cityData.forEach(d=>{
     h+='<option value="'+d.c.id+'"'+(fc===d.c.id?' selected':'')+(d.used>0||Object.keys(d.bldStock).length>0?'':' style="color:var(--td)"')+'>📍 '+d.c.name+' ('+d.used+'/'+d.cap+')</option>'});
