@@ -2380,21 +2380,14 @@ function newGame(city){
 let _lastLbSave=0;
 let _savePending=null;
 async function save(){
-  try{
-    const d=JSON.stringify(G);
-    window.storage.set('logistix_save',d).catch(e=>console.warn('save personal err',e));
+  if(!G||!currentUser)return;
+  if(_savePending)clearTimeout(_savePending);
+  _savePending=setTimeout(async()=>{
+    _savePending=null;
+    try{await storeSet('lx_save_'+currentUser,JSON.stringify({...G,_t:Date.now()}))}catch(e){}
     const now=Date.now();
-    if(!window._lastLbSync)window._lastLbSync=0;
-    if(now-window._lastLbSync>300000){
-      window._lastLbSync=now;
-      const lb={name:G.companyName||'Unbekannt',money:G.money||0,level:G.level||1,cities:(G.cities||[]).length,vehs:(G.vehs||[]).length,ts:now};
-      window.storage.get('leaderboard',true).then(r=>{
-        let board={};try{board=JSON.parse(r.value||'{}')}catch(e){}
-        board[lb.name]=lb;
-        window.storage.set('leaderboard',JSON.stringify(board),true).catch(e=>console.warn('lb err',e));
-      }).catch(e=>console.warn('lb read err',e));
-    }
-  }catch(e){console.error('save err',e)}
+    if(now-_lastLbSave>60000){_lastLbSave=now;_saveLb()}
+  },300);
 }
 // Immediate save for beforeunload / critical moments — bypasses debounce
 function saveNow(){
