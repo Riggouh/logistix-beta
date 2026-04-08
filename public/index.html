@@ -45,9 +45,11 @@ body{font-family:'Barlow',sans-serif;background:var(--bg);color:var(--t);overflo
 
 /* ═══ HAMBURGER ═══ */
 .hamburger-wrap{position:relative;pointer-events:auto}
-.hb-menu{display:none;position:fixed;top:56px;right:14px;background:var(--bg);border:1px solid var(--bd2);border-radius:var(--rr);overflow:hidden;min-width:200px;box-shadow:0 12px 40px rgba(0,0,0,.7);z-index:9999}
+.hb-menu{display:none;position:fixed;top:56px;right:14px;background:var(--bg);border:1px solid var(--bd2);border-radius:var(--rr);overflow:hidden;min-width:210px;box-shadow:0 12px 40px rgba(0,0,0,.7);z-index:9999}
 .hb-menu.open{display:block}
-.hb-item{padding:12px 16px;font-size:14px;cursor:pointer;transition:.12s;font-family:var(--mono);color:var(--td);border-bottom:1px solid var(--bd)}
+.hb-label{padding:8px 16px 4px;font-size:10px;font-weight:700;color:var(--td);text-transform:uppercase;letter-spacing:.8px;background:rgba(0,0,0,.15);border-bottom:1px solid var(--bd)}
+.hb-sep{height:1px;background:rgba(255,255,255,.06);margin:2px 12px}
+.hb-item{padding:10px 16px;font-size:13px;cursor:pointer;transition:.12s;font-family:var(--mono);color:var(--td);border-bottom:1px solid var(--bd)}
 .hb-item:hover{background:rgba(61,214,140,.06);color:var(--t)}.hb-item:last-child{border-bottom:none}
 
 /* ═══ GAME SCREEN ═══ */
@@ -381,10 +383,10 @@ body{font-family:'Barlow',sans-serif;background:var(--bg);color:var(--t);overflo
 .ctab i{margin-right:4px;font-size:14px}
 
 /* ═══ WIKI STYLES ═══ */
-.wk-hero{font-family:var(--mono);font-size:20px;font-weight:700;color:var(--a);text-align:center;padding:16px 0 8px}
-.wk-desc{font-size:13px;line-height:1.7;color:var(--t);margin-bottom:12px}
-.wk-h2{font-family:var(--mono);font-size:15px;font-weight:700;color:var(--a);margin:16px 0 8px;padding-bottom:6px;border-bottom:1px solid var(--bd)}
-.wk-h3{font-family:var(--mono);font-size:12px;font-weight:600;color:var(--a2);margin:12px 0 4px}
+.wk-hero{font-family:var(--mono);font-size:22px;font-weight:700;color:var(--a);text-align:center;padding:16px 0 8px}
+.wk-desc{font-size:13px;line-height:1.8;color:var(--t);margin-bottom:14px}
+.wk-h2{font-family:var(--mono);font-size:16px;font-weight:700;color:var(--a);margin:20px 0 10px;padding-bottom:8px;border-bottom:1px solid var(--bd)}
+.wk-h3{font-family:var(--mono);font-size:13px;font-weight:600;color:var(--a2);margin:16px 0 6px}
 .wk-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:12px 0}
 .wk-card{padding:12px;border:1px solid var(--bd);border-radius:10px;background:rgba(255,255,255,.02)}
 .wk-card-ico{width:32px;height:32px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:16px;margin-bottom:6px}
@@ -393,11 +395,12 @@ body{font-family:'Barlow',sans-serif;background:var(--bg);color:var(--t);overflo
 .wk-steps{display:flex;flex-direction:column;gap:6px;margin:8px 0}
 .wk-step{display:flex;align-items:center;gap:10px;padding:8px 10px;border-radius:8px;background:rgba(255,255,255,.02);border:1px solid var(--bd);font-size:12px;color:var(--t)}
 .wk-num{width:24px;height:24px;border-radius:50%;background:rgba(61,214,140,.12);color:var(--a);display:flex;align-items:center;justify-content:center;font-family:var(--mono);font-size:11px;font-weight:700;flex-shrink:0}
-.wk-table{margin:8px 0;overflow-x:auto}
-.wk-table table{width:100%;border-collapse:collapse;font-size:11px}
-.wk-table th{text-align:left;padding:6px 8px;color:var(--td);font-family:var(--mono);font-size:10px;text-transform:uppercase;letter-spacing:.5px;border-bottom:1px solid var(--bd2);background:rgba(0,0,0,.2)}
-.wk-table td{padding:5px 8px;border-bottom:1px solid var(--bd);color:var(--t)}
-.wk-table tr:hover td{background:rgba(61,214,140,.02)}
+.wk-table{margin:10px 0;overflow-x:auto;border-radius:8px;border:1px solid var(--bd)}
+.wk-table table{width:100%;border-collapse:collapse;font-size:12px}
+.wk-table th{text-align:left;padding:8px 10px;color:var(--td);font-family:var(--mono);font-size:10px;text-transform:uppercase;letter-spacing:.5px;border-bottom:1px solid var(--bd2);background:rgba(0,0,0,.3)}
+.wk-table td{padding:6px 10px;border-bottom:1px solid var(--bd);color:var(--t)}
+.wk-table tr:nth-child(even) td{background:rgba(255,255,255,.015)}
+.wk-table tr:hover td{background:rgba(61,214,140,.03)}
 
 /* ═══ ALLIANCE PANEL ═══ */
 .ally-panel{position:fixed;inset:0;z-index:1500;background:rgba(0,0,0,.7);backdrop-filter:blur(8px);display:none;align-items:center;justify-content:center;padding:20px}
@@ -727,19 +730,20 @@ body{font-family:'Barlow',sans-serif;background:var(--bg);color:var(--t);overflo
       <div class="hamburger-wrap">
         <button class="top-btn" onclick="event.stopPropagation();toggleHamburger()">☰</button>
         <div class="hb-menu" id="hbMenu">
+          <div class="hb-label">👤 Spieler</div>
           <div class="hb-item" onclick="showProfile();closeHamburger()"><i class="ri-user-3-line"></i> Profil</div>
           <div class="hb-item" onclick="showLeaderboard();closeHamburger()"><i class="ri-trophy-line"></i> Leaderboard</div>
           <div class="hb-item" onclick="showAchievements();closeHamburger()"><i class="ri-medal-line"></i> Errungenschaften</div>
           <div class="hb-item mob-only" onclick="openAlliancePanel();closeHamburger()"><i class="ri-team-line"></i> Allianz</div>
-          <div style="height:1px;background:rgba(255,255,255,.06);margin:2px 12px"></div>
+          <div class="hb-label">📖 Hilfe</div>
           <div class="hb-item" onclick="showWiki();closeHamburger()"><i class="ri-book-open-line"></i> Wiki</div>
           <div class="hb-item" onclick="showTutorial(0);closeHamburger()"><i class="ri-graduation-cap-line"></i> Tutorial</div>
           <div class="hb-item" onclick="showExplorerUI();closeHamburger()"><i class="ri-layout-grid-line"></i> Explorer</div>
-          <div style="height:1px;background:rgba(255,255,255,.06);margin:2px 12px"></div>
+          <div class="hb-label">⚙️ System</div>
           <div class="hb-item" onclick="openSettings();closeHamburger()"><i class="ri-settings-3-line"></i> Einstellungen</div>
           <div class="hb-item" onclick="showChangelog();closeHamburger()"><i class="ri-file-list-3-line"></i> Changelog</div>
           <div class="hb-item" onclick="toggleAdmin();closeHamburger()"><i class="ri-tools-line"></i> Admin</div>
-          <div style="height:1px;background:rgba(255,255,255,.06);margin:2px 12px"></div>
+          <div class="hb-sep"></div>
           <div class="hb-item" style="color:var(--r)" onclick="doLogout();closeHamburger()"><i class="ri-logout-box-r-line"></i> Abmelden</div>
         </div>
       </div>
@@ -2609,12 +2613,12 @@ function showMarketSellPopup(cid,good){
   const dest={name:market.name,co:market.co,lat:market.lat,lng:market.lng};
   const dist=Math.max(5,Math.round(hav(c.lat,c.lng,dest.lat,dest.lng)));
   const isLocal=cities.some(x=>x.name===market.name);
-  // Available vehicles (local + remote) — filtered by spec
-  const localVehs=G.vehs.filter(v=>v.st==='idle'&&v.loc===cid&&!v.followUpOrder&&!v.pendingTransfer&&canVehCarry(v,good,dist));
-  const remoteVehs=G.vehs.filter(v=>v.st==='idle'&&v.loc!==cid&&!v.followUpOrder&&!v.pendingTransfer&&canVehCarry(v,good,dist));
+  // Available vehicles (local + remote) — filtered by spec, exclude SO-bound
+  const localVehs=G.vehs.filter(v=>v.st==='idle'&&v.loc===cid&&!v.followUpOrder&&!v.pendingTransfer&&!isSOBound(v)&&canVehCarry(v,good,dist));
+  const remoteVehs=G.vehs.filter(v=>v.st==='idle'&&v.loc!==cid&&!v.followUpOrder&&!v.pendingTransfer&&!isSOBound(v)&&canVehCarry(v,good,dist));
   const allVehs=[...localVehs,...remoteVehs];
-  const maxCap=localVehs.reduce((s,v)=>s+vehCap(v),0);
-  const maxAmt=Math.min(stock,maxCap||remoteVehs.reduce((s,v)=>s+vehCap(v),0));
+  const totalCap=allVehs.reduce((s,v)=>s+vehCap(v),0);
+  const maxAmt=Math.min(stock,totalCap);
   // Price (10% fee if market is at own city)
   let price=marketPrice(good,reg);
   // Events already applied in marketPrice()
@@ -2703,7 +2707,7 @@ function execMarketSell(cid,good,destName,destLat,destLng,price,dist){
   if(profit<=0){addLog('❌ Transportkosten übersteigen Erlös');return}
   const destId='mkt_'+destName.toLowerCase().replace(/[^a-z0-9]/g,'');
   // 1. Local vehicles first
-  const localV=G.vehs.filter(v=>v.st==='idle'&&v.loc===cid&&!v.followUpOrder&&canVehCarry(v,good,dist)).sort((a,b)=>vehCap(b)-vehCap(a));
+  const localV=G.vehs.filter(v=>v.st==='idle'&&v.loc===cid&&!v.followUpOrder&&!isSOBound(v)&&canVehCarry(v,good,dist)).sort((a,b)=>vehCap(b)-vehCap(a));
   let remaining=amt;
   for(const v of localV){
     if(remaining<=0)break;
@@ -3993,15 +3997,31 @@ function getCitiesInTerritory(tKey){
   return sorted.slice(start,start+chunk).map(d=>({name:d[0],co:d[1],lat:d[3],lng:d[4]}));
 }
 
-// Storage with fallback
-const _allyCache={alliances:{},territories:{},market:[]};
-async function getAlliances(){try{const r=await window.storage.get('alliances',true);if(r&&r.value){_allyCache.alliances=JSON.parse(r.value);return _allyCache.alliances}}catch(e){}return _allyCache.alliances}
-async function saveAlliances(d){_allyCache.alliances=d;try{await window.storage.set('alliances',JSON.stringify(d),true)}catch(e){}}
+// Storage with TTL cache (30s) to avoid polling on every render
+const _allyCache={alliances:{},territories:{},market:[],_ts:{alliances:0,territories:0,market:0}};
+const ALLY_CACHE_TTL=30000; // 30s
+async function getAlliances(){
+  const now=Date.now();
+  if(now-_allyCache._ts.alliances<ALLY_CACHE_TTL&&Object.keys(_allyCache.alliances).length)return _allyCache.alliances;
+  try{const r=await window.storage.get('alliances',true);if(r&&r.value){_allyCache.alliances=JSON.parse(r.value);_allyCache._ts.alliances=now;return _allyCache.alliances}}catch(e){}
+  return _allyCache.alliances;
+}
+async function saveAlliances(d){_allyCache.alliances=d;_allyCache._ts.alliances=Date.now();try{await window.storage.set('alliances',JSON.stringify(d),true)}catch(e){}}
 async function getAlliance(id){const a=await getAlliances();return a[id]||null}
 async function saveAlliance(a){const all=await getAlliances();all[a.id]=a;await saveAlliances(all)}
-async function getTerritoryOwners(){try{const r=await window.storage.get('terr_owners',true);if(r&&r.value){_allyCache.territories=JSON.parse(r.value);return _allyCache.territories}}catch(e){}return _allyCache.territories}
-async function saveTerritoryOwners(d){_allyCache.territories=d;try{await window.storage.set('terr_owners',JSON.stringify(d),true)}catch(e){}}
-async function getTerritoryMarket(){try{const r=await window.storage.get('terr_market',true);if(r&&r.value){_allyCache.market=JSON.parse(r.value);return _allyCache.market}}catch(e){}return _allyCache.market}
+async function getTerritoryOwners(){
+  const now=Date.now();
+  if(now-_allyCache._ts.territories<ALLY_CACHE_TTL&&Object.keys(_allyCache.territories).length)return _allyCache.territories;
+  try{const r=await window.storage.get('terr_owners',true);if(r&&r.value){_allyCache.territories=JSON.parse(r.value);_allyCache._ts.territories=now;return _allyCache.territories}}catch(e){}
+  return _allyCache.territories;
+}
+async function saveTerritoryOwners(d){_allyCache.territories=d;_allyCache._ts.territories=Date.now();try{await window.storage.set('terr_owners',JSON.stringify(d),true)}catch(e){}}
+async function getTerritoryMarket(){
+  const now=Date.now();
+  if(now-_allyCache._ts.market<ALLY_CACHE_TTL&&_allyCache.market.length)return _allyCache.market;
+  try{const r=await window.storage.get('terr_market',true);if(r&&r.value){_allyCache.market=JSON.parse(r.value);_allyCache._ts.market=now;return _allyCache.market}}catch(e){}
+  return _allyCache.market;
+}
 async function saveTerritoryMarket(d){_allyCache.market=d;try{await window.storage.set('terr_market',JSON.stringify(d),true)}catch(e){}}
 function RA(){if(typeof renderAlliance==='function')renderAlliance()}
 
@@ -5088,14 +5108,14 @@ function tick(){
       }
     }catch(e){}
   }
-  if(tc%3===0){try{uvmk()}catch(e){}}
+  if(tc%5===0){try{uvmk()}catch(e){}}
   if(tc%5===0){try{if(minimapOpen&&typeof updateMinimap==='function')updateMinimap()}catch(e){}}
   if(tc%2===0){try{if(typeof tutorialTick==='function')tutorialTick()}catch(e){}}
   if(tc%30===0)try{markDirty()}catch(e){}
   // Check for admin-triggered reload every 30s
-  if(tc%30===0&&currentUser)checkAdminReload();
+  if(tc%120===0&&currentUser)checkAdminReload();
   // Check for admin money messages every 30s (offset by 15)
-  if(tc%30===15&&currentUser&&typeof _checkAdminMsg==='function')_checkAdminMsg();
+  if(tc%120===60&&currentUser&&typeof _checkAdminMsg==='function')_checkAdminMsg();
 }
 
 async function checkAdminReload(){
@@ -5219,10 +5239,15 @@ function initMap(){
   }
 }
 
-// ── OSRM Route Fetching ──
+// ── OSRM Route Fetching (rate-limited) ──
+let _osrmPending=0;const OSRM_MAX_CONCURRENT=2;let _osrmLastCall=0;
 async function fetchRoute(fLat,fLng,tLat,tLng){
   const key=fLat.toFixed(3)+','+fLng.toFixed(3)+'>'+tLat.toFixed(3)+','+tLng.toFixed(3);
   if(routeCache[key]&&routeCache[key].length>2)return routeCache[key];
+  // Rate limit: max concurrent + min interval
+  if(_osrmPending>=OSRM_MAX_CONCURRENT)return routeCache[key]||[[fLat,fLng],[tLat,tLng]];
+  const now=Date.now();if(now-_osrmLastCall<1000)return routeCache[key]||[[fLat,fLng],[tLat,tLng]];
+  _osrmLastCall=now;_osrmPending++;
   try{
     const url='https://router.project-osrm.org/route/v1/driving/'+fLng+','+fLat+';'+tLng+','+tLat+'?overview=full&geometries=geojson';
     const ctrl=new AbortController();const tid=setTimeout(()=>ctrl.abort(),5000);
@@ -5230,9 +5255,10 @@ async function fetchRoute(fLat,fLng,tLat,tLng){
     const data=await r.json();
     if(data.routes&&data.routes[0]){
       const coords=data.routes[0].geometry.coordinates.map(c=>[c[1],c[0]]);
-      _routeCachePut(key,coords);return coords;
+      _routeCachePut(key,coords);_osrmPending--;return coords;
     }
   }catch(e){}
+  _osrmPending--;
   if(!routeCache[key])_routeCachePut(key,[[fLat,fLng],[tLat,tLng]]);
   return routeCache[key];
 }
@@ -5274,8 +5300,8 @@ function ensureRoute(v){
   }
   const key=f.lat.toFixed(3)+','+f.lng.toFixed(3)+'>'+t.lat.toFixed(3)+','+t.lng.toFixed(3);
   const cached=routeCache[key];
-  // Fetch if no cache, or if cache is just a 2-point fallback (retry for real route)
-  if(!cached||(cached.length<=2&&Math.random()<0.05))fetchRoute(f.lat,f.lng,t.lat,t.lng);
+  // Only fetch if never attempted (no cache entry at all)
+  if(!cached)fetchRoute(f.lat,f.lng,t.lat,t.lng);
 }
 
 function interpRoute(coords,pct){
@@ -7422,7 +7448,7 @@ function renderMaintVeh(v){
   const loc=C(v.loc);const depot=C(v.depot||v.loc);
   const mk=vehMaintKm(v);const kmSince=(v.km||0)-(v.lastMaintKm||0);
   let h='<div class="crd" style="padding:6px 8px;'+(cond<30?'border-color:rgba(248,113,113,.3);background:rgba(248,113,113,.03)':'')+'">';
-  h+='<div class="rw"><span>'+vt.em+' <b>'+vehName(v)+'</b> <span class="sub">'+vt.name+'</span>'+(isSOBound(v)?' <span class="tg" style="font-size:9px;color:var(--go);border-color:rgba(251,191,36,.3)">🔄 DA</span>':'')+'</span>';
+  h+='<div class="rw"><span>'+vt.em+' <b>'+vehName(v)+'</b> <span class="sub">'+vt.name+'</span>'+(vt.spec?' <span class="tg" style="font-size:9px;padding:1px 4px;color:var(--go);border-color:rgba(251,191,36,.2)">'+SPEC_LABELS[vt.spec]+'</span>':'')+(isSOBound(v)?' <span class="tg" style="font-size:9px;color:var(--go);border-color:rgba(251,191,36,.3)">🔄 DA</span>':'')+'</span>';
   h+='<span style="font-family:var(--mono);color:'+condClr+';font-weight:700" title="Zustand: '+cond+'% · Wartung alle '+mk.toLocaleString('de-DE')+' km">🔧 '+cond+'%</span></div>';
   h+='<div class="pb" style="margin:2px 0;height:4px"><div class="pf" style="width:'+cond+'%;background:'+condClr+'"></div></div>';
   h+='<div class="sub">'+(v.km||0).toLocaleString('de-DE')+' km · '+kmSince.toLocaleString('de-DE')+'/'+mk.toLocaleString('de-DE')+' km bis Wartung · '+(v.st==='idle'?'📍 '+(loc?.name||'?'):'🔶 unterwegs')+'</div>';
@@ -7513,6 +7539,17 @@ function compFleet(el){
   const tc2={};G.vehs.forEach(v=>{tc2[v.type]=(tc2[v.type]||0)+1});
   Object.entries(tc2).forEach(([t,n])=>{const vt=VT[t];if(vt)h+='<span class="tg">'+vt.em+' ×'+n+'</span>'});
   h+='</div>';
+  // Spec category summary
+  const specCounts={normal:0,cool:0,tank:0,hazard:0};
+  const specCap={normal:0,cool:0,tank:0,hazard:0};
+  G.vehs.forEach(v=>{const vt=VT[v.type];if(!vt)return;const s=vt.spec||'normal';specCounts[s]++;specCap[s]+=vehCap(v)});
+  h+='<div class="crd" style="padding:6px 10px;margin-bottom:8px"><div style="font-size:11px;font-weight:600;margin-bottom:4px">Flottentypen</div>';
+  h+='<div style="display:grid;grid-template-columns:1fr 1fr;gap:3px 12px;font-size:12px">';
+  h+='<div>🚛 <b>Universal:</b> '+specCounts.normal+' Fzg · '+specCap.normal+'× Kap</div>';
+  h+='<div>🧊 <b>Kühlung:</b> '+specCounts.cool+' Fzg · '+specCap.cool+'× Kap</div>';
+  h+='<div>🛢️ <b>Tank:</b> '+specCounts.tank+' Fzg · '+specCap.tank+'× Kap</div>';
+  h+='<div>⚠️ <b>Gefahrgut:</b> '+specCounts.hazard+' Fzg · '+specCap.hazard+'× Kap</div>';
+  h+='</div></div>';
   // Group filter
   if(G.vehGroups.length){
     h+='<div style="display:flex;gap:4px;margin-bottom:8px;align-items:center;flex-wrap:wrap">';
@@ -7565,7 +7602,7 @@ function compFleet(el){
       const vGrp=v.group?G.vehGroups.find(g=>g.id===v.group):null;
       const matchingOrds=G.orders.filter(o=>o.acc&&(o.amt-(o.shipped||0))>0&&_cityStock(sc.id,o.good)>0&&!G.vehs.find(x=>x.cargo?.oid===o.id&&x.st==='moving'));
       h+='<div class="crd" style="padding:6px 8px;'+(needsM?'border-color:rgba(248,113,113,.4);background:rgba(248,113,113,.04)':'')+'">';
-      h+='<div class="rw"><span>'+vt.em+' <b>'+vehName(v)+'</b> <span class="sub">'+vt.name+'</span>'+(isSOBound(v)?' <span class="tg" style="font-size:9px;color:var(--go);border-color:rgba(251,191,36,.3)">🔄 DA</span>':'')+(vGrp?' <span class="tg" style="font-size:9px;color:'+vGrp.color+';border-color:'+vGrp.color+'40">'+vGrp.name+'</span>':'')+'</span>';
+      h+='<div class="rw"><span>'+vt.em+' <b>'+vehName(v)+'</b> <span class="sub">'+vt.name+'</span>'+(vt.spec?' <span class="tg" style="font-size:9px;padding:1px 4px;color:var(--go);border-color:rgba(251,191,36,.2)">'+SPEC_LABELS[vt.spec]+'</span>':'')+(isSOBound(v)?' <span class="tg" style="font-size:9px;color:var(--go);border-color:rgba(251,191,36,.3)">🔄 DA</span>':'')+(vGrp?' <span class="tg" style="font-size:9px;color:'+vGrp.color+';border-color:'+vGrp.color+'40">'+vGrp.name+'</span>':'')+'</span>';
       h+='<span style="font-family:var(--mono);font-size:12px"><span style="color:'+condClr+'">'+cond+'%</span> · Kap: '+vehCap(v)+' · '+km.toLocaleString('de-DE')+' km'+(util>0?' · <span style="color:'+utilClr+'" title="Auslastung">⚡'+util+'%</span>':'')+'</span></div>';
       h+='<div class="pb" style="margin:3px 0;height:4px"><div class="pf" style="width:'+cond+'%;background:'+condClr+'"></div></div>';
       // Show available orders for this vehicle
@@ -7591,7 +7628,7 @@ function compFleet(el){
       const isMarket=v.cargo?.market;const isAlly=v.cargo?.allianceDelivery;
       const tripLabel=isMarket?(v.cargo.returning?'🔙 Rückfahrt':'💰 Marktfahrt'):isAlly?(v.cargo.returning?'🔙 Rückfahrt':'🤝 Allianzlieferung'):'';
       h+='<div class="crd fleet-exp" style="padding:5px 8px;cursor:pointer;'+(isMarket?'border-left:3px solid var(--go)':isAlly?'border-left:3px solid #a855f7':'')+'" onclick="this.classList.toggle(\'open\')">';
-      h+='<div class="rw"><span>'+vt.em+' <b>'+vehName(v)+'</b>'+(isSOBound(v)?' <span class="tg" style="font-size:9px;color:var(--go);border-color:rgba(251,191,36,.3)">🔄 DA</span>':'')+' → '+t.name+(tripLabel?' <span class="tg" style="font-size:10px;'+(isAlly?'color:#a855f7':'color:var(--go)')+'">'+tripLabel+'</span>':'')+'</span><span class="eta" data-veta="'+v.id+'">'+Math.floor(pct*100)+'% · '+ftime(Math.max(0,tn-v.prog))+'</span></div>';
+      h+='<div class="rw"><span>'+vt.em+' <b>'+vehName(v)+'</b>'+(vt.spec?' <span class="tg" style="font-size:9px;padding:1px 4px;color:var(--go);border-color:rgba(251,191,36,.2)">'+SPEC_LABELS[vt.spec]+'</span>':'')+(isSOBound(v)?' <span class="tg" style="font-size:9px;color:var(--go);border-color:rgba(251,191,36,.3)">🔄 DA</span>':'')+' → '+t.name+(tripLabel?' <span class="tg" style="font-size:10px;'+(isAlly?'color:#a855f7':'color:var(--go)')+'">'+tripLabel+'</span>':'')+'</span><span class="eta" data-veta="'+v.id+'">'+Math.floor(pct*100)+'% · '+ftime(Math.max(0,tn-v.prog))+'</span></div>';
       h+='<div class="pb" style="margin:2px 0"><div class="pf" data-vprog="'+v.id+'" style="width:'+pct*100+'%;background:'+(isAlly?'#a855f7':isMarket?'var(--go)':'var(--a)')+'"></div></div>';
       h+='<div class="fleet-details"><div class="sub">'+vt.name+' · Kap: '+vehCap(v)+' · 🛣️ '+km.toLocaleString('de-DE')+' km</div>';
       if(cargo!=='leer')h+='<div class="sub">Ladung: '+cargo+'</div>';
@@ -7610,7 +7647,7 @@ function compFleet(el){
       const tn=tripT(f,sc,vt.spd),pct=Math.min(v.prog/tn,1);
       const cargo=v.cargo?(v.cargo.returning?'🔙 Rückfahrt':((GOODS[v.cargo.good]?.em||'')+' '+(v.cargo.amt||0)+'×')):'';
       h+='<div class="crd fleet-exp" style="padding:5px 8px;cursor:pointer" onclick="this.classList.toggle(\'open\')">';
-      h+='<div class="rw"><span style="font-size:11px">'+vt.em+' <b>'+vehName(v)+'</b>'+(isSOBound(v)?' <span class="tg" style="font-size:9px;color:var(--go);border-color:rgba(251,191,36,.3)">🔄 DA</span>':'')+' ← '+f.name+'</span><span class="eta" data-veta="'+v.id+'">'+Math.floor(pct*100)+'% · '+ftime(Math.max(0,tn-v.prog))+'</span></div>';
+      h+='<div class="rw"><span style="font-size:11px">'+vt.em+' <b>'+vehName(v)+'</b>'+(vt.spec?' <span class="tg" style="font-size:9px;padding:1px 4px;color:var(--go);border-color:rgba(251,191,36,.2)">'+SPEC_LABELS[vt.spec]+'</span>':'')+(isSOBound(v)?' <span class="tg" style="font-size:9px;color:var(--go);border-color:rgba(251,191,36,.3)">🔄 DA</span>':'')+' ← '+f.name+'</span><span class="eta" data-veta="'+v.id+'">'+Math.floor(pct*100)+'% · '+ftime(Math.max(0,tn-v.prog))+'</span></div>';
       h+='<div class="pb" style="margin:2px 0"><div class="pf" data-vprog="'+v.id+'" style="width:'+pct*100+'%"></div></div>';
       h+='<div class="fleet-details"><div class="sub">'+vt.name+' · Kap: '+vehCap(v)+(cargo?' · '+cargo:'')+'</div>';
       if(!v.recallToDepot)h+='<button class="btn sm" style="margin-top:3px" onclick="event.stopPropagation();recallAfterDelivery(\''+v.id+'\')">🔙 Nach Lieferung → Depot</button>';
@@ -8329,7 +8366,7 @@ function compMarket(el){
     if(!G.sellCityFilter)G.sellCityFilter='all';
     if(!G.sellGoodFilter)G.sellGoodFilter='all';
     h+='<div style="display:flex;gap:6px;margin-bottom:8px;align-items:center;flex-wrap:wrap">';
-    h+='<select class="sl" style="font-size:12px;padding:4px 8px;min-width:150px" onchange="if(this.value!==\'all\'){G.sellCityFilter=this.value;selectLocation(this.value)}else{G.sellCityFilter=\'all\';G.sel=null}renComp()">';
+    h+='<select class="sl" style="font-size:12px;padding:4px 8px;min-width:150px" onchange="G.sellCityFilter=this.value===\'all\'?\'all\':this.value;if(this.value!==\'all\')G.sel=this.value;renComp()">';
     h+='<option value="all"'+(G.sellCityFilter==='all'?' selected':'')+'>🌍 Alle Standorte</option>';
     cities.forEach(c=>{const s=G.stor[c.id]||{};const cnt=Object.values(s).filter(v=>v>0).length;
       h+='<option value="'+c.id+'"'+(G.sellCityFilter===c.id?' selected':'')+(cnt?'':' style="color:var(--td)"')+'>📍 '+c.name+' ('+cnt+' Waren)</option>'});
@@ -9904,65 +9941,81 @@ function showWiki(section){
     levels:{t:'Level-System',c:`
       <div class="wk-h2">15 Level · Gründer bis Legende</div>
       <div class="wk-desc">Jedes Level schaltet Gebäude, Fahrzeuge und Regionen frei. Level-Up im Profil (Level-Badge klicken oder ☰ → Profil).</div>
-      <div class="wk-h3">Entfernungs-Progression</div>
-      <div class="wk-table"><table><tr><th>Level</th><th>Radius</th><th>Beispiel</th></tr>
-        <tr><td>1-2</td><td>25-35 km</td><td>Nachbarstädte</td></tr>
-        <tr><td>3-5</td><td>50-200 km</td><td>Regional bis landesweit</td></tr>
-        <tr><td>6-8</td><td>500-5.000 km</td><td>Europaweit</td></tr>
-        <tr><td>9-12</td><td>10.000+ km</td><td>Interkontinental</td></tr>
-        <tr><td>13-15</td><td>25.000 km</td><td>Weltweit</td></tr>
+      <div class="wk-h3">📏 Auftrags-Distanzen pro Level</div>
+      <div class="wk-desc">Aufträge werden nur innerhalb des Radius generiert. Bis Level 8 bleibt alles regional, dann kommt der große Sprung.</div>
+      <div class="wk-table"><table><tr><th>Level</th><th>Radius</th><th>Phase</th><th>Neue Fahrzeuge</th></tr>
+        <tr><td>1 🌱</td><td>25 km</td><td>Nachbarstädte</td><td>Transporter</td></tr>
+        <tr><td>2 🌾</td><td>35 km</td><td>Lokal</td><td>Lieferwagen, 🧊 Kl. Kühltransporter</td></tr>
+        <tr><td>3 📈</td><td>50 km</td><td>Lokal</td><td>7,5t LKW, 🛢️ Kl. Tankwagen</td></tr>
+        <tr><td>4 🏢</td><td>75 km</td><td>Regional</td><td>Kühltransporter, ⚠️ Gefahrgut-Transporter</td></tr>
+        <tr><td>5 🏗️</td><td>100 km</td><td>Regional</td><td>Sattelzug 40t</td></tr>
+        <tr><td>6 🎩</td><td>150 km</td><td>Regional</td><td>Tankwagen</td></tr>
+        <tr><td>7 💼</td><td>200 km</td><td>Regional</td><td>🚆 Güterzug</td></tr>
+        <tr><td>8 💎</td><td>300 km</td><td>Expansion</td><td>🧊 Kühl-Sattelzug, 🚢 Küstenfrachter, 🛩️ Propeller</td></tr>
+        <tr style="background:rgba(251,191,36,.04)"><td>9 🏆</td><td><b>1.000 km</b></td><td>💥 Großer Sprung</td><td>🛢️ Tanksattelzug, ✈️ Frachtjet</td></tr>
+        <tr><td>10 👑</td><td>3.000 km</td><td>Interkontinental</td><td>⚠️ Gefahrgut-Sattelzug, 🛳️ Containerschiff</td></tr>
+        <tr><td>11+ 🌟</td><td>8.000 km</td><td>Global</td><td>ICE-Güterzug, Schwerlastzug, Superfrachter</td></tr>
       </table></div>
       <div class="wk-h3">Anforderungen</div>
       <div class="wk-desc">Jedes Level braucht: Lieferungen + Unternehmenswert + Standorte + Aufstiegskosten. Fortschritt im Profil sichtbar.</div>`},
     vehicles:{t:'Fahrzeuge',c:`
-      <div class="wk-h2">18 Fahrzeugtypen · 4 Kategorien</div>
-      <div class="wk-h3">Benennung: EU/ALZ-KT01</div>
-      <div class="wk-desc">Region / Stadt (3 Buchstaben) - Typkürzel + Nummer</div>
-      <div class="wk-h3">🚛 Land</div>
-      <div class="wk-desc">Fahren überall hin. Keine Infrastruktur nötig.</div>
-      <div class="wk-h3">🚆 Schiene</div>
-      <div class="wk-desc">Braucht <b>Bahnhof</b> an BEIDEN Enden! Züge fahren <b>direkte Bahnstrecken</b> — nicht über Straßen, sondern geradliniger (blau gestrichelt auf der Karte).<br>
-      • 🚆 <b>Güterzug</b> (Lv7): 100 km/h, 350 Kap — Massentransport für Verteilerzentren<br>
-      • 🚄 <b>ICE-Güterzug</b> (Lv11): 250 km/h, 80 Kap — schnell für Eilfracht<br>
-      • 🚃 <b>Schwerlastzug</b> (Lv12): 80 km/h, 800 Kap — Mega-Bulk für Langstrecke<br>
-      Alle Züge sind mit <b>Waggon-Upgrades</b> erweiterbar (+30 Kap/Waggon, max 5).</div>
-      <div class="wk-h3">🧊🛢️⚠️ Spezialtransport</div>
-      <div class="wk-desc">Bestimmte Waren brauchen ab einer Mindestdistanz <b>Spezialfahrzeuge</b>. Unterhalb der Distanz kann jedes Fahrzeug liefern.<br><br>
-      <b>🧊 Kühlpflicht ab 150 km:</b> Milch, Eier, Butter, Käse, Fleisch, Fisch, Obst, Saft, Tiefkühlkost, Torte, Medikamente, Biotech<br>
-      <b>🛢️ Tankpflicht ab 100 km:</b> Öl, Bier, Wein, Spirituosen<br>
-      <b>⚠️ Gefahrgut ab 60 km:</b> Kohle, Kunststoff, Gummi<br><br>
-      <b>Universelle Ausnahmen:</b> Züge, Schiffe und Flugzeuge sind immer universell — sie können alles transportieren.<br><br>
-      <b>Spezialfahrzeuge können auch normale Waren transportieren!</b> Ein Kühltransporter fährt auch Holz oder Möbel. Aber nur er darf Milch über 80 km bringen.<br><br>
-      <b>Kleine Spezialfahrzeuge:</b> 🧊 Kl. Kühltransporter (Lv2, 10 Kap) · 🛢️ Kl. Tankwagen (Lv3, 15 Kap) · ⚠️ Gefahrgut-Transporter (Lv4, 12 Kap)<br>
-      <b>Große Spezialfahrzeuge:</b> 🧊 Kühl-Sattelzug (Lv8, 65 Kap) · 🛢️ Tanksattelzug (Lv9, 80 Kap) · ⚠️ Gefahrgut-Sattelzug (Lv10, 50 Kap)</div>
-      <div class="wk-h3">🚢 See · ✈️ Luft</div>
-      <div class="wk-desc">Hafen bzw. Flughafen an <b>BEIDEN</b> Endpunkten nötig.</div>
-      <div class="wk-h3">🏢 Depot-System</div>
-      <div class="wk-desc">Ohne Depot: 3 Plätze · Mit Depot: 4 + upgradbar bis 8. Fahrzeughalle (Lv3): +4–14 · Großes Depot (Lv7): +8–18. Verkauf nur im Heimat-Depot.</div>
-      <div class="wk-h3">🔧 Wartung</div>
-      <div class="wk-desc">Km-basiert, variiert pro Fahrzeugtyp. Unter 50% Zustand: Wartung empfohlen. Unter 30%: kritisch, Fahrzeug wird langsamer.</div>
-      <div class="wk-table"><table><tr><th>Kategorie</th><th>Fahrzeug</th><th>Wartung alle</th></tr>
-        <tr><td>🚛 Land</td><td>Kleintransporter</td><td>5.000 km</td></tr>
-        <tr><td></td><td>Lieferwagen</td><td>7.000 km</td></tr>
-        <tr><td></td><td>LKW 7.5t / Kühlwagen / Tankwagen</td><td>8-10.000 km</td></tr>
-        <tr><td></td><td>Sattelzug</td><td>12.000 km</td></tr>
-        <tr><td></td><td>Schwertransporter</td><td>15.000 km</td></tr>
-        <tr><td>🚆 Schiene</td><td>ICE-Güterzug</td><td>20.000 km</td></tr>
-        <tr><td></td><td>Güterzug / Doppelstock</td><td>22-25.000 km</td></tr>
-        <tr><td></td><td>Schwerlastzug</td><td>30.000 km</td></tr>
-        <tr><td>🚢 See</td><td>Küstenfrachter</td><td>40.000 km</td></tr>
-        <tr><td></td><td>Containerschiff</td><td>60.000 km</td></tr>
-        <tr><td></td><td>Superfrachter</td><td>80.000 km</td></tr>
-        <tr><td>✈️ Luft</td><td>Propeller</td><td>10.000 km</td></tr>
-        <tr><td></td><td>Frachtjet</td><td>15.000 km</td></tr>
-        <tr><td></td><td>Cargojet</td><td>20.000 km</td></tr>
-        <tr><td></td><td>Megatransporter</td><td>25.000 km</td></tr>
+      <div class="wk-h2">24 Fahrzeugtypen · 4 Kategorien · 3 Spezialisierungen</div>
+      <div class="wk-h3">Benennung</div>
+      <div class="wk-desc"><b>EU/ALZ-KT01</b> = Region / Stadt (3 Buchstaben) - Typkürzel + Nummer</div>
+
+      <div class="wk-h3">🚛 Alle Fahrzeuge</div>
+      <div class="wk-table"><table><tr><th>Lvl</th><th>Fahrzeug</th><th>Kat</th><th>Spd</th><th>Kap</th><th>Preis</th><th>Spezial</th></tr>
+        <tr><td>1</td><td>🚐 3,5t Transporter</td><td>Land</td><td>90</td><td>12</td><td>6.000€</td><td>—</td></tr>
+        <tr><td>2</td><td>🧊 Kl. Kühltransporter</td><td>Land</td><td>82</td><td>10</td><td>8.000€</td><td>🧊 Kühlung</td></tr>
+        <tr><td>2</td><td>🚙 Lieferwagen 5t</td><td>Land</td><td>85</td><td>20</td><td>12.000€</td><td>—</td></tr>
+        <tr><td>3</td><td>🛢️ Kl. Tankwagen</td><td>Land</td><td>75</td><td>15</td><td>12.000€</td><td>🛢️ Tank</td></tr>
+        <tr><td>3</td><td>🚛 7,5t LKW</td><td>Land</td><td>80</td><td>35</td><td>18.000€</td><td>—</td></tr>
+        <tr><td>4</td><td>🧊 Kühltransporter</td><td>Land</td><td>78</td><td>40</td><td>28.000€</td><td>🧊 Kühlung</td></tr>
+        <tr><td>4</td><td>⚠️ Gefahrgut-Transporter</td><td>Land</td><td>70</td><td>12</td><td>18.000€</td><td>⚠️ Gefahrgut</td></tr>
+        <tr><td>5</td><td>🚚 Sattelzug 40t</td><td>Land</td><td>75</td><td>80</td><td>45.000€</td><td>—</td></tr>
+        <tr><td>6</td><td>🛢️ Tankwagen</td><td>Land</td><td>70</td><td>100</td><td>60.000€</td><td>🛢️ Tank</td></tr>
+        <tr><td>7</td><td>🚆 Güterzug</td><td>Schiene</td><td>100</td><td>350</td><td>120.000€</td><td>Universal</td></tr>
+        <tr><td>8</td><td>🧊 Kühl-Sattelzug</td><td>Land</td><td>72</td><td>65</td><td>55.000€</td><td>🧊 Kühlung</td></tr>
+        <tr><td>8</td><td>🚢 Küstenfrachter</td><td>See</td><td>25</td><td>500</td><td>200.000€</td><td>Universal</td></tr>
+        <tr><td>8</td><td>🛩️ Propellermaschine</td><td>Luft</td><td>450</td><td>15</td><td>300.000€</td><td>Universal</td></tr>
+        <tr><td>9</td><td>🛢️ Tanksattelzug</td><td>Land</td><td>68</td><td>80</td><td>75.000€</td><td>🛢️ Tank</td></tr>
+        <tr><td>9</td><td>✈️ Frachtjet</td><td>Luft</td><td>850</td><td>50</td><td>1,5M€</td><td>Universal</td></tr>
+        <tr><td>10</td><td>⚠️ Gefahrgut-Sattelzug</td><td>Land</td><td>65</td><td>50</td><td>90.000€</td><td>⚠️ Gefahrgut</td></tr>
+        <tr><td>10</td><td>🛳️ Containerschiff</td><td>See</td><td>18</td><td>2.000</td><td>800.000€</td><td>Universal</td></tr>
+        <tr><td>11</td><td>🚄 ICE-Güterzug</td><td>Schiene</td><td>250</td><td>80</td><td>350.000€</td><td>Universal</td></tr>
+        <tr><td>12</td><td>🚛 Doppelstock-LKW</td><td>Land</td><td>72</td><td>150</td><td>180.000€</td><td>—</td></tr>
+        <tr><td>12</td><td>🚃 Schwerlastzug</td><td>Schiene</td><td>80</td><td>800</td><td>600.000€</td><td>Universal</td></tr>
+        <tr><td>13</td><td>🚛 Schwertransporter</td><td>Land</td><td>60</td><td>250</td><td>250.000€</td><td>—</td></tr>
+        <tr><td>14</td><td>🛳️ Superfrachter</td><td>See</td><td>22</td><td>5.000</td><td>3M€</td><td>Universal</td></tr>
+        <tr><td>14</td><td>🛫 Cargo-Großraumjet</td><td>Luft</td><td>900</td><td>120</td><td>5M€</td><td>Universal</td></tr>
+        <tr><td>15</td><td>🚀 Megatransporter</td><td>Land</td><td>65</td><td>400</td><td>8M€</td><td>—</td></tr>
       </table></div>
-      <div class="wk-desc">Die Anzeige 🔧 X% im Fuhrpark zeigt den aktuellen <b>Zustand</b> — darunter steht das genaue Verhältnis gefahrene/max km.</div>
+
+      <div class="wk-h3">🧊🛢️⚠️ Spezialtransport-Regeln</div>
+      <div class="wk-desc">Bestimmte Waren brauchen ab einer Mindestdistanz <b>Spezialfahrzeuge</b>. Unterhalb der Distanz kann jedes Fahrzeug liefern.</div>
+      <div class="wk-table"><table><tr><th>Typ</th><th>Ab Distanz</th><th>Betroffene Waren</th></tr>
+        <tr><td>🧊 Kühlung</td><td><b>150 km</b></td><td>Milch, Eier, Butter, Käse, Fleisch, Fisch, Obst, Saft, Tiefkühlkost, Torte, Medikamente, Biotech</td></tr>
+        <tr><td>🛢️ Tank</td><td><b>100 km</b></td><td>Öl, Bier, Wein, Spirituosen</td></tr>
+        <tr><td>⚠️ Gefahrgut</td><td><b>60 km</b></td><td>Kohle, Kunststoff, Gummi</td></tr>
+      </table></div>
+      <div class="wk-desc">
+      💡 <b>Züge, Schiffe und Flugzeuge</b> sind immer universell — keine Einschränkung.<br>
+      💡 <b>Spezialfahrzeuge</b> können auch normale Waren transportieren. Ein Kühltransporter fährt auch Holz.</div>
+
+      <div class="wk-h3">🚆 Schienentransport</div>
+      <div class="wk-desc">Braucht <b>Bahnhof an BEIDEN Enden</b>. Züge fahren direkte Bahnstrecken (blau gestrichelt auf der Karte), nicht über Straßen.<br>
+      Alle Züge erweiterbar mit <b>Waggon-Upgrades</b> (+30 Kap/Waggon, max 5).</div>
+
+      <div class="wk-h3">🏢 Depot-System</div>
+      <div class="wk-desc">Ohne Depot: 3 Plätze · Mit Depot: 4 + upgradbar bis 8<br>
+      Fahrzeughalle (Lv3): +4–14 · Großes Depot (Lv7): +8–18 · Verkauf nur im Heimat-Depot</div>
+
+      <div class="wk-h3">🔧 Wartung</div>
+      <div class="wk-desc">Km-basiert, variiert pro Typ. Unter 50%: Wartung empfohlen. Unter 30%: kritisch, Fahrzeug langsamer.<br>
+      🟢 &gt;60% · 🟡 &gt;30% · 🔴 &lt;30%</div>
+
       <div class="wk-h3">🔒 Dauerauftrag-Bindung</div>
-      <div class="wk-desc">Fahrzeuge in Daueraufträgen sind fest gebunden — nicht für Aufträge, Auto-Manager oder Marktverkauf nutzbar.</div>
-      <div class="wk-h3">🔙 Rückruf-Optionen</div>
-      <div class="wk-desc"><b>Sofort zurück:</b> Bricht ab, Fracht geht zurück, Fahrzeug fährt ins Depot<br><b>Nach Lieferung:</b> Beendet aktuelle Fahrt, fährt dann ins Depot — kein Frachtverlust</div>`},
+      <div class="wk-desc">Fahrzeuge in Daueraufträgen sind <b>exklusiv gebunden</b> — nicht für Aufträge, Auto-Manager oder Marktverkauf nutzbar. Lösung: Rückruf im Fuhrpark.</div>`},
     orders:{t:'Aufträge & Logistik',c:`
       <div class="wk-h2">🎯 Zielbasierte Aufträge</div>
       <div class="wk-h3">So funktionieren Aufträge</div>
@@ -10189,23 +10242,34 @@ function showWiki(section){
       <div class="wk-desc">• Aufträge > Marktverkauf (1,3-3× Preis)<br>• 🤖 Auto-Manager schützt 15 Zyklen Produktions-Reserve automatisch<br>• 🧮 Routen-Optimierer weist alle Aufträge mit einem Klick zu<br>• 🔗 Lieferketten-Planer zeigt Erweiterungen im Baumenü<br>• 🛒 Spieler-Börse: Handele Waren mit anderen Spielern (Markt-Tab)<br>• 🔴 Off Duty bei Pausen — keine Kosten!<br>• 🌳 Obstplantage: max 8/Sorte, 20 gesamt<br>• 📱 PWA: "Zum Startbildschirm hinzufügen" für App-Feeling</div>`},
   };
   const sections2=Object.keys(W);
-  let h='<div style="width:720px;max-width:95vw;height:82vh;display:flex;overflow:hidden;border-radius:14px;border:1px solid var(--bd2);background:var(--bg);box-shadow:0 20px 60px rgba(0,0,0,.5)">';
+  let h='<div style="width:920px;max-width:96vw;height:85vh;display:flex;overflow:hidden;border-radius:14px;border:1px solid var(--bd2);background:var(--bg);box-shadow:0 20px 60px rgba(0,0,0,.5)">';
   // Sidebar
-  h+='<div style="width:175px;min-width:175px;background:rgba(0,0,0,.25);border-right:1px solid var(--bd);overflow-y:auto;padding:10px 6px">';
-  h+='<div style="font-family:var(--mono);font-size:14px;font-weight:700;color:var(--a);padding:10px 8px 8px;display:flex;align-items:center;gap:6px"><i class="ri-book-open-line"></i> Wiki</div>';
+  h+='<div style="width:190px;min-width:190px;background:rgba(0,0,0,.25);border-right:1px solid var(--bd);overflow-y:auto;padding:10px 6px">';
+  h+='<div style="font-family:var(--mono);font-size:15px;font-weight:700;color:var(--a);padding:10px 8px 8px;display:flex;align-items:center;gap:6px"><i class="ri-book-open-line"></i> Wiki</div>';
   h+='<input id="wikiSearch" type="text" class="auth-input" placeholder="🔍 Suche..." style="margin:0 6px 8px;width:calc(100% - 12px);font-size:11px;padding:5px 8px" oninput="_wikiSearch(this.value)" onfocus="renderBlocked=true" onblur="setTimeout(()=>{renderBlocked=false},200)"/>';
   h+='<div id="wikiSearchRes" style="display:none;padding:0 6px 8px"></div>';
+  // Grouped sidebar
+  const groups=[
+    {label:'📘 Grundlagen',items:['overview','duty','levels']},
+    {label:'🚛 Transport',items:['vehicles','orders']},
+    {label:'💰 Wirtschaft',items:['production','market','chains','buildings_list']},
+    {label:'🏗️ Infrastruktur',items:['infra','events']},
+    {label:'📋 Weitere',items:['alliance','tips']}
+  ];
   const kw={overview:'start anleitung hilfe',buildings_list:'gebäude bauen liste',chains:'kette rezept verarbeitung',duty:'pause kosten offline',alliance:'allianz spieler',levels:'level aufstieg erfahrung',vehicles:'fahrzeug lkw zug schiff flugzeug wartung',orders:'auftrag lieferung express',market:'markt verkauf preis börse',production:'produktion bauernhof fabrik reservierung reserve lager',infra:'infrastruktur depot lagerhalle',events:'event bonus malus',tips:'tipps strategie'};
-  sections2.forEach(s=>{const w=W[s];const active=section===s;
-    h+='<div data-kw="'+(kw[s]||'')+' '+w.t.toLowerCase()+'" style="padding:7px 10px;border-radius:8px;cursor:pointer;font-size:12px;margin:1px 0;transition:.15s;'+(active?'background:rgba(61,214,140,.1);color:var(--a);font-weight:600':'color:var(--td);font-weight:400')+'" onclick="showWiki(\''+s+'\')">';
-    h+='<i class="'+(ic[s]||'ri-file-text-line')+'" style="margin-right:6px"></i>'+w.t+'</div>'});
+  groups.forEach(g=>{
+    h+='<div style="font-size:10px;font-weight:700;color:var(--td);padding:8px 10px 3px;text-transform:uppercase;letter-spacing:.8px">'+g.label+'</div>';
+    g.items.forEach(s=>{const w2=W[s];if(!w2)return;const active=section===s;
+      h+='<div data-kw="'+(kw[s]||'')+' '+w2.t.toLowerCase()+'" style="padding:6px 10px;border-radius:8px;cursor:pointer;font-size:12px;margin:1px 0;transition:.15s;'+(active?'background:rgba(61,214,140,.1);color:var(--a);font-weight:600':'color:var(--td);font-weight:400')+'" onclick="showWiki(\''+s+'\')">';
+      h+='<i class="'+(ic[s]||'ri-file-text-line')+'" style="margin-right:6px"></i>'+w2.t+'</div>'});
+  });
   h+='<div style="height:1px;background:var(--bd);margin:8px"></div>';
   h+='<div style="padding:7px 10px;border-radius:8px;cursor:pointer;font-size:12px;color:var(--td)" onclick="closePopup(\'wikiPopup\')"><i class="ri-close-line" style="margin-right:6px"></i>Schließen</div>';
   h+='</div>';
   // Content
   const w=W[section]||W.overview;
-  h+='<div style="flex:1;overflow-y:auto;padding:24px 28px">';
-  h+='<div style="font-family:var(--mono);font-size:11px;color:var(--td);margin-bottom:12px"><i class="'+(ic[section]||'ri-file-text-line')+'"></i> '+w.t+'</div>';
+  h+='<div style="flex:1;overflow-y:auto;padding:24px 32px">';
+  h+='<div style="font-family:var(--mono);font-size:11px;color:var(--td);margin-bottom:14px"><i class="'+(ic[section]||'ri-file-text-line')+'"></i> '+w.t+'</div>';
   h+=w.c;
   h+='</div></div>';
   createPopup('wikiPopup',h,{raw:true});
@@ -11643,7 +11707,7 @@ function launchGame(sc){
   document.addEventListener('visibilitychange',()=>{if(!document.hidden&&gameStarted)tick()});
   window.addEventListener('focus',()=>{if(gameStarted)tick()});
   if(typeof checkTutorial==='function')checkTutorial();
-  setInterval(save,30000);
+  setInterval(save,60000);
   setInterval(saveCache,120000); // Save cache every 2min
 }
 
