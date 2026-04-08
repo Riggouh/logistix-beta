@@ -1,12 +1,13 @@
+version: "3.8"
 services:
   logistix:
     build: .
-    container_name: logistix
-    restart: unless-stopped
     ports:
       - "3000:3000"
     volumes:
-      - logistix-data:/app/data
-
+      - logistix-data:/data
+    environment:
+      - DATA_DIR=/data
+    restart: unless-stopped
 volumes:
   logistix-data:
