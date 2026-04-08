@@ -11731,6 +11731,10 @@ function openAlliancePanel(){
   document.getElementById('alliancePanel').classList.add('open');
   alliancePanelOpen=true;renderAlliance();
 }
+function closeAlliancePanel(){
+  document.getElementById('alliancePanel').classList.remove('open');
+  alliancePanelOpen=false;
+}
 function renderAlliance(){if(alliancePanelOpen)compAlliance()}
 
 async function compAlliance(){
@@ -12243,6 +12247,9 @@ function updAllyReqPrice(){
   const mktP=BASE_PRICES[good]||GOODS[good]?.bp||100;
   const total=amt*ppu;const diff=Math.round((ppu/mktP-1)*100);
   el.innerHTML='Gesamt: <b style="color:#a855f7">'+fmt(total)+'</b> aus Allianzkasse · Marktpreis: '+fmt(mktP)+'/St. · <span style="color:'+(diff>=0?'var(--a)':'var(--r)')+'">'+(diff>=0?'+':'')+diff+'%</span>';
+}
+function closeAlliancePanel(){
+  const p=document.getElementById('alliancePanel');if(p)p.style.display='none';
 }
 // ══════════════════════════════════════════
 // ADMIN PANEL v2 – Explorer UI with player details

@@ -1,7 +1,6 @@
-FROM node:22-alpine
+FROM node:18-alpine
 WORKDIR /app
 COPY server.js .
-COPY public/ ./public/
-RUN mkdir -p /app/data
+COPY public/ public/
 EXPOSE 3000
-CMD ["node", "server.js"]
+CMD ["node","server.js"]
