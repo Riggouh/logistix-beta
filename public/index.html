@@ -10,10 +10,10 @@
 <meta name="description" content="Logistik-Wirtschaftsspiel — Produziere, transportiere, handle!">
 <meta name="mobile-web-app-capable" content="yes">
 <title>LogistiX</title>
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css"/>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.min.css"/>
+<script src="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.min.js"></script>
 <link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@400;600;700&family=Barlow:wght@400;500;600&display=swap" rel="stylesheet">
-<link href="https://cdnjs.cloudflare.com/ajax/libs/remixicon/4.6.0/remixicon.min.css" rel="stylesheet">
+<link href="https://cdn.jsdelivr.net/npm/remixicon@4.6.0/fonts/remixicon.min.css" rel="stylesheet">
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
 :root{--a:#3dd68c;--a2:#38bdf8;--gw:rgba(61,214,140,.2);--bg:#0f1419;--pn:rgba(15,20,25,.97);--cd:rgba(22,30,40,.85);--bd:rgba(255,255,255,.07);--bd2:rgba(255,255,255,.12);--t:#e2e8f0;--td:#64748b;--r:#f87171;--go:#fbbf24;--bl:#60a5fa;--rr:12px;--mono:'Chakra Petch','Courier New',monospace}
@@ -2621,7 +2621,9 @@ async function load(){
       const n=Math.min(off,repaired?600:28800);
       if(n>30){
         addLog('⏰ '+ftime(n)+' offline — Fahrzeuge haben weitergearbeitet');
+        _catchingUp=true;
         for(let i=0;i<n;i++)tickCore();
+        _catchingUp=false;
         addLog('✅ '+ftime(n)+' nachgeholt!');
       }
     } else {
@@ -3715,12 +3717,12 @@ function startNextRoute(v){
 // ── Orders ──
 function accO(oid){if(!G)return;const o=G.orders.find(x=>x.id===oid);if(!o)return;
   const totalAvail=_globalStock(o.good);
-  if(totalAvail<1){addLog('❌ Kein '+(GOODS[o.good]?.name||o.good)+' vorhanden');if(typeof toast==='function')toast('❌ Kein '+(GOODS[o.good]?.name||o.good)+' vorhanden','var(--r)');G.orders=G.orders.filter(x=>x.id!==oid);ua();return}
+  if(totalAvail<1){addLog('❌ Kein '+(GOODS[o.good]?.name||o.good)+' vorhanden');if(typeof toast==='function')toast('❌ Kein '+(GOODS[o.good]?.name||o.good)+' vorhanden','var(--r)');return}
   o.acc=true;o.shipped=0;o.delivered=0;o.accTick=G.tick;o.accTs=Date.now();
   addLog('📋 Angenommen'+(totalAvail<o.amt?' ('+totalAvail+'/'+o.amt+' vorrätig)':'')+' – weise Fahrzeuge zu!');
   if(typeof toast==='function')toast('📋 Auftrag angenommen! '+(GOODS[o.good]?.em||'')+' '+o.amt+'×');
   ua()}
-function declineO(oid){if(!G)return;G.orders=G.orders.filter(x=>x.id!==oid);addLog('✖️ Abgelehnt');if(typeof toast==='function')toast('✖️ Auftrag abgelehnt','var(--td)');ua()}
+function declineO(oid){if(!G)return;G.orders=G.orders.filter(x=>x.id!==oid);addLog('✖️ Abgelehnt');if(typeof toast==='function')toast('✖️ Auftrag abgelehnt','var(--td)');save();ua()}
 function cancelO(oid){if(!G)return;const o=G.orders.find(x=>x.id===oid);if(!o)return;
   const _penAge=o.accTick?(G.tick-o.accTick):0;const _penPct2=o.deliverTl?Math.min(_penAge/o.deliverTl,1):0;const _penEst=Math.floor((o.origRew||o.rew)*(PENALTY_BASE+_penPct2*PENALTY_SCALE));
   if(!confirm('Auftrag stornieren? Strafe: -'+fmt(_penEst)))return;
@@ -3731,7 +3733,7 @@ function cancelO(oid){if(!G)return;const o=G.orders.find(x=>x.id===oid);if(!o)re
   });
   const delivAge=o.accTick?(G.tick-o.accTick):0;const pctUsed=o.deliverTl?Math.min(delivAge/o.deliverTl,1):0;
   const penRate=PENALTY_BASE+pctUsed*PENALTY_SCALE;
-  const penalty=Math.floor((o.origRew||o.rew)*penRate);G.money-=penalty;finLog("penalty",-penalty,"Storno");G.orders=G.orders.filter(x=>x.id!==oid);addLog('❌ Storniert (−'+fmt(penalty)+')');if(typeof toast==='function')toast('❌ Storniert! -'+fmt(penalty),'var(--r)');ua()}
+  const penalty=Math.floor((o.origRew||o.rew)*penRate);G.money-=penalty;finLog("penalty",-penalty,"Storno");G.orders=G.orders.filter(x=>x.id!==oid);addLog('❌ Storniert (−'+fmt(penalty)+')');if(typeof toast==='function')toast('❌ Storniert! -'+fmt(penalty),'var(--r)');save();ua()}
 
 // Helper: get stock of good at a city (city + building stores) — cached per tick
 let _stockCacheGen=0;const _stockCache={};
@@ -5423,7 +5425,7 @@ function tickCore(){
   }
 
   // ── Events: synchronized across all players via shared storage ──
-  if(G.tick%60===0)_syncEvents(); // poll shared events every 60 ticks
+  if(G.tick%60===0&&!_catchingUp)_syncEvents(); // poll shared events every 60 ticks
   if(G.tick%3600===0)_trySpawnEvent(); // attempt spawn every hour
   // Clean expired events
   G.events=(G.events||[]).filter(e=>e.endTick>G.tick);
@@ -5485,7 +5487,7 @@ function tickCore(){
 
   // ── Player Marketplace: expiry + credit collection ──
   if(G.tick%300===150){try{_pmCheckExpiry()}catch(e){}}
-  if(G.tick%120===90){try{_pmCollectCredits()}catch(e){}}
+  if(G.tick%120===90&&!_catchingUp){try{_pmCollectCredits()}catch(e){}}
 
   // ── Auto-Maintenance: queue vehicles below threshold ──
   if(G.autoMaint&&playerLvl()>=8&&G.tick%60===45){
