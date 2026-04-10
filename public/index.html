@@ -3106,7 +3106,7 @@ function showMarketSellPopup(cid,good){
   const consume=typeof _cityConsumption==='function'?_cityConsumption(cid,good):0;
   if(consume>0){const reserve=consume*PRODUCTION_RESERVE_CYCLES;h+='<div class="sub" style="color:var(--go)">🏭 Prod.-Reserve: '+reserve+'× ('+consume+'×/Zyklus) — frei: '+Math.max(0,stock-reserve)+'×</div>'}
   const resAmt=G.storRes&&G.storRes[cid]&&G.storRes[cid][good]||0;
-  if(resAmt>0)h+='<div class="sub" style="color:var(--a2)">📋 Reserviert: '+resAmt+'× — Verkauf reduziert reservierten Bestand!</div>';
+  if(resAmt>0)h+='<div class="sub" style="color:var(--a2)">📋 Reserviert: '+resAmt+'× — geschützt vor Auftragsversand</div>';
   h+='</div>';
   // Destination - Regional Market
   h+='<div class="crd" style="border-color:rgba(251,191,36,.15)"><div class="rw"><span>📍 '+c.name+' → 🏪 '+dest.name+'</span>';
@@ -3774,17 +3774,16 @@ function _cityConsumption(cid,good){
   return consume;
 }
 
-// Helper: stock available for orders (total stock minus production reserve)
-// Reserve = 5 cycles worth of consumption (buffer for standing order delivery time)
-// Note: Storage reservations protect SPACE (other goods can't fill it), not the stock itself.
-// Reserved goods CAN be shipped for orders and standing orders.
+// Helper: stock available for orders (total stock minus production reserve and storage reservations)
+// Reserve = 15 cycles worth of consumption (buffer for standing order delivery time)
+// Storage reservations also protect goods from being shipped for orders.
 const PRODUCTION_RESERVE_CYCLES=15;
 function _availableForOrders(cid,good){
   const stock=_cityStock(cid,good);
   const consume=_cityConsumption(cid,good);
-  if(consume<=0)return stock;
-  const prodReserve=consume*PRODUCTION_RESERVE_CYCLES;
-  return Math.max(0,stock-prodReserve);
+  const prodReserve=consume>0?consume*PRODUCTION_RESERVE_CYCLES:0;
+  const storReserve=G.storRes&&G.storRes[cid]&&G.storRes[cid][good]||0;
+  return Math.max(0,stock-Math.max(prodReserve,storReserve));
 }
 
 // Helper: is a city a "hub" (no production consumption of this good)
