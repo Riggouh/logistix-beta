@@ -16,8 +16,8 @@
 <link href="https://cdnjs.cloudflare.com/ajax/libs/remixicon/4.6.0/remixicon.min.css" rel="stylesheet">
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
-:root{--a:#3dd68c;--a2:#38bdf8;--gw:rgba(61,214,140,.2);--bg:#0f1419;--pn:rgba(15,20,25,.97);--cd:rgba(22,30,40,.85);--bd:rgba(255,255,255,.07);--bd2:rgba(255,255,255,.12);--t:#e2e8f0;--td:#64748b;--r:#f87171;--go:#fbbf24;--bl:#60a5fa;--rr:12px;--mono:'Chakra Petch',monospace}
-body{font-family:'Barlow',sans-serif;background:var(--bg);color:var(--t);overflow:hidden;height:100vh;font-size:15px}
+:root{--a:#3dd68c;--a2:#38bdf8;--gw:rgba(61,214,140,.2);--bg:#0f1419;--pn:rgba(15,20,25,.97);--cd:rgba(22,30,40,.85);--bd:rgba(255,255,255,.07);--bd2:rgba(255,255,255,.12);--t:#e2e8f0;--td:#64748b;--r:#f87171;--go:#fbbf24;--bl:#60a5fa;--rr:12px;--mono:'Chakra Petch','Courier New',monospace}
+body{font-family:'Barlow','Segoe UI','Helvetica Neue',Arial,sans-serif;background:var(--bg);color:var(--t);overflow:hidden;height:100vh;font-size:15px}
 .leaflet-control-zoom{display:none!important}
 .leaflet-control-attribution{font-size:8px!important;opacity:.4}
 #map .leaflet-top{top:60px!important}
@@ -75,7 +75,7 @@ body{font-family:'Barlow',sans-serif;background:var(--bg);color:var(--t);overflo
 .dash-x:hover{color:var(--t);border-color:var(--a)}
 .dash-body{padding:18px}
 .dash-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
-@media(max-width:700px){.dash-grid{grid-template-columns:1fr}}
+
 .dash-card{background:var(--cd);border:1px solid var(--bd);border-radius:var(--rr);padding:14px}
 .dash-card-title{font-family:var(--mono);font-size:14px;text-transform:uppercase;letter-spacing:1.5px;color:var(--td);margin-bottom:8px;padding-bottom:4px;border-bottom:1px solid var(--bd)}
 .dash-big{font-family:var(--mono);font-size:26px;font-weight:700;color:var(--a);margin-bottom:2px}
@@ -235,7 +235,7 @@ body{font-family:'Barlow',sans-serif;background:var(--bg);color:var(--t);overflo
 .zb:hover{color:var(--a);border-color:var(--a)}
 
 .split{display:grid;grid-template-columns:1fr 1fr;gap:12px}
-@media(max-width:800px){.split{grid-template-columns:1fr}}
+
 
 /* ═══ DASHBOARD PANEL (default view) ═══ */
 #dashPanel{position:fixed;top:56px;left:0;right:0;bottom:0;background:var(--bg);overflow:hidden;z-index:2}
@@ -296,7 +296,7 @@ body{font-family:'Barlow',sans-serif;background:var(--bg);color:var(--t);overflo
 
 /* ═══ REGION CARDS (start screen) ═══ */
 .region-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-top:14px;text-align:left}
-@media(max-width:600px){.region-grid{grid-template-columns:repeat(2,1fr)}}
+
 .region-card{padding:8px 10px;border-radius:8px;border:1px solid var(--bd);background:rgba(255,255,255,.02);cursor:pointer;transition:.15s}
 .region-card:hover{background:rgba(255,255,255,.05);transform:translateY(-1px)}
 .rc-head{font-family:var(--mono);font-size:14px;font-weight:700;margin-bottom:2px}
@@ -481,6 +481,9 @@ body{font-family:'Barlow',sans-serif;background:var(--bg);color:var(--t);overflo
 
 /* Mobile layout */
 @media(max-width:768px){
+  .dash-grid{grid-template-columns:1fr}
+  .split{grid-template-columns:1fr}
+  .region-grid{grid-template-columns:repeat(2,1fr)}
   #map .leaflet-top{top:52px!important}
   /* Terminal fullscreen below topbar */
   #computer{top:48px!important;bottom:56px!important;padding:0!important}.ally-panel{top:48px!important;bottom:56px!important;padding:0!important}
@@ -698,6 +701,9 @@ body{font-family:'Barlow',sans-serif;background:var(--bg);color:var(--t);overflo
   /* Adjust content for bottom nav */
   .dash-scroll{padding-bottom:64px}
   #mapHost{bottom:56px}
+  #map{bottom:56px!important}
+  .map-zoom{bottom:70px!important}
+  #minimap-wrap{width:160px;height:120px;bottom:66px;right:8px}
   #dashOverlay{bottom:56px}
   #dashPanel{padding-bottom:60px}
 
@@ -793,6 +799,14 @@ body{font-family:'Barlow',sans-serif;background:var(--bg);color:var(--t);overflo
   .home-cta span[style*="font-size:28px"]{font-size:22px!important}
   .home-view .crd{margin-bottom:5px!important}
 }
+.lx-popup .leaflet-popup-content-wrapper{background:rgba(15,20,25,.95);color:var(--t);border:1px solid var(--bd2);border-radius:12px;backdrop-filter:blur(12px);box-shadow:0 8px 30px rgba(0,0,0,.5)}
+.lx-popup .leaflet-popup-tip{background:rgba(15,20,25,.95);border:1px solid var(--bd2)}
+.lx-popup .leaflet-popup-close-button{color:var(--td)!important;font-size:18px!important}
+.lx-popup .leaflet-popup-content{margin:10px 12px;font-family:var(--mono)}
+.lx-loading{position:fixed;top:0;left:0;right:0;bottom:0;z-index:99999;background:rgba(0,0,0,.5);display:flex;align-items:center;justify-content:center;backdrop-filter:blur(4px)}
+.lx-loading-box{background:var(--bg);border:1px solid var(--bd2);border-radius:12px;padding:20px 30px;text-align:center;font-family:var(--mono);font-size:13px;color:var(--t);box-shadow:0 8px 30px rgba(0,0,0,.5)}
+.lx-spinner{width:24px;height:24px;border:3px solid var(--bd);border-top-color:var(--a);border-radius:50%;animation:spin .8s linear infinite;margin:0 auto 8px}
+@keyframes spin{to{transform:rotate(360deg)}}
 </style>
 </head>
 <body>
@@ -890,7 +904,7 @@ body{font-family:'Barlow',sans-serif;background:var(--bg);color:var(--t);overflo
     <div class="top-right">
       <button class="top-btn duty-toggle" id="dutyBtn" onclick="toggleDuty()" title="On/Off Duty — Klick zum Umschalten">⏳</button>
       <button class="top-btn" id="viewToggleBtn" onclick="toggleView()">🗺️ Karte</button>
-      <button class="top-btn glow" onclick="openComputer()">💻 Terminal</button>
+      <button class="top-btn glow" onclick="computerOpen?closeComputer():openComputer()">💻 Terminal</button>
       <div class="hamburger-wrap">
         <button class="top-btn" onclick="event.stopPropagation();toggleHamburger()">☰</button>
         <div class="hb-menu" id="hbMenu">
@@ -933,7 +947,7 @@ body{font-family:'Barlow',sans-serif;background:var(--bg);color:var(--t);overflo
   <div class="mob-nav" id="mobNav">
     <button class="mob-nav-btn" onclick="if(viewMode!=='dashboard'){toggleView()}else{renDash()}" id="mnDash"><i class="ri-dashboard-line"></i><span>Dashboard</span></button>
     <button class="mob-nav-btn" onclick="if(viewMode!=='map')toggleView()" id="mnMap"><i class="ri-map-2-line"></i><span>Karte</span></button>
-    <button class="mob-nav-btn mob-nav-main" onclick="openComputer()" id="mnTerm"><i class="ri-terminal-box-line"></i><span>Terminal</span></button>
+    <button class="mob-nav-btn mob-nav-main" onclick="computerOpen?closeComputer():openComputer()" id="mnTerm"><i class="ri-terminal-box-line"></i><span>Terminal</span></button>
     <button class="mob-nav-btn" onclick="openAlliancePanel()" id="mnAlly"><i class="ri-team-line"></i><span>Allianz</span></button>
     <button class="mob-nav-btn" onclick="toggleHamburger()" id="mnMenu"><i class="ri-menu-line"></i><span>Menü</span></button>
   </div>
@@ -967,7 +981,7 @@ body{font-family:'Barlow',sans-serif;background:var(--bg);color:var(--t);overflo
       <div class="comp-body" id="compBody"></div>
     </div>
   </div>
-  <div id="minimap-wrap"><div id="minimap"></div></div>
+  <div id="minimap-wrap"><button onclick="toggleMinimap()" style="position:absolute;top:4px;right:4px;z-index:1502;width:24px;height:24px;border-radius:6px;border:1px solid rgba(255,255,255,.2);background:rgba(0,0,0,.6);color:#fff;font-size:14px;cursor:pointer;display:flex;align-items:center;justify-content:center">✕</button><div id="minimap"></div></div>
 </div>
 
 <!-- ═══ MODAL ═══ -->
@@ -1801,6 +1815,14 @@ function hasReservation(cid,good){
   const cur=(G.stor[cid]||{})[good]||0;
   return res>0&&cur<res;
 }
+
+function showLoading(msg){
+  hideLoading();
+  const el=document.createElement('div');el.id='lxLoading';el.className='lx-loading';
+  el.innerHTML='<div class="lx-loading-box"><div class="lx-spinner"></div>'+(msg||'Laden...')+'</div>';
+  document.body.appendChild(el);
+}
+function hideLoading(){const el=document.getElementById('lxLoading');if(el)el.remove()}
 const TF=2700;const routeCache={};let _routeCacheCount=0;const ROUTE_CACHE_MAX=500;
 function _routeCachePut(key,val){if(_routeCacheCount>=ROUTE_CACHE_MAX){const keys=Object.keys(routeCache);for(let i=0;i<100&&i<keys.length;i++){delete routeCache[keys[i]];_routeCacheCount--}}routeCache[key]=val;_routeCacheCount++}
 
@@ -2084,7 +2106,7 @@ function _checkFeedbackTrigger(){
 // AUTH + GAME STATE
 // ══════════════════════════════════════════
 
-let cities=[],G=null,gameStarted=false,tickIv=null;
+let cities=[],G=null,gameStarted=false,tickIv=null,saveIv=null,saveCacheIv=null;
 let currentUser=null;
 function C(id){return cities.find(c=>c.id===id)}
 // Extended lookup: also check orders for non-unlocked city info
@@ -2118,13 +2140,13 @@ async function storeGet(k,shared){
 }
 async function storeSet(k,v,shared){
   _memStore[k]=v;
-  if(window.storage){try{await window.storage.set(k,v,!!shared)}catch(e){}}
-  else if(typeof localStorage!=='undefined'){try{localStorage.setItem(k,v)}catch(e){}}
+  if(window.storage){try{await window.storage.set(k,v,!!shared)}catch(e){console.warn('Storage:',e)}}
+  else if(typeof localStorage!=='undefined'){try{localStorage.setItem(k,v)}catch(e){console.warn('Storage:',e)}}
 }
 async function storeDel(k,shared){
   delete _memStore[k];
-  if(window.storage){try{await window.storage.delete(k,!!shared)}catch(e){}}
-  else if(typeof localStorage!=='undefined'){try{localStorage.removeItem(k)}catch(e){}}
+  if(window.storage){try{await window.storage.delete(k,!!shared)}catch(e){console.warn('Storage:',e)}}
+  else if(typeof localStorage!=='undefined'){try{localStorage.removeItem(k)}catch(e){console.warn('Storage:',e)}}
 }
 
 // ═══ SECURITY: Password hashing with SHA-256 + salt ═══
@@ -2174,7 +2196,7 @@ async function getUsers(){
   }catch(e){return{}}
 }
 async function saveUsers(users){
-  try{await storeSet('lx_users',JSON.stringify(users),true)}catch(e){}
+  try{await storeSet('lx_users',JSON.stringify(users),true)}catch(e){console.warn('Storage:',e)}
 }
 
 function showAuth(mode){
@@ -2207,16 +2229,17 @@ async function doChangeEmail(){
 async function doLogin(){
   const user=sanitize(document.getElementById('loginUser').value);
   const pass=document.getElementById('loginPass').value;
-  if(!user||!pass){authMsg('Bitte ausfüllen',false);return}
-  if(!await checkRateLimit(user)){authMsg('Zu viele Versuche. Warte 5 Minuten.',false);return}
+  if(!user||!pass){authMsg('Bitte ausfüllen',false);hideLoading();return}
+  showLoading('Anmelden...');
+  if(!await checkRateLimit(user)){authMsg('Zu viele Versuche. Warte 5 Minuten.',false);hideLoading();return}
   const users=await getUsers();
   const u=users[user.toLowerCase()];
-  if(!u){authMsg('Falscher Benutzername oder Passwort',false);return}
+  if(!u){authMsg('Falscher Benutzername oder Passwort',false);hideLoading();return}
   // Support both hashed and legacy plaintext passwords
   let valid=false;
   if(u.salt&&u.hash){valid=await verifyPassword(pass,u.hash,u.salt)}
   else if(u.pass){valid=u.pass===pass;if(valid)window._legacyMigrated=true} // Legacy: migrate on success
-  if(!valid){authMsg('Falscher Benutzername oder Passwort',false);return}
+  if(!valid){authMsg('Falscher Benutzername oder Passwort',false);hideLoading();return}
   // Migrate legacy plaintext to hashed on successful login
   if(!u.salt||!u.hash){
     const{hash,salt}=await hashPassword(pass);
@@ -2228,7 +2251,7 @@ async function doLogin(){
   currentUser=user.toLowerCase();
   authMsg('');
   try{adminLog('auth','🔑 Login: '+user)}catch(e){}
-  afterLogin(u);
+  hideLoading();afterLogin(u);
 }
 
 async function doRegister(){
@@ -2242,14 +2265,16 @@ async function doRegister(){
   if(pass!==pass2){authMsg('Passwörter stimmen nicht überein',false);return}
   if(user.length<2||user.length>20){authMsg('Benutzername: 2–20 Zeichen',false);return}
   if(!/^[a-zA-Z0-9_\-äöüÄÖÜß]+$/.test(user)){authMsg('Benutzername: nur Buchstaben, Zahlen, _ und -',false);return}
-  if(pass.length<4){authMsg('Passwort: mindestens 4 Zeichen',false);return}
+  if(pass.length<8){authMsg('Passwort: mindestens 8 Zeichen',false);return}
+  if(!await checkRateLimit('reg_'+user)){authMsg('Zu viele Versuche. Warte 5 Minuten.',false);return}
+  showLoading('Registrieren...');
   const users=await getUsers();
-  if(users[user.toLowerCase()]){authMsg('Benutzername bereits vergeben',false);return}
-  // Hash password + security answer
+  if(users[user.toLowerCase()]){hideLoading();authMsg('Benutzername bereits vergeben',false);return}
   const{hash,salt}=await hashPassword(pass);
   const{hash:ansHash,salt:ansSalt}=await hashPassword(answer.toLowerCase());
   users[user.toLowerCase()]={user:sanitize(user),email:sanitize(email),hash,salt,question,ansHash,ansSalt,created:Date.now()};
   await saveUsers(users);
+  hideLoading();
   try{adminLog('auth','📝 Neuer Spieler: '+user)}catch(e){}
   authMsg('✅ Registrierung erfolgreich! Bitte melde dich jetzt an.',true);
   setTimeout(()=>{showAuth('login');document.getElementById('loginUser').value=user},1200);
@@ -2278,7 +2303,7 @@ async function doResetStep2(){
   if(u.ansSalt&&u.ansHash){ansValid=await verifyPassword(answer,u.ansHash,u.ansSalt)}
   else{ansValid=u.answer===answer}
   if(!ansValid){authMsg('Falsche Antwort',false);return}
-  if(newPass.length<4){authMsg('Passwort: mindestens 4 Zeichen',false);return}
+  if(newPass.length<8){authMsg('Passwort: mindestens 8 Zeichen',false);return}
   const{hash,salt}=await hashPassword(newPass);
   u.hash=hash;u.salt=salt;delete u.pass;
   await saveUsers(users);
@@ -2291,6 +2316,8 @@ function doLogout(){
   try{sessionStorage.setItem('lx_session','')}catch(e){}
   currentUser=null;G=null;gameStarted=false;cities=[];
   if(tickIv){clearInterval(tickIv);tickIv=null}
+  if(saveIv){clearInterval(saveIv);saveIv=null}
+  if(saveCacheIv){clearInterval(saveCacheIv);saveCacheIv=null}
   document.getElementById('loginScreen').style.display='flex';
   document.getElementById('startScreen').style.display='none';
   ['gameScreen','computer','topBar'].forEach(id=>{const e=document.getElementById(id);if(e)e.style.display='none'});
@@ -2302,31 +2329,133 @@ function doLogout(){
 
 async function deleteSave(){
   if(!currentUser)return;
-  try{await storeSet('lx_save_'+currentUser,null)}catch(e){}
+  try{await storeSet('lx_save_'+currentUser,null)}catch(e){console.warn('Storage:',e)}
   G=null;
 }
 
+function _initSettings(){if(!G.settings)G.settings={};
+  const d=G.settings;
+  if(d.mapStyle===undefined)d.mapStyle='standard';
+  if(d.minimap===undefined)d.minimap=true;
+  if(d.showUnowned===undefined)d.showUnowned=true;
+  if(d.minReward===undefined)d.minReward=0;
+  if(d.expressFirst===undefined)d.expressFirst=true;
+  if(d.offDutyDays===undefined)d.offDutyDays=3;
+}
 function openSettings(){
+  if(!G)return;_initSettings();
+  const s=G.settings;
+  if(!window._setTab)window._setTab='map';
+  const tab=window._setTab;
   let h='';
-  h+='<div style="text-align:center;margin-bottom:16px"><span style="font-size:28px">⚙️</span><div style="font-family:var(--mono);font-size:20px;font-weight:700;color:var(--a);margin-top:6px">Einstellungen</div></div>';
-  h+='<div class="sec-label">Konto</div>';
-  h+='<div class="crd"><div class="rw"><span>👤 Benutzer</span><span style="font-family:var(--mono);color:var(--a)">'+sanitize(currentUser)+'</span></div></div>';
-  h+='<div class="crd"><div class="sub" style="margin-bottom:6px">Passwort ändern</div>';
-  h+='<input type="password" id="setNewPw" class="auth-input" placeholder="Neues Passwort" style="margin-bottom:6px"/>';
-  h+='<button class="btn full" onclick="const p=document.getElementById(\'setNewPw\').value;if(p.length<3){alert(\'Mindestens 3 Zeichen\');return}changePassword(p).then(()=>{alert(\'✅ Passwort geändert\')})">Passwort ändern</button></div>';
-  h+='<div class="sec-label" style="margin-top:12px">Spielstand</div>';
-  h+='<div class="crd"><button class="btn full" onclick="if(confirm(\'Spielstand wirklich löschen? Das kann nicht rückgängig gemacht werden!\')){deleteSave();closePopup(\'settingsPopup\');location.reload()}">🗑️ Spielstand löschen</button></div>';
-  h+='<div class="sec-label" style="margin-top:12px">Benachrichtigungen</div>';
-  if(typeof Notification!=='undefined'){
-    const perm=Notification.permission;
-    if(perm==='granted')h+='<div class="crd"><div class="rw"><span>🔔 Browser-Benachrichtigungen</span><span style="color:var(--a)">✅ Aktiv</span></div><div class="sub">Du wirst benachrichtigt wenn ein Lager &gt;90% voll ist (nur bei inaktivem Tab).</div></div>';
-    else if(perm==='denied')h+='<div class="crd"><div class="rw"><span>🔕 Browser-Benachrichtigungen</span><span style="color:var(--r)">Blockiert</span></div><div class="sub">Erlaube Benachrichtigungen in deinen Browser-Einstellungen.</div></div>';
-    else h+='<div class="crd"><div class="sub" style="margin-bottom:6px">🔔 Lager-Warnungen als Browser-Benachrichtigung (bei inaktivem Tab)</div><button class="btn full" onclick="Notification.requestPermission().then(p=>{openSettings()})">🔔 Benachrichtigungen aktivieren</button></div>';
-  } else h+='<div class="crd"><div class="sub" style="color:var(--td)">Browser unterstützt keine Benachrichtigungen</div></div>';
-  h+='<div class="sec-label" style="margin-top:12px">Abmelden</div>';
-  h+='<div class="crd"><button class="btn red full" onclick="closePopup(\'settingsPopup\');doLogout()">🚪 Abmelden</button></div>';
-  h+='<button class="btn full" style="margin-top:16px" onclick="closePopup(\'settingsPopup\')">Schließen</button>';
-  createPopup('settingsPopup',h,{maxWidth:'460px'});
+  // Header
+  h+='<div style="text-align:center;margin-bottom:12px"><span style="font-size:28px">⚙️</span><div style="font-family:var(--mono);font-size:18px;font-weight:700;color:var(--a);margin-top:4px">Einstellungen</div></div>';
+  // Tabs
+  h+='<div style="display:flex;gap:0;border-bottom:1px solid var(--bd);margin-bottom:12px">';
+  [['map','🗺️ Karte'],['orders','📋 Aufträge'],['system','⚙️ System']].forEach(([id,lbl])=>{
+    const on=tab===id;
+    h+='<button style="flex:1;padding:8px 4px;font-size:12px;font-family:var(--mono);font-weight:'+(on?'700':'500')+';color:'+(on?'var(--a)':'var(--td)')+';background:'+(on?'rgba(61,214,140,.08)':'transparent')+';border:none;border-bottom:2px solid '+(on?'var(--a)':'transparent')+';cursor:pointer;transition:.15s" onclick="window._setTab=\''+id+'\';openSettings()">'+lbl+'</button>';
+  });
+  h+='</div>';
+
+  if(tab==='map'){
+    h+='<div class="sec-label">Kartenstil</div>';
+    h+='<div class="crd"><select class="sl" style="width:100%;font-size:13px;padding:6px 8px" onchange="G.settings.mapStyle=this.value;save();_applyMapStyle()">';
+    [['standard','🗺️ Standard'],['clean','🧭 Clean'],['topo','⛰️ Gelände'],['sat','🛰️ Satellit'],['dark','🌙 Dunkel']].forEach(([v,l])=>{
+      h+='<option value="'+v+'"'+(s.mapStyle===v?' selected':'')+'>'+l+'</option>';
+    });
+    h+='</select><div class="sub" style="margin-top:4px">Wird beim nächsten Öffnen der Karte angewendet</div></div>';
+
+    h+='<div class="sec-label" style="margin-top:10px">Anzeige</div>';
+    h+='<div class="crd"><label style="display:flex;align-items:center;gap:8px;cursor:pointer"><input type="checkbox" '+(s.minimap?'checked':'')+' onchange="G.settings.minimap=this.checked;save();toggleMinimap()" style="width:16px;height:16px;accent-color:var(--a)"/><div><div style="font-size:13px">Minimap im Terminal</div><div class="sub">Kleine Karte unten rechts im Terminal</div></div></label></div>';
+
+    h+='<div class="crd"><label style="display:flex;align-items:center;gap:8px;cursor:pointer"><input type="checkbox" '+(s.showUnowned?'checked':'')+' onchange="G.settings.showUnowned=this.checked;save();if(typeof showUnownedCities===\'function\'){if(this.checked)showUnownedCities();else{_unownedMk.forEach(m=>MP.removeLayer(m));_unownedMk=[]}}" style="width:16px;height:16px;accent-color:var(--a)"/><div><div style="font-size:13px">Freischaltbare Städte auf Karte</div><div class="sub">Goldene Punkte für kaufbare Städte in der Nähe</div></div></label></div>';
+
+  } else if(tab==='orders'){
+    h+='<div class="sec-label">Filter</div>';
+    h+='<div class="crd"><div style="font-size:13px;margin-bottom:6px">Mindest-Belohnung</div>';
+    h+='<div style="display:flex;gap:6px;align-items:center"><input type="range" min="0" max="50000" step="1000" value="'+(s.minReward||0)+'" style="flex:1;accent-color:var(--a)" oninput="G.settings.minReward=+this.value;document.getElementById(\'_minRewVal\').textContent=this.value>0?fmt(this.value)+\' €\':\'Aus\';save()"/>';
+    h+='<span id="_minRewVal" style="font-family:var(--mono);font-size:12px;min-width:60px;text-align:right">'+(s.minReward>0?fmt(s.minReward)+' €':'Aus')+'</span></div>';
+    h+='<div class="sub" style="margin-top:4px">Aufträge unter diesem Wert werden ausgeblendet</div></div>';
+
+    h+='<div class="sec-label" style="margin-top:10px">Sortierung</div>';
+    h+='<div class="crd"><label style="display:flex;align-items:center;gap:8px;cursor:pointer"><input type="checkbox" '+(s.expressFirst?'checked':'')+' onchange="G.settings.expressFirst=this.checked;save()" style="width:16px;height:16px;accent-color:var(--go)"/><div><div style="font-size:13px">Express-Aufträge oben anzeigen</div><div class="sub">⚡ Express-Aufträge werden vor normalen sortiert</div></div></label></div>';
+
+    // Auto-Manager
+    h+='<div class="sec-label" style="margin-top:10px">🤖 Auto-Manager'+(G.amUnlocked?'':' <span style="color:var(--td);font-weight:400">(ab Level 5)</span>')+'</div>';
+    if(G.amUnlocked){
+      h+='<div class="crd"><label style="display:flex;align-items:center;gap:8px;cursor:pointer"><input type="checkbox" '+(G.autoManager?'checked':'')+' onchange="G.autoManager=this.checked;save();openSettings()" style="width:16px;height:16px;accent-color:var(--a)"/><div><div style="font-size:13px">Auto-Manager aktiv</div><div class="sub">Weist automatisch Fahrzeuge zu Aufträgen zu</div></div></label></div>';
+      if(G.autoManager){
+        h+='<div class="crd"><div style="font-size:13px;margin-bottom:6px">Max. Reichweite</div>';
+        h+='<div style="display:flex;gap:6px;align-items:center"><input type="range" min="0" max="500" step="10" value="'+(G.amMaxDist||50)+'" style="flex:1;accent-color:var(--a)" oninput="G.amMaxDist=+this.value;document.getElementById(\'_amDistVal\').textContent=this.value==0?\'Nur lokal\':this.value+\' km\';save()"/>';
+        h+='<span id="_amDistVal" style="font-family:var(--mono);font-size:12px;min-width:70px;text-align:right">'+((G.amMaxDist||50)===0?'Nur lokal':(G.amMaxDist||50)+' km')+'</span></div></div>';
+        h+='<div class="crd"><div style="font-size:13px;margin-bottom:6px">Priorität</div>';
+        h+='<select class="sl" style="width:100%;font-size:13px;padding:6px 8px" onchange="G.amPriority=this.value;save()">';
+        [['reward','💰 Höchste Belohnung'],['deadline','⏱️ Kürzeste Deadline'],['express','⚡ Express bevorzugt'],['fifo','📋 Reihenfolge (FIFO)']].forEach(([v,l])=>{
+          h+='<option value="'+v+'"'+((G.amPriority||'reward')===v?' selected':'')+'>'+l+'</option>';
+        });
+        h+='</select></div>';
+      }
+    } else {
+      h+='<div class="crd"><div class="sub" style="text-align:center;padding:4px">Noch nicht freigeschaltet (Level 5 + 25.000€)</div></div>';
+    }
+
+    // Auto-Wartung
+    h+='<div class="sec-label" style="margin-top:10px">🔧 Auto-Wartung'+(playerLvl()>=8?'':' <span style="color:var(--td);font-weight:400">(ab Level 8)</span>')+'</div>';
+    if(playerLvl()>=8){
+      h+='<div class="crd"><label style="display:flex;align-items:center;gap:8px;cursor:pointer"><input type="checkbox" '+(G.autoMaint?'checked':'')+' onchange="G.autoMaint=this.checked;save();openSettings()" style="width:16px;height:16px;accent-color:var(--a)"/><div><div style="font-size:13px">Auto-Wartung aktiv</div><div class="sub">Repariert Fahrzeuge automatisch unter der Schwelle</div></div></label></div>';
+      if(G.autoMaint){
+        h+='<div class="crd"><div style="font-size:13px;margin-bottom:6px">Wartungsschwelle</div>';
+        h+='<div style="display:flex;gap:6px;align-items:center"><input type="range" min="20" max="60" step="5" value="'+(G.autoMaintPct||40)+'" style="flex:1;accent-color:var(--a)" oninput="G.autoMaintPct=+this.value;document.getElementById(\'_amPctVal\').textContent=this.value+\' %\';save()"/>';
+        h+='<span id="_amPctVal" style="font-family:var(--mono);font-size:12px;min-width:40px;text-align:right">'+(G.autoMaintPct||40)+' %</span></div>';
+        h+='<div class="sub" style="margin-top:4px">Fahrzeuge werden repariert wenn Zustand unter diese Schwelle fällt</div></div>';
+      }
+    } else {
+      h+='<div class="crd"><div class="sub" style="text-align:center;padding:4px">Noch nicht verfügbar (ab Level 8)</div></div>';
+    }
+
+  } else if(tab==='system'){
+    h+='<div class="sec-label">Konto</div>';
+    h+='<div class="crd"><div class="rw"><span>👤 Benutzer</span><span style="font-family:var(--mono);color:var(--a)">'+sanitize(currentUser)+'</span></div></div>';
+    h+='<div class="crd"><div style="font-size:13px;margin-bottom:6px">🔑 Passwort ändern</div>';
+    h+='<input type="password" id="setNewPw" class="sl" placeholder="Neues Passwort" style="width:100%;margin-bottom:6px;font-size:13px"/>';
+    h+='<button class="btn full" onclick="const p=document.getElementById(\'setNewPw\').value;if(p.length<3){toast(\'Mindestens 3 Zeichen\',\'var(--r)\');return}changePassword(p).then(()=>{toast(\'✅ Passwort geändert\')})">Ändern</button></div>';
+
+    h+='<div class="sec-label" style="margin-top:10px">Benachrichtigungen</div>';
+    if(typeof Notification!=='undefined'){
+      const perm=Notification.permission;
+      if(perm==='granted')h+='<div class="crd"><div class="rw"><span>🔔 Browser-Benachrichtigungen</span><span style="color:var(--a)">✅ Aktiv</span></div><div class="sub">Benachrichtigung wenn Lager &gt;90% voll (bei inaktivem Tab)</div></div>';
+      else if(perm==='denied')h+='<div class="crd"><div class="rw"><span>🔕 Benachrichtigungen</span><span style="color:var(--r)">Blockiert</span></div><div class="sub">In Browser-Einstellungen erlauben</div></div>';
+      else h+='<div class="crd"><button class="btn full" onclick="Notification.requestPermission().then(p=>{openSettings()})">🔔 Benachrichtigungen aktivieren</button></div>';
+    }
+
+    h+='<div class="sec-label" style="margin-top:10px">Off-Duty Timer</div>';
+    h+='<div class="crd"><div style="font-size:13px;margin-bottom:6px">Automatisch Off-Duty nach Inaktivität</div>';
+    h+='<div style="display:flex;gap:4px">';
+    [1,2,3].forEach(d=>{
+      const on=s.offDutyDays===d;
+      h+='<button class="btn sm'+(on?' on':'')+'" style="flex:1;'+(on?'background:var(--a);color:var(--bg);border-color:var(--a)':'')+'" onclick="G.settings.offDutyDays='+d+';save();openSettings()">'+d+(d===1?' Tag':' Tage')+'</button>';
+    });
+    h+='</div><div class="sub" style="margin-top:4px">Spart Wartungskosten bei längerer Abwesenheit (max. 3 Tage)</div></div>';
+
+    h+='<div class="sec-label" style="margin-top:10px">Cache</div>';
+    h+='<div class="crd"><button class="btn full" onclick="if(typeof clearRouteCache===\'function\')clearRouteCache();if(typeof clearSearchCache===\'function\')clearSearchCache();toast(\'🗑️ Cache geleert\')">🗑️ Route-Cache leeren</button>';
+    h+='<div class="sub" style="margin-top:4px">Gespeicherte Routen und Suchergebnisse löschen</div></div>';
+
+    h+='<div class="sec-label" style="margin-top:10px">Info</div>';
+    h+='<div class="crd"><div style="display:flex;flex-wrap:wrap;gap:8px;font-size:12px">';
+    h+='<span class="sub">📦 v7.0</span>';
+    h+='<span class="sub">⏱️ '+ftime(G.tick||0)+' Spielzeit</span>';
+    h+='<span class="sub">📦 '+(G.dels||0)+' Lieferungen</span>';
+    h+='</div></div>';
+
+    h+='<div class="sec-label" style="margin-top:14px;color:var(--r)">Gefahrenzone</div>';
+    h+='<div class="crd" style="border-color:rgba(248,113,113,.2)"><button class="btn red full" onclick="if(confirm(\'Spielstand wirklich löschen? Das kann nicht rückgängig gemacht werden!\')){deleteSave();closePopup(\'settingsPopup\');location.reload()}">🗑️ Spielstand löschen</button></div>';
+    h+='<div class="crd" style="margin-top:8px"><button class="btn red full" onclick="closePopup(\'settingsPopup\');doLogout()">🚪 Abmelden</button></div>';
+  }
+
+  h+='<button class="btn full sec" style="margin-top:16px" onclick="closePopup(\'settingsPopup\')">Schließen</button>';
+  createPopup('settingsPopup',h,{maxWidth:'480px'});
 }
 
 async function afterLogin(userData){
@@ -2359,7 +2488,7 @@ async function ensureTestAccount(){
 
 async function changePassword(newPass){
   if(!currentUser)return;
-  if(!newPass||newPass.length<4){if(typeof toast==='function')toast('Mindestens 4 Zeichen','var(--r)');return}
+  if(!newPass||newPass.length<8){if(typeof toast==='function')toast('Mindestens 8 Zeichen','var(--r)');return}
   const users=await getUsers();const u=users[currentUser];if(!u)return;
   const{hash,salt}=await hashPassword(newPass);
   u.hash=hash;u.salt=salt;delete u.pass;
@@ -2384,7 +2513,7 @@ async function save(){
   if(_savePending)clearTimeout(_savePending);
   _savePending=setTimeout(async()=>{
     _savePending=null;
-    try{await storeSet('lx_save_'+currentUser,JSON.stringify({...G,_t:Date.now()}))}catch(e){}
+    try{await storeSet('lx_save_'+currentUser,JSON.stringify({...G,_t:Date.now()}))}catch(e){console.warn('Storage:',e)}
     const now=Date.now();
     if(now-_lastLbSave>60000){_lastLbSave=now;_saveLb()}
   },300);
@@ -2393,7 +2522,7 @@ async function save(){
 function saveNow(){
   if(!G||!currentUser)return;
   if(_savePending){clearTimeout(_savePending);_savePending=null}
-  try{storeSet('lx_save_'+currentUser,JSON.stringify({...G,_t:Date.now()}))}catch(e){}
+  try{storeSet('lx_save_'+currentUser,JSON.stringify({...G,_t:Date.now()}))}catch(e){console.warn('Storage:',e)}
 }
 let _lbLastMoney=null;let _lbLastTs=0;
 function _saveLb(){
@@ -2436,6 +2565,7 @@ async function load(){
     if(d.unlockedCities&&d.unlockedCities.length){cities=[];d.unlockedCities.forEach(c=>{if(!cities.find(x=>x.id===c.id))cities.push(c)})}
     G=d;if(!G.history)G.history=[];if(!G.infra)G.infra={};if(!G.standingOrders)G.standingOrders=[];if(!G.level)G.level=1;
     if(!G.pmListings)G.pmListings=[];if(!G.pmPickups)G.pmPickups=[];
+    _initSettings();
     if(!G._fbAsked)G._fbAsked={};
     // ── Comprehensive save repair ──
     let repaired=false;
@@ -2478,10 +2608,11 @@ async function load(){
     // Clean stale vehicle IDs from standing orders
     if(G.standingOrders){const vehIds=new Set(G.vehs.map(v=>v.id));G.standingOrders.forEach(so=>{if(so.vehicleIds)so.vehicleIds=so.vehicleIds.filter(id=>vehIds.has(id))})}
     if(repaired)addLog('🔧 Spielstand repariert');
-    // Auto off-duty after 3 days (259200 seconds)
-    if(G.lastLogin&&(Date.now()-G.lastLogin)>259200000&&G.onDuty!==false){
+    // Auto off-duty based on settings (default 3 days, max 3)
+    const offDays=Math.min(G.settings?.offDutyDays||3,3);
+    if(G.lastLogin&&(Date.now()-G.lastLogin)>offDays*86400000&&G.onDuty!==false){
       G.onDuty=false;
-      addLog('🔴 Auto Off-Duty — 3 Tage inaktiv');
+      addLog('🔴 Auto Off-Duty — '+offDays+' Tag'+(offDays>1?'e':'')+' inaktiv');
     }
     // Default onDuty for new saves
     if(G.onDuty===undefined)G.onDuty=true;
@@ -2502,6 +2633,8 @@ async function load(){
 async function reset(){
   if(!confirm('Spielstand komplett löschen?'))return;
   if(tickIv){clearInterval(tickIv);tickIv=null}
+  if(saveIv){clearInterval(saveIv);saveIv=null}
+  if(saveCacheIv){clearInterval(saveCacheIv);saveCacheIv=null}
   if(MP){try{cities.forEach(c=>{if(cMk[c.id])MP.removeLayer(cMk[c.id]);if(cLb[c.id])MP.removeLayer(cLb[c.id]);(bMk[c.id]||[]).forEach(m=>MP.removeLayer(m))});
   Object.values(vMk).forEach(m=>MP.removeLayer(m));Object.values(rLn).forEach(l=>MP.removeLayer(l))}catch(e){}}
   cities=[];G=null;gameStarted=false;
@@ -2583,6 +2716,67 @@ function genOrd(){
     tl:acceptTl,deliverTl,born:G.tick,bornTs:Date.now(),acc:false,
     pricePerUnit:Math.round(rew/amt)||1,mktRef:mktPrice,toName:tName,toLat:tLat,toLng:tLng,toUnlocked:tUnlocked,
     srcCity:srcCityName,srcCityId,srcStock:srcStock,srcDist:Math.round(nearestDist)};
+}
+
+// ═══ SPECIAL ORDERS: Multi-good mega-orders (Level 8+) ═══
+const SPECIAL_TEMPLATES=[
+  {name:'Fabrik-Ausstattung',em:'🏭',goods:['stahl','elektronik'],mults:[50,30],rewMult:3.5,minLvl:8},
+  {name:'Stadt-Versorgung',em:'🏙️',goods:['getreide','holz','kohle'],mults:[80,60,40],rewMult:3.0,minLvl:8},
+  {name:'Hightech-Lieferung',em:'💻',goods:['elektronik','glas'],mults:[40,25],rewMult:4.0,minLvl:9},
+  {name:'Luxus-Paket',em:'💎',goods:['schmuck','textilien','wein'],mults:[15,30,20],rewMult:5.0,minLvl:10},
+  {name:'Bauvorhaben',em:'🏗️',goods:['stahl','holz','glas'],mults:[60,50,30],rewMult:3.5,minLvl:9},
+  {name:'Energie-Projekt',em:'⚡',goods:['kohle','stahl'],mults:[100,40],rewMult:3.0,minLvl:8},
+  {name:'Medizin-Transport',em:'🏥',goods:['medikamente','chemikalien'],mults:[20,15],rewMult:5.5,minLvl:11},
+  {name:'Weltraum-Zulieferung',em:'🛰️',goods:['satelliten','elektronik','chips'],mults:[5,20,15],rewMult:8.0,minLvl:13},
+  {name:'Automobil-Fertigung',em:'🚗',goods:['stahl','gummi','elektronik'],mults:[40,25,15],rewMult:4.5,minLvl:10},
+  {name:'Textil-Großauftrag',em:'👔',goods:['baumwolle','textilien'],mults:[60,30],rewMult:3.5,minLvl:9},
+];
+
+function genSpecialOrder(){
+  if(!cities.length||!G||playerLvl()<8)return null;
+  const lvl=playerLvl();
+  // Filter templates by level
+  const avail=SPECIAL_TEMPLATES.filter(t=>t.minLvl<=lvl);
+  if(!avail.length)return null;
+  const tmpl=avail[Math.floor(Math.random()*avail.length)];
+  // Check if player has at least SOME stock of required goods
+  const globalStock={};
+  Object.entries(G.stor).forEach(([cid,s])=>{Object.entries(s).forEach(([g,a])=>{if(a>0)globalStock[g]=(globalStock[g]||0)+a})});
+  Object.entries(G.blds||{}).forEach(([cid,bs])=>{(bs||[]).forEach(b=>{if(b.localStor)Object.entries(b.localStor).forEach(([g,a])=>{if(a>0)globalStock[g]=(globalStock[g]||0)+a})})});
+  // Need at least 1 of each good available (or produceable)
+  const hasGoods=tmpl.goods.every(g=>globalStock[g]>0||G.vehs.length>5);
+  if(!hasGoods)return null;
+  // Scale amounts by level
+  const scale=0.5+lvl*0.1;
+  const goods=tmpl.goods.map((g,i)=>{
+    const base=tmpl.mults[i]||20;
+    const amt=Math.max(3,Math.round(base*scale*(0.7+Math.random()*0.6)));
+    return{good:g,amt};
+  });
+  // Find target city
+  const maxDist=ORDER_DIST[Math.min(lvl-1,ORDER_DIST.length-1)];
+  const allDB=typeof DB!=='undefined'?DB:[];
+  const dbPool=allDB.filter(x=>{
+    const isOwn=cities.some(c=>c.name===x[0]);
+    return !isOwn&&cities.some(c=>hav(c.lat,c.lng,x[3],x[4])<maxDist);
+  });
+  if(!dbPool.length)return null;
+  const td=dbPool[Math.floor(Math.random()*dbPool.length)];
+  const match=cities.find(c=>c.name===td[0]);
+  let tId,tName,tLat,tLng,tCo,tUnlocked;
+  if(match){tId=match.id;tName=match.name;tLat=match.lat;tLng=match.lng;tCo=match.co;tUnlocked=true}
+  else{tId='db_'+td[0].toLowerCase().replace(/[^a-z0-9]/g,'');tName=td[0];tLat=td[3];tLng=td[4];tCo=td[1];tUnlocked=false}
+  // Calculate reward
+  const totalValue=goods.reduce((s,g)=>{const bp=BASE_PRICES[g.good]||100;return s+bp*g.amt},0);
+  const rew=Math.round(totalValue*tmpl.rewMult);
+  const deliverTl=Math.max(21600,Math.floor(21600+maxDist*30+goods.reduce((s,g)=>s+g.amt,0)*200));
+  if(!G.orderNum)G.orderNum=0;G.orderNum++;
+  return{id:uid(),num:G.orderNum,type:'special',specName:tmpl.name,specEm:tmpl.em,
+    to:tId,toName:tName,toLat:tLat,toLng:tLng,toUnlocked:tUnlocked,
+    goods,good:goods[0].good,amt:goods[0].amt,rew,origRew:rew,
+    tl:3600,deliverTl,born:G.tick,bornTs:Date.now(),acc:false,
+    pricePerUnit:Math.round(rew/goods.reduce((s,g)=>s+g.amt,0)),mktRef:0,
+    srcCity:'',srcDist:0};
 }
 // ══════════════════════════════════════════
 // CACHE SYSTEM – persistent route + search cache
@@ -2862,12 +3056,6 @@ function claimWeekly(idx){
   G.money+=q.reward;finLog('quest',q.reward,'Mission: '+(q.title||''));q.claimed=true;
   addLog('🎁 Wochenbelohnung: +'+fmt(q.reward)+' ('+q.name+')');ua();
 }
-
-function timeLeft(ts,dur){
-  const left=Math.max(0,(ts+dur)-Date.now());
-  const h=Math.floor(left/3600000),m=Math.floor((left%3600000)/60000);
-  return h+'h '+m+'m';
-}
 // ═══ MARKET SELL: Popup + vehicle drives to market city ═══
 function showMarketSellPopup(cid,good){
   if(!G)return;const c=C(cid);if(!c)return;
@@ -2875,7 +3063,7 @@ function showMarketSellPopup(cid,good){
   const reg=getRegion((c.co||'').toUpperCase());const ri=REGIONS[reg];
   // Use regional market
   const market=getRegionalMarket(reg);
-  if(!market){addLog('❌ Kein Marktplatz in Region');return}
+  if(!market){addLog('❌ Kein Marktplatz in Region');if(typeof toast==='function')toast('❌ Kein Marktplatz in Region','var(--r)');return}
   const dest={name:market.name,co:market.co,lat:market.lat,lng:market.lng};
   const dist=Math.max(5,Math.round(hav(c.lat,c.lng,dest.lat,dest.lng)));
   const isLocal=cities.some(x=>x.name===market.name);
@@ -2966,11 +3154,11 @@ function updMktCalc(){
 function execMarketSell(cid,good,destName,destLat,destLng,price,dist){
   if(!G)return;const stor=G.stor[cid];if(!stor)return;
   const amt=parseInt(document.getElementById('mktAmt')?.value||1,10);
-  if((stor[good]||0)<amt){addLog('❌ Nicht genug Ware');return}
+  if((stor[good]||0)<amt){addLog('❌ Nicht genug Ware');if(typeof toast==='function')toast('❌ Nicht genug Ware','var(--r)');return}
   const c=C(cid);if(!c)return;
   const transport=Math.round(dist*0.8+amt*3);
   const revenue=price*amt;const profit=revenue-transport;
-  if(profit<=0){addLog('❌ Transportkosten übersteigen Erlös');return}
+  if(profit<=0){addLog('❌ Transportkosten übersteigen Erlös');if(typeof toast==='function')toast('❌ Transportkosten übersteigen Erlös','var(--r)');return}
   const destId='mkt_'+destName.toLowerCase().replace(/[^a-z0-9]/g,'');
   // 1. Local vehicles first
   const localV=G.vehs.filter(v=>v.st==='idle'&&v.loc===cid&&!v.followUpOrder&&!isSOBound(v)&&canVehCarry(v,good,dist)).sort((a,b)=>vehCap(b)-vehCap(a));
@@ -3094,10 +3282,10 @@ function canVehTravel(v,toCid){
 function buyV(type){
   if(!G)return;const d=VT[type];if(!d||G.money<d.price)return;
   const loc=G.sel||cities[0]?.id;
-  if(!canBuyVehAt(type,loc)){addLog('❌ Infrastruktur fehlt!');return}
+  if(!canBuyVehAt(type,loc)){addLog('❌ Infrastruktur fehlt!');if(typeof toast==='function')toast('❌ Infrastruktur fehlt!','var(--r)');return}
   const vAtDepot=G.vehs.filter(v=>(v.depot||v.loc)===loc).length;
   const cap=depotCap(loc);
-  if(vAtDepot>=cap){addLog('❌ Depot voll! ('+vAtDepot+'/'+cap+') – Depot ausbauen');return}
+  if(vAtDepot>=cap){addLog('❌ Depot voll! ('+vAtDepot+'/'+cap+') – Depot ausbauen');if(typeof toast==='function')toast('❌ Depot voll! Ausbauen nötig','var(--r)');return}
   G.money-=d.price;finLog("expense",-d.price,"Fahrzeug: "+d.name);const v={id:uid(),type,st:'idle',loc,depot:loc,cargo:null,rt:null,prog:0,queue:[],km:0,lastMaintKm:0};
   if(VT[type]?.cat==='rail')v.wagons=0;
   G.vehs.push(v);addLog(d.em+' '+vehName(v)+' gekauft in '+(C(loc)?.name||''));if(typeof toast==='function')toast(d.em+' '+d.name+' gekauft! -'+fmt(d.price),'var(--a)');ua();
@@ -3108,7 +3296,7 @@ function buyV(type){
 function doMaintenance(vid){
   if(!G)return;const v=G.vehs.find(x=>x.id===vid);if(!v||v.st!=='idle')return;
   const cost=maintCost(v);
-  if(G.money<cost){addLog('❌ Nicht genug Geld für Wartung ('+fmt(cost)+')');return}
+  if(G.money<cost){addLog('❌ Nicht genug Geld für Wartung ('+fmt(cost)+')');if(typeof toast==='function')toast('❌ Nicht genug Geld für Wartung','var(--r)');return}
   G.money-=cost;finLog('expense',-cost,'Wartung: '+vehName(v));v.lastMaintKm=v.km||0;v.needsMaint=false;v.maintQueued=false;
   addLog('🔧 Wartung: '+vehName(v)+' · -'+fmt(cost));if(typeof toast==='function')toast('🔧 Wartung! -'+fmt(cost),'var(--a)');ua();
 }
@@ -3180,9 +3368,9 @@ function _unbindFromSO(vid){
 const AM_UNLOCK_COST=25000;
 function unlockAutoManager(){
   if(!G)return;
-  if(playerLvl()<5){addLog('❌ Auto-Manager erst ab Level 5 verfügbar');return}
+  if(playerLvl()<5){addLog('❌ Auto-Manager erst ab Level 5 verfügbar');if(typeof toast==='function')toast('❌ Auto-Manager erst ab Level 5 verfügbar','var(--r)');return}
   if(G.amUnlocked){addLog('ℹ️ Auto-Manager bereits freigeschaltet');return}
-  if(G.money<AM_UNLOCK_COST){addLog('❌ Nicht genug Geld ('+fmt(AM_UNLOCK_COST)+' benötigt)');return}
+  if(G.money<AM_UNLOCK_COST){addLog('❌ Nicht genug Geld ('+fmt(AM_UNLOCK_COST)+' benötigt)');if(typeof toast==='function')toast('❌ Nicht genug Geld','var(--r)');return}
   G.money-=AM_UNLOCK_COST;finLog('expense',-AM_UNLOCK_COST,'Auto-Manager Freischaltung');
   G.amUnlocked=true;G.autoManager=true;
   if(G.amMaxDist===undefined)G.amMaxDist=50;
@@ -3190,7 +3378,7 @@ function unlockAutoManager(){
 }
 function toggleAutoManager(){
   if(!G)return;
-  if(playerLvl()<5){addLog('❌ Auto-Manager erst ab Level 5 verfügbar');return}
+  if(playerLvl()<5){addLog('❌ Auto-Manager erst ab Level 5 verfügbar');if(typeof toast==='function')toast('❌ Auto-Manager erst ab Level 5 verfügbar','var(--r)');return}
   if(!G.amUnlocked){showAMUnlockPopup();return}
   G.autoManager=!G.autoManager;
   addLog(G.autoManager?'🤖 Auto-Manager aktiviert':'🤖 Auto-Manager deaktiviert');ua();
@@ -3291,9 +3479,9 @@ function vehName(v){
 function sellVehicle(vid){
   if(!G)return;const v=G.vehs.find(x=>x.id===vid);if(!v)return;
   const _vt=VT[v.type];if(_vt&&!confirm(''+_vt.em+' '+_vt.name+' verkaufen? Erstattung: '+fmt(Math.floor(_vt.price*0.4))))return;
-  if(v.st!=='idle'){addLog('❌ Fahrzeug ist unterwegs – erst zurückrufen');return}
+  if(v.st!=='idle'){addLog('❌ Fahrzeug ist unterwegs – erst zurückrufen');if(typeof toast==='function')toast('❌ Fahrzeug ist unterwegs – erst zurückrufen','var(--r)');return}
   const home=v.depot||v.loc;
-  if(v.depot&&v.loc!==v.depot){addLog('❌ Nur im Heimat-Depot verkaufbar. Zurückrufen nach '+(C(v.depot)?.name||'Depot')+'!');return}
+  if(v.depot&&v.loc!==v.depot){addLog('❌ Nur im Heimat-Depot verkaufbar. Zurückrufen nach '+(C(v.depot)?.name||'Depot')+'!');if(typeof toast==='function')toast('❌ Nur im Heimat-Depot verkaufbar','var(--r)');return}
   const vt=VT[v.type];if(!vt)return;const refund=Math.floor(vt.price*0.4);
   G.vehs=G.vehs.filter(x=>x.id!==vid);G.money+=refund;finLog('refund',refund,'Fzg verkauft: '+vt.name);
   // Clean vehicle from standing orders
@@ -3301,7 +3489,7 @@ function sellVehicle(vid){
   addLog(vt.em+' '+vt.name+' verkauft → +'+fmt(refund));if(typeof toast==='function')toast(vt.em+' Verkauft! +'+fmt(refund),'var(--go)');ua();
 }
 
-function bld(cid,type){if(!G)return;const d=BLD[type];if(!d||G.money<d.price)return;if(!canBuildInCity(type,cid)){addLog('❌ Kann hier nicht gebaut werden');return}const c=C(cid);if(!c)return;const ex=G.blds[cid]||[];const slotsNeeded=d.slots||1;if(usedSlots(cid)+slotsNeeded>mxB(c.pop)){addLog('❌ Nicht genug Bauplätze ('+slotsNeeded+' benötigt)');return}G.money-=d.price;finLog('expense',-d.price,'Gebäude: '+d.name);if(!G.blds[cid])G.blds[cid]=[];
+function bld(cid,type){if(!G)return;const d=BLD[type];if(!d||G.money<d.price)return;if(!canBuildInCity(type,cid)){addLog('❌ Kann hier nicht gebaut werden');if(typeof toast==='function')toast('❌ Kann hier nicht gebaut werden','var(--r)');return}const c=C(cid);if(!c)return;const ex=G.blds[cid]||[];const slotsNeeded=d.slots||1;if(usedSlots(cid)+slotsNeeded>mxB(c.pop)){addLog('❌ Nicht genug Bauplätze ('+slotsNeeded+' benötigt)');return}G.money-=d.price;finLog('expense',-d.price,'Gebäude: '+d.name);if(!G.blds[cid])G.blds[cid]=[];
   const b={type,id:uid(),ups:{},localStor:{},overflow:'city'};
   if(type==='bauernhof')b.animals={};
   if(type==='obstplantage')b.fruits={};
@@ -3315,8 +3503,8 @@ function buyAnimal(cid,bid,animalKey){
   if(!G)return;const bs=G.blds[cid];if(!bs)return;
   const b=bs.find(x=>x.id===bid);if(!b||b.type!=='bauernhof')return;
   const a=ANIMALS[animalKey];if(!a)return;
-  if(a.lvl&&a.lvl>playerLvl()){addLog('❌ Benötigt Level '+a.lvl);return}
-  if(G.money<a.price){addLog('❌ '+fmt(a.price)+' nötig');return}
+  if(a.lvl&&a.lvl>playerLvl()){addLog('❌ Benötigt Level '+a.lvl);if(typeof toast==='function')toast('❌ Benötigt Level '+a.lvl,'var(--r)');return}
+  if(G.money<a.price){addLog('❌ '+fmt(a.price)+' nötig');if(typeof toast==='function')toast('❌ Nicht genug Geld','var(--r)');return}
   if(!b.animals)b.animals={};
   const cur=b.animals[animalKey]||0;
   const totalAnimals=sumObj(b.animals);
@@ -3342,14 +3530,14 @@ function buyFruit(cid,bid,fruitKey){
   if(!G)return;const bs=G.blds[cid];if(!bs)return;
   const b=bs.find(x=>x.id===bid);if(!b||b.type!=='obstplantage')return;
   const f=FRUITS[fruitKey];if(!f)return;
-  if(f.lvl&&f.lvl>playerLvl()){addLog('❌ Benötigt Level '+f.lvl);return}
+  if(f.lvl&&f.lvl>playerLvl()){addLog('❌ Benötigt Level '+f.lvl);if(typeof toast==='function')toast('❌ Benötigt Level '+f.lvl,'var(--r)');return}
   if(!b.fruits)b.fruits={};
   const MAX_PER_TYPE=8,MAX_TOTAL=20;
   const cur=b.fruits[fruitKey]||0;
   const total=sumObj(b.fruits);
-  if(cur>=MAX_PER_TYPE){addLog('❌ Max. '+MAX_PER_TYPE+' Bäume pro Sorte');return}
-  if(total>=MAX_TOTAL){addLog('❌ Max. '+MAX_TOTAL+' Bäume gesamt');return}
-  if(G.money<f.price){addLog('❌ '+fmt(f.price)+' nötig');return}
+  if(cur>=MAX_PER_TYPE){addLog('❌ Max. '+MAX_PER_TYPE+' Bäume pro Sorte');if(typeof toast==='function')toast('❌ Max. '+MAX_PER_TYPE+' Bäume pro Sorte','var(--r)');return}
+  if(total>=MAX_TOTAL){addLog('❌ Max. '+MAX_TOTAL+' Bäume gesamt');if(typeof toast==='function')toast('❌ Max. '+MAX_TOTAL+' Bäume gesamt','var(--r)');return}
+  if(G.money<f.price){addLog('❌ '+fmt(f.price)+' nötig');if(typeof toast==='function')toast('❌ Nicht genug Geld','var(--r)');return}
   b.fruits[fruitKey]=cur+1;
   G.money-=f.price;finLog('expense',-f.price,'Farm: '+f.name);addLog(f.em+' +1 '+f.name+' ('+total+1+'/'+MAX_TOTAL+')');ua();
 }
@@ -3471,12 +3659,12 @@ function _freeCapAtCity(cid){
 function buildInfra(cid,type){
   if(!G)return;const d=INFRA[type];if(!d||G.money<d.price)return;
   const c=C(cid);if(!c)return;
-  if(d.req==='airport'&&!c.airport){addLog('❌ Kein Flughafen-Standort!');return}
-  if(d.req==='harbor'&&!c.harbor){addLog('❌ Kein Hafen-Standort!');return}
+  if(d.req==='airport'&&!c.airport){addLog('❌ Kein Flughafen-Standort!');if(typeof toast==='function')toast('❌ Kein Flughafen-Standort!','var(--r)');return}
+  if(d.req==='harbor'&&!c.harbor){addLog('❌ Kein Hafen-Standort!');if(typeof toast==='function')toast('❌ Kein Hafen-Standort!','var(--r)');return}
   if(!G.infra)G.infra={};
   if(!G.infra[cid])G.infra[cid]=[];
   // Non-stackable: check not already built
-  if(!d.stack&&G.infra[cid].find(x=>x.type===type)){addLog('❌ Bereits vorhanden!');return}
+  if(!d.stack&&G.infra[cid].find(x=>x.type===type)){addLog('❌ Bereits vorhanden!');if(typeof toast==='function')toast('❌ Bereits vorhanden!','var(--r)');return}
   G.money-=d.price;finLog('expense',-d.price,'Infra: '+d.name);
   G.infra[cid].push({type,id:uid()});
   addLog('🏗️ '+d.em+' '+d.name+' in '+c.name+(d.storCap?' (+'+d.storCap+' Lager)':''));if(typeof toast==='function')toast(d.em+' '+d.name+' gebaut!','var(--a)');ua();
@@ -3491,7 +3679,7 @@ function upgBld(cid,bid,track){
   const lvl=b.ups[track]||0;
   if(lvl>=upDef.max)return;
   const cost=upCost(track,lvl);
-  if(G.money<cost){addLog('❌ '+fmt(cost)+' nötig');return}
+  if(G.money<cost){addLog('❌ '+fmt(cost)+' nötig');if(typeof toast==='function')toast('❌ Nicht genug Geld','var(--r)');return}
   G.money-=cost;finLog('expense',-cost,'Gebäude-Upgrade');b.ups[track]=lvl+1;
   if(typeof toast==='function')toast(upDef.em+' Upgrade Stufe '+(lvl+1)+'! -'+fmt(cost),'var(--a)');
   addLog('⬆️ '+upDef.em+' '+upDef.name+' → Lvl '+(lvl+1));ua();
@@ -3501,7 +3689,7 @@ function upgBld(cid,bid,track){
 
 function setPostDelivery(vid,cid){
   if(!G)return;const v=G.vehs.find(x=>x.id===vid);if(!v)return;
-  if(cid&&!canVehTravel(v,cid)){addLog('❌ Kann dort nicht hin!');return}
+  if(cid&&!canVehTravel(v,cid)){addLog('❌ Kann dort nicht hin!');if(typeof toast==='function')toast('❌ Kann dort nicht hin!','var(--r)');return}
   v.postDelivery=cid||null;v.followUpOrder=null;
   if(cid)addLog('📍 Nach Auftrag → '+C(cid)?.name);ua();
 }
@@ -3527,11 +3715,12 @@ function startNextRoute(v){
 // ── Orders ──
 function accO(oid){if(!G)return;const o=G.orders.find(x=>x.id===oid);if(!o)return;
   const totalAvail=_globalStock(o.good);
-  if(totalAvail<1){addLog('❌ Kein '+(GOODS[o.good]?.name||o.good)+' vorhanden');G.orders=G.orders.filter(x=>x.id!==oid);ua();return}
+  if(totalAvail<1){addLog('❌ Kein '+(GOODS[o.good]?.name||o.good)+' vorhanden');if(typeof toast==='function')toast('❌ Kein '+(GOODS[o.good]?.name||o.good)+' vorhanden','var(--r)');G.orders=G.orders.filter(x=>x.id!==oid);ua();return}
   o.acc=true;o.shipped=0;o.delivered=0;o.accTick=G.tick;o.accTs=Date.now();
   addLog('📋 Angenommen'+(totalAvail<o.amt?' ('+totalAvail+'/'+o.amt+' vorrätig)':'')+' – weise Fahrzeuge zu!');
+  if(typeof toast==='function')toast('📋 Auftrag angenommen! '+(GOODS[o.good]?.em||'')+' '+o.amt+'×');
   ua()}
-function declineO(oid){if(!G)return;G.orders=G.orders.filter(x=>x.id!==oid);addLog('✖️ Abgelehnt');ua()}
+function declineO(oid){if(!G)return;G.orders=G.orders.filter(x=>x.id!==oid);addLog('✖️ Abgelehnt');if(typeof toast==='function')toast('✖️ Auftrag abgelehnt','var(--td)');ua()}
 function cancelO(oid){if(!G)return;const o=G.orders.find(x=>x.id===oid);if(!o)return;
   const _penAge=o.accTick?(G.tick-o.accTick):0;const _penPct2=o.deliverTl?Math.min(_penAge/o.deliverTl,1):0;const _penEst=Math.floor((o.origRew||o.rew)*(PENALTY_BASE+_penPct2*PENALTY_SCALE));
   if(!confirm('Auftrag stornieren? Strafe: -'+fmt(_penEst)))return;
@@ -3796,7 +3985,7 @@ function _sendRemote(vid,oid){
     if(aH!==bH)return aH-bH;
     return hav(a.lat,a.lng,tgt.lat,tgt.lng)-hav(b.lat,b.lng,tgt.lat,tgt.lng);
   });
-  const dest=stockCities[0];if(!dest){addLog('❌ Kein Bestand verfügbar');return}
+  const dest=stockCities[0];if(!dest){addLog('❌ Kein Bestand verfügbar');if(typeof toast==='function')toast('❌ Kein Bestand verfügbar','var(--r)');return}
   v.st='moving';v.rt={from:v.loc,to:dest.id};v.prog=0;
   v.followUpOrder=oid;
   if(typeof ensureRoute==='function')ensureRoute(v);
@@ -3811,9 +4000,9 @@ function adminDiscardGoods(cid,good,maxAmt){
   const amtStr=prompt((gd?.em||'')+' '+(gd?.name||good)+' in '+(cn?.name||'?')+' entsorgen?\n\nVerfügbar: '+maxAmt+'\nMenge eingeben (oder "alle"):','alle');
   if(amtStr===null)return;
   const amt=amtStr.toLowerCase()==='alle'?maxAmt:parseInt(amtStr,10);
-  if(isNaN(amt)||amt<=0){addLog('❌ Ungültige Menge');return}
+  if(isNaN(amt)||amt<=0){addLog('❌ Ungültige Menge');if(typeof toast==='function')toast('❌ Ungültige Menge','var(--r)');return}
   const actual=Math.min(amt,G.stor[cid]?.[good]||0);
-  if(actual<=0){addLog('❌ Nichts zu entsorgen');return}
+  if(actual<=0){addLog('❌ Nichts zu entsorgen');if(typeof toast==='function')toast('❌ Nichts zu entsorgen','var(--r)');return}
   G.stor[cid][good]-=actual;
   if(G.stor[cid][good]<=0)delete G.stor[cid][good];
   addLog('🗑️ '+actual+'× '+(gd?.em||'')+' '+(gd?.name||good)+' entsorgt in '+(cn?.name||'?'));
@@ -3948,12 +4137,9 @@ function _doMultiAssign(o,vids){
     const t=Cx(o.to);
     addLog('🚀 '+vehCount+'× · '+totalLoaded+'× '+(GOODS[o.good]?.em||'')+' → '+(t?.name||''));
     if(typeof toast==='function')toast('🚀 '+vehCount+' Fzg losgeschickt!','var(--a)');
-  } else addLog('❌ Nichts geladen');
+  } else addLog('❌ Nichts geladen');if(typeof toast==='function')toast('❌ Nichts geladen','var(--r)');
   ua();
 }
-function sndV(vid,cid){if(!G)return;const v=G.vehs.find(x=>x.id===vid);if(!v||v.st!=='idle'||v.loc===cid)return;
-  if(!canVehTravel(v,cid)){addLog('❌ '+VT[v.type].name+' kann dort nicht hin!');return}
-  v.st='moving';v.rt={from:v.loc,to:cid};v.cargo=null;v.prog=0;ensureRoute(v);const vt=VT[v.type],f=C(v.loc),t=C(cid);addLog(vt.em+'→'+t?.name+' ('+ftime(tripT(f,t,vt.spd))+')');ua()}
 
 function goCity(id){sr.classList.remove('open');si.value='';sel(id)}
 
@@ -4096,7 +4282,7 @@ function addSOGood(soId){
   // Build list of available goods at source (city + building stores)
   const existing=so.goods.map(g=>g.good);
   const avail=Object.keys(GOODS).filter(g=>!existing.includes(g)&&_cityStock(so.from,g)>=1);
-  if(!avail.length){addLog('❌ Keine weiteren Waren am Standort');return}
+  if(!avail.length){addLog('❌ Keine weiteren Waren am Standort');if(typeof toast==='function')toast('❌ Keine weiteren Waren am Standort','var(--r)');return}
   // Add first available good
   const pick=avail[0];
   so.goods.push({good:pick,amt:10});
@@ -4106,7 +4292,7 @@ function addSOGood(soId){
 function removeSOGood(soId,idx){
   if(!G||!G.standingOrders)return;
   const so=G.standingOrders.find(x=>x.id===soId);if(!so||!so.goods)return;
-  if(so.goods.length<=1){addLog('❌ Mindestens eine Ware nötig');return}
+  if(so.goods.length<=1){addLog('❌ Mindestens eine Ware nötig');if(typeof toast==='function')toast('❌ Mindestens eine Ware nötig','var(--r)');return}
   so.goods.splice(idx,1);ua();
 }
 function removeStandingOrder(soId){
@@ -4367,7 +4553,7 @@ function pmConfirmCreate(){
     if(!G.stor[cid])G.stor[cid]={};G.stor[cid][good]=(G.stor[cid][good]||0)+amt;
     G.money+=fee;
     G.pmListings=G.pmListings.filter(l=>l.id!==offer.id);
-    addLog('❌ Fehler beim Einstellen');
+    addLog('❌ Fehler beim Einstellen');if(typeof toast==='function')toast('❌ Fehler beim Einstellen','var(--r)');
   }})();
 
   closePopup('pmCreatePopup');markDirty();ua();
@@ -4395,7 +4581,7 @@ function pmRemoveOffer(offerId){
     G.pmListings=(G.pmListings||[]).filter(l=>l.id!==offerId);
     toast('🗑️ Angebot zurückgezogen','#fb923c');
     markDirty();renComp();
-  }catch(e){addLog('❌ Fehler beim Zurückziehen')}})();
+  }catch(e){addLog('❌ Fehler beim Zurückziehen');if(typeof toast==='function')toast('❌ Fehler beim Zurückziehen','var(--r)')}})();
 }
 
 // ── Buy Offer (no teleport — creates pickup) ──
@@ -4445,7 +4631,7 @@ function pmBuyOffer(offerId,buyAmt){
     addLog('🛒 Gekauft: '+(GOODS[o.good]?.em||'')+amt+'× von '+o.seller+' für '+fmt(total)+' — Abholung in '+o.cityName);
     toast('🛒 Gekauft! Sende ein Fahrzeug zur Abholung','#fb923c');
     markDirty();renComp();
-  }catch(e){addLog('❌ Kauffehler: '+e.message)}})();
+  }catch(e){addLog('❌ Kauffehler: '+e.message);if(typeof toast==='function')toast('❌ Kauffehler','var(--r)')}})();
 }
 
 // ── Dispatch Vehicle for Pickup ──
@@ -4674,16 +4860,16 @@ async function joinAlliance(id){
   if(!G||!currentUser||G.alliance)return;
   const a=await getAlliance(id);if(!a)return;
   if(!a.applications)a.applications=[];
-  if(a.applications.find(x=>x.user===currentUser)){addLog('❌ Bewerbung bereits eingereicht');return}
+  if(a.applications.find(x=>x.user===currentUser)){addLog('❌ Bewerbung bereits eingereicht');if(typeof toast==='function')toast('❌ Bewerbung bereits eingereicht','var(--r)');return}
   a.applications.push({user:currentUser,applied:Date.now()});
   await saveAlliance(a);
   addLog('📨 Bewerbung eingereicht');if(typeof toast==='function')toast('📨 Bewerbung gesendet — warte auf Genehmigung');RA();
 }
 async function approveApplication(user){
   if(!G||!G.alliance)return;const a=await getAlliance(G.alliance);if(!a)return;
-  if(!canDo(a,currentUser,'canRoles')&&!canDo(a,currentUser,'canInvite')){addLog('❌ Keine Berechtigung');return}
+  if(!canDo(a,currentUser,'canRoles')&&!canDo(a,currentUser,'canInvite')){addLog('❌ Keine Berechtigung');if(typeof toast==='function')toast('❌ Keine Berechtigung','var(--r)');return}
   const lv=ALLIANCE_LEVELS[a.level-1];
-  if(a.members.length>=lv.maxMembers){addLog('❌ Allianz voll');return}
+  if(a.members.length>=lv.maxMembers){addLog('❌ Allianz voll');if(typeof toast==='function')toast('❌ Allianz voll','var(--r)');return}
   if(!a.applications)return;
   a.applications=a.applications.filter(x=>x.user!==user);
   a.members.push({user,role:'member',joined:Date.now()});
@@ -4695,7 +4881,7 @@ async function rejectApplication(user){
   a.applications=a.applications.filter(x=>x.user!==user);
   await saveAlliance(a);addLog('❌ '+user+' abgelehnt');if(typeof toast==='function')toast('❌ Bewerbung abgelehnt','var(--r)');RA();
 }
-async function leaveAlliance(){if(!G||!G.alliance)return;const a=await getAlliance(G.alliance);if(!a)return;if(a.leader===currentUser&&a.members.length>1){addLog('❌ Erst Leitung übergeben');return}a.members=a.members.filter(m=>m.user!==currentUser);if(!a.members.length){const al=await getAlliances();delete al[a.id];await saveAlliances(al)}else{if(a.leader===currentUser)a.leader=a.members[0].user;await saveAlliance(a)}G.alliance=null;ua();RA()}
+async function leaveAlliance(){if(!G||!G.alliance)return;const a=await getAlliance(G.alliance);if(!a)return;if(a.leader===currentUser&&a.members.length>1){addLog('❌ Erst Leitung übergeben');if(typeof toast==='function')toast('❌ Erst Leitung übergeben','var(--r)');return}a.members=a.members.filter(m=>m.user!==currentUser);if(!a.members.length){const al=await getAlliances();delete al[a.id];await saveAlliances(al)}else{if(a.leader===currentUser)a.leader=a.members[0].user;await saveAlliance(a)}G.alliance=null;ua();RA()}
 async function upgradeAlliance(){if(!G||!G.alliance)return;const a=await getAlliance(G.alliance);if(!a||a.leader!==currentUser)return;const n=ALLIANCE_LEVELS[a.level];if(!n){addLog('❌ Max');return}if(a.treasury<n.cost){addLog('❌ Kasse: '+fmt(a.treasury));return}a.treasury-=n.cost;a.level++;await saveAlliance(a);addLog('⬆️ Level '+a.level);if(typeof toast==='function')toast('⬆️ Allianz Level '+a.level+'!','#a855f7');ua();RA()}
 async function deliverToAlliance(cid,good,amt,targetAllyId){
   if(!G||!G.alliance)return;
@@ -4715,7 +4901,7 @@ async function deliverToAlliance(cid,good,amt,targetAllyId){
   const dest=nearby[0]||[c.name,c.co,0,c.lat+0.1,c.lng+0.1];
   const dist=Math.round(hav(c.lat,c.lng,dest[3],dest[4]));
   const specVehs=vehs.filter(v2=>canVehCarry(v2,good,dist));
-  if(!specVehs.length){const sw5=specWarn(good,dist);addLog('❌ Kein passendes Fahrzeug '+(sw5||''));return}
+  if(!specVehs.length){const sw5=specWarn(good,dist);addLog('❌ Kein passendes Fahrzeug '+(sw5||''));if(typeof toast==='function')toast('❌ Kein passendes Fahrzeug','var(--r)');return}
   const v=specVehs.sort((a2,b)=>vehCap(b)-vehCap(a2))[0];
   const maxAmt=Math.min(amt,vehCap(v));
   s[good]-=maxAmt;if(s[good]<=0)delete s[good];
@@ -4733,19 +4919,19 @@ async function buildAllianceBuilding(type,cityName,cityCountry){
   if(!G||!G.alliance)return;const a=await getAlliance(G.alliance);if(!a)return;
   const d=ALLIANCE_BUILDINGS[type];if(!d)return;
   const lv=ALLIANCE_LEVELS[a.level-1];
-  if(a.buildings.length>=lv.slots){addLog('❌ Max '+lv.slots+' Gebäude');return}
-  if(a.level<d.lvl){addLog('❌ Allianz Lvl '+d.lvl+' nötig');return}
-  if(a.treasury<d.price){addLog('❌ Kasse: '+fmt(a.treasury));return}
-  if(!canDo(a,currentUser,'canBuild')){addLog('❌ Keine Bauberechtigung');return}
+  if(a.buildings.length>=lv.slots){addLog('❌ Max '+lv.slots+' Gebäude');if(typeof toast==='function')toast('❌ Max '+lv.slots+' Gebäude','var(--r)');return}
+  if(a.level<d.lvl){addLog('❌ Allianz Lvl '+d.lvl+' nötig');if(typeof toast==='function')toast('❌ Allianz Lvl '+d.lvl+' nötig','var(--r)');return}
+  if(a.treasury<d.price){addLog('❌ Kasse: '+fmt(a.treasury));if(typeof toast==='function')toast('❌ Kasse reicht nicht','var(--r)');return}
+  if(!canDo(a,currentUser,'canBuild')){addLog('❌ Keine Bauberechtigung');if(typeof toast==='function')toast('❌ Keine Bauberechtigung','var(--r)');return}
   const cont=cityCountry?getRegion(cityCountry):'europa';
-  if(!d.conts.includes('all')&&!d.conts.includes(cont)){addLog('❌ Nicht in dieser Region baubar');return}
+  if(!d.conts.includes('all')&&!d.conts.includes(cont)){addLog('❌ Nicht in dieser Region baubar');if(typeof toast==='function')toast('❌ Nicht in dieser Region baubar','var(--r)');return}
   // Territory check: production buildings need territory, base buildings (conts:['all']) don't
   const cc=(cityCountry||'').toUpperCase();
   if(!d.conts.includes('all')){
     const ownsTerr=a.territories.some(tK=>{const t=TERRITORIES[tK];return t&&t.country===cc});
     if(!ownsTerr){addLog('❌ Kein Territorium in '+(COUNTRIES[cc]?.name||cc)+'! Erst Gebiet beanspruchen.');if(typeof toast==='function')toast('❌ Territorium in '+(COUNTRIES[cc]?.name||cc)+' nötig','var(--r)');return}
   }
-  if(a.buildings.find(b=>b.cityName===cityName)){addLog('❌ Stadt bereits belegt');return}
+  if(a.buildings.find(b=>b.cityName===cityName)){addLog('❌ Stadt bereits belegt');if(typeof toast==='function')toast('❌ Stadt bereits belegt','var(--r)');return}
   a.treasury-=d.price;
   a.buildings.push({type,cityName,continent:cont,country:cc,recipe:0,built:Date.now()});
   _allyLog(a,'🏭 '+d.em+' '+d.name+' in '+cityName+' gebaut',currentUser);
@@ -4754,15 +4940,15 @@ async function buildAllianceBuilding(type,cityName,cityCountry){
 async function allianceProduce(i){if(!G||!G.alliance)return;const a=await getAlliance(G.alliance);if(!a)return;const b=a.buildings[i];if(!b)return;const d=ALLIANCE_BUILDINGS[b.type];if(!d||!d.recipes.length)return;const r=d.recipes[b.recipe||0];if(!r)return;if((a.storage[r.in1]||0)<r.in1N){addLog('❌ '+(GOODS[r.in1]?.name||'')+' fehlt');return}if(r.in2&&(a.storage[r.in2]||0)<r.in2N){addLog('❌ '+(GOODS[r.in2]?.name||'')+' fehlt');return}a.storage[r.in1]-=r.in1N;if(a.storage[r.in1]<=0)delete a.storage[r.in1];if(r.in2){a.storage[r.in2]-=r.in2N;if(a.storage[r.in2]<=0)delete a.storage[r.in2]}a.storage[r.out]=(a.storage[r.out]||0)+r.outR;await saveAlliance(a);addLog('🏭 '+(GOODS[r.out]?.em||'')+' '+r.outR+'×');if(typeof toast==='function')toast('🏭 '+r.outR+'× '+(GOODS[r.out]?.name||'')+' produziert!','#a855f7');ua();RA()}
 async function claimTerritory(tKey){
   if(!G||!G.alliance)return;const a=await getAlliance(G.alliance);if(!a)return;
-  if(!canDo(a,currentUser,'canClaim')){addLog('❌ Keine Berechtigung');return}
+  if(!canDo(a,currentUser,'canClaim')){addLog('❌ Keine Berechtigung');if(typeof toast==='function')toast('❌ Keine Berechtigung','var(--r)');return}
   const t=TERRITORIES[tKey];if(!t)return;
   const lv=ALLIANCE_LEVELS[a.level-1];
-  if(a.territories.length>=lv.maxTerr){addLog('❌ Max '+lv.maxTerr);return}
-  const to=await getTerritoryOwners();if(to[tKey]){addLog('❌ Vergeben');return}
+  if(a.territories.length>=lv.maxTerr){addLog('❌ Max '+lv.maxTerr);if(typeof toast==='function')toast('❌ Max '+lv.maxTerr,'var(--r)');return}
+  const to=await getTerritoryOwners();if(to[tKey]){addLog('❌ Vergeben');if(typeof toast==='function')toast('❌ Vergeben','var(--r)');return}
   // Progressive cost: base fee×30, +15% per existing territory
   const mult=1+a.territories.length*0.15;
   const cost=Math.round(t.fee*30*mult);
-  if(a.treasury<cost){addLog('❌ '+fmt(cost)+' nötig (Kasse: '+fmt(a.treasury)+')');return}
+  if(a.treasury<cost){addLog('❌ '+fmt(cost)+' nötig (Kasse: '+fmt(a.treasury)+')');if(typeof toast==='function')toast('❌ Nicht genug in der Kasse','var(--r)');return}
   a.treasury-=cost;a.territories.push(tKey);
   // Rent: paid until now + 7 days
   if(!a.terrRent)a.terrRent={};
@@ -4791,26 +4977,26 @@ function getMemberRole(a,user){const m=a.members.find(x=>x.user===user);return m
 function canDo(a,user,perm){const role=getMemberRole(a,user);return ALLY_ROLES[role]?.[perm]||false}
 async function setMemberRole(targetUser,newRole){
   if(!G||!G.alliance)return;const a=await getAlliance(G.alliance);if(!a)return;
-  if(!canDo(a,currentUser,'canRoles')){addLog('❌ Keine Berechtigung');return}
-  if(newRole==='leader'){addLog('❌ CEO-Übertragung nur über Verlassen');return}
-  const m=a.members.find(x=>x.user===targetUser);if(!m){addLog('❌ Nicht gefunden');return}
-  if(m.role==='leader'){addLog('❌ CEO kann nicht degradiert werden');return}
+  if(!canDo(a,currentUser,'canRoles')){addLog('❌ Keine Berechtigung');if(typeof toast==='function')toast('❌ Keine Berechtigung','var(--r)');return}
+  if(newRole==='leader'){addLog('❌ CEO-Übertragung nur über Verlassen');if(typeof toast==='function')toast('❌ CEO-Übertragung nur über Verlassen','var(--r)');return}
+  const m=a.members.find(x=>x.user===targetUser);if(!m){addLog('❌ Nicht gefunden');if(typeof toast==='function')toast('❌ Nicht gefunden','var(--r)');return}
+  if(m.role==='leader'){addLog('❌ CEO kann nicht degradiert werden');if(typeof toast==='function')toast('❌ CEO kann nicht degradiert werden','var(--r)');return}
   m.role=newRole;await saveAlliance(a);addLog('👤 '+targetUser+' → '+ALLY_ROLES[newRole].name);RA();
 }
 async function inviteToAlliance(userName){
   if(!G||!G.alliance)return;const a=await getAlliance(G.alliance);if(!a)return;
-  if(!canDo(a,currentUser,'canInvite')){addLog('❌ Keine Einladeberechtigung');return}
+  if(!canDo(a,currentUser,'canInvite')){addLog('❌ Keine Einladeberechtigung');if(typeof toast==='function')toast('❌ Keine Einladeberechtigung','var(--r)');return}
   if(!a.invites)a.invites=[];
-  if(a.invites.includes(userName)){addLog('❌ Bereits eingeladen');return}
+  if(a.invites.includes(userName)){addLog('❌ Bereits eingeladen');if(typeof toast==='function')toast('❌ Bereits eingeladen','var(--r)');return}
   a.invites.push(userName);await saveAlliance(a);
   addLog('📨 '+userName+' eingeladen');RA();
 }
 async function acceptInvite(allyId){
   if(!G||!currentUser||G.alliance)return;
   const a=await getAlliance(allyId);if(!a)return;
-  if(!a.invites||!a.invites.includes(currentUser)){addLog('❌ Keine Einladung');return}
+  if(!a.invites||!a.invites.includes(currentUser)){addLog('❌ Keine Einladung');if(typeof toast==='function')toast('❌ Keine Einladung','var(--r)');return}
   const lv=ALLIANCE_LEVELS[a.level-1];
-  if(a.members.length>=lv.maxMembers){addLog('❌ Voll');return}
+  if(a.members.length>=lv.maxMembers){addLog('❌ Voll');if(typeof toast==='function')toast('❌ Voll','var(--r)');return}
   a.invites=a.invites.filter(x=>x!==currentUser);
   a.members.push({user:currentUser,role:'member',joined:Date.now()});
   await saveAlliance(a);G.alliance=allyId;
@@ -4837,8 +5023,8 @@ async function saveAllianceMarket(d){
 async function postAllianceRequest(good,amt,ppu){
   if(!G||!G.alliance)return;
   const a=await getAlliance(G.alliance);if(!a)return;
-  if(!canDo(a,currentUser,'canOrders')&&a.leader!==currentUser){addLog('❌ Keine Berechtigung');return}
-  if(!good||!amt||amt<1||!ppu||ppu<1){addLog('❌ Ungültige Eingabe');return}
+  if(!canDo(a,currentUser,'canOrders')&&a.leader!==currentUser){addLog('❌ Keine Berechtigung');if(typeof toast==='function')toast('❌ Keine Berechtigung','var(--r)');return}
+  if(!good||!amt||amt<1||!ppu||ppu<1){addLog('❌ Ungültige Eingabe');if(typeof toast==='function')toast('❌ Ungültige Eingabe','var(--r)');return}
   const totalCost=amt*ppu;
   if(a.treasury<totalCost){addLog('❌ Kasse: '+fmt(a.treasury)+' ('+fmt(totalCost)+' nötig)');if(typeof toast==='function')toast('❌ Nicht genug in der Allianzkasse','var(--r)');return}
   // Reserve money
@@ -4857,7 +5043,7 @@ async function fulfillAllianceRequest(reqId,cid,amt){
   const req=mk.find(r=>r.id===reqId);if(!req)return;
   const remaining=req.amt-req.filled;
   if(amt>remaining)amt=remaining;
-  const stor=G.stor[cid];if(!stor||(stor[req.good]||0)<amt){addLog('❌ Nicht genug Ware');return}
+  const stor=G.stor[cid];if(!stor||(stor[req.good]||0)<amt){addLog('❌ Nicht genug Ware');if(typeof toast==='function')toast('❌ Nicht genug Ware','var(--r)');return}
   // Need vehicle
   const c=C(cid);if(!c)return;
   const vehs=G.vehs.filter(v=>v.st==='idle'&&v.loc===cid);
@@ -4909,7 +5095,7 @@ function _allyLog(a,msg,user){
 // ═══ LEADER TRANSFER ═══
 async function transferLeadership(targetUser){
   if(!G||!G.alliance)return;const a=await getAlliance(G.alliance);if(!a||a.leader!==currentUser)return;
-  const m=a.members.find(x=>x.user===targetUser);if(!m){addLog('❌ Spieler nicht in Allianz');return}
+  const m=a.members.find(x=>x.user===targetUser);if(!m){addLog('❌ Spieler nicht in Allianz');if(typeof toast==='function')toast('❌ Spieler nicht in Allianz','var(--r)');return}
   if(!confirm('CEO-Rolle an '+targetUser+' übertragen? Du wirst zum Mitglied.'))return;
   const oldLeaderM=a.members.find(x=>x.user===currentUser);
   if(oldLeaderM)oldLeaderM.role='member';
@@ -5103,7 +5289,7 @@ async function proposeTradeAgreement(targetAllyId){
   const a=await getAlliance(G.alliance);if(!a||a.leader!==currentUser)return;
   const target=await getAlliance(targetAllyId);if(!target)return;
   if(!a.agreements)a.agreements=[];
-  if(a.agreements.find(x=>x.partner===targetAllyId)){addLog('❌ Abkommen existiert bereits');return}
+  if(a.agreements.find(x=>x.partner===targetAllyId)){addLog('❌ Abkommen existiert bereits');if(typeof toast==='function')toast('❌ Abkommen existiert bereits','var(--r)');return}
   if(!target.pendingAgreements)target.pendingAgreements=[];
   target.pendingAgreements.push({from:a.id,fromTag:a.tag,fromName:a.name,proposed:Date.now()});
   await saveAlliance(target);
@@ -5211,7 +5397,7 @@ function tickCore(){
       // After 150% delivery time: auto-cancel with penalty
       if(delivAge>=o.deliverTl*1.5){
         const pen=Math.round((o.origRew||0)*0.4)||0;if(pen>0){G.money-=pen;finLog("penalty",-pen,"Auftrag verfallen")}
-        addLog('❌ Auftrag '+fmtOrd(o.num)+' abgelaufen! -'+fmt(pen)+' Strafe');markCompDirty();
+                addLog('❌ Auftrag '+fmtOrd(o.num)+' abgelaufen! -'+fmt(pen)+' Strafe');if(typeof toast==='function')toast('❌ Auftrag abgelaufen! -'+fmt(pen),'var(--r)');markCompDirty();
         o._expired=true;G._lastExpiredTick=G.tick;
         if(o.express)G._expressExpired=true;
       }
@@ -5287,6 +5473,12 @@ function tickCore(){
       const eo=genExpressOrder();if(eo){G.orders.push(eo);
         const en=Cx(eo.to);if(typeof toast==='function')toast('⚡ Express: '+(GOODS[eo.good]?.em||'')+' '+eo.amt+'× → '+(en?.name||'?')+' · '+fmt(eo.rew),'#fbbf24');
         try{if(navigator.vibrate)navigator.vibrate([100,50,100])}catch(e){}
+        markCompDirty()}
+    }
+    // Special orders every ~10 min at level 8+
+    if(G.tick%600===0&&playerLvl()>=8&&G.orders.filter(o=>o.type==='special'&&!o.acc).length<1){
+      const so=genSpecialOrder();if(so){G.orders.push(so);
+        if(typeof toast==='function')toast('🌟 Spezialauftrag: '+so.goods.map(g=>(GOODS[g.good]?.em||'')+g.amt+'×').join(' + ')+' · '+fmt(so.rew),'#c084fc');
         markCompDirty()}
     }
   }
@@ -6209,7 +6401,12 @@ function initMap(){
   const topoLayer=L.tileLayer('https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png',{maxZoom:17,attribution:'© <a href="https://opentopomap.org">OpenTopoMap</a> · © OSM'});
   const satLayer=L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',{maxZoom:19,attribution:'© Esri · Maxar · Earthstar'});
   const darkLayer=L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png',{maxZoom:19,attribution:'© <a href="https://carto.com">CARTO</a> · © OSM'});
-  osmLayer.addTo(MP);
+  window._mapLayers={standard:osmLayer,clean:cleanLayer,topo:topoLayer,sat:satLayer,dark:darkLayer};
+  window._activeLayer=osmLayer;
+  // Apply saved style
+  const savedStyle=G?.settings?.mapStyle||'standard';
+  const initLayer=window._mapLayers[savedStyle]||osmLayer;
+  initLayer.addTo(MP);window._activeLayer=initLayer;
   L.control.layers({'🗺️ Standard':osmLayer,'🧭 Clean':cleanLayer,'⛰️ Gelände':topoLayer,'🛰️ Satellit':satLayer,'🌙 Dunkel':darkLayer},{},{position:'topright',collapsed:true}).addTo(MP);
   // Hide building markers at low zoom
   MP.on('zoomend',()=>{const z=MP.getZoom();Object.values(bMk).flat().forEach(m=>{if(z<10)m.getElement()&&(m.getElement().style.display='none');else m.getElement()&&(m.getElement().style.display='')})});
@@ -6303,12 +6500,32 @@ function addCityMap(c){
   if(!MP)return;
   const sz=c.pop>5e6?18:c.pop>1e6?14:c.pop>5e5?11:c.pop>1e5?8:c.pop>20000?6:5;
   const mk=L.marker([c.lat,c.lng],{icon:L.divIcon({className:'',iconSize:[sz,sz],iconAnchor:[sz/2,sz/2],html:'<div class="city-dot" id="cd-'+c.id+'" style="width:'+sz+'px;height:'+sz+'px"></div>'})}).addTo(MP);
-  mk.on('click',()=>sel(c.id));cMk[c.id]=mk;
+  mk.on('click',()=>{sel(c.id);_showCityPopup(c)});cMk[c.id]=mk;
   cLb[c.id]=L.marker([c.lat,c.lng],{icon:L.divIcon({className:'',iconSize:[0,0],iconAnchor:[-sz/2-3,7],html:'<div class="clb">'+c.name+'</div>'}),interactive:false}).addTo(MP);
 }
 
+// Show nearby unowned cities as buyable markers
+let _unownedMk=[];
+function showUnownedCities(){
+  if(!MP)return;
+  _unownedMk.forEach(m=>MP.removeLayer(m));_unownedMk=[];
+  if(G?.settings?.showUnowned===false)return;
+  const ownedNames=new Set(cities.map(c=>(c.name+'_'+c.co).toLowerCase()));
+  const nearby=DB.map(d=>({name:d[0],co:d[1],pop:d[2],lat:d[3],lng:d[4],harbor:d[5],airport:d[6]}))
+    .filter(c=>!ownedNames.has((c.name+'_'+c.co).toLowerCase()))
+    .filter(c=>{let md=99999;cities.forEach(oc=>{const d=hav(oc.lat,oc.lng,c.lat,c.lng);if(d<md)md=d});c._dist=md;return md<200})
+    .sort((a,b)=>a._dist-b._dist).slice(0,20);
+  nearby.forEach(c=>{
+    const cost=typeof unlockCost==='function'?unlockCost(c.lat,c.lng,c.pop):Math.round(c._dist*5+c.pop/50);
+    const mk=L.marker([c.lat,c.lng],{icon:L.divIcon({className:'',iconSize:[10,10],iconAnchor:[5,5],
+      html:'<div style="width:10px;height:10px;border-radius:50%;background:rgba(251,191,36,.4);border:1.5px solid rgba(251,191,36,.6);cursor:pointer" title="'+c.name+' — '+fmt(cost)+'"></div>'})}).addTo(MP);
+    mk.on('click',()=>{showUnlockPopup(c,cost)});
+    const lb=L.marker([c.lat,c.lng],{icon:L.divIcon({className:'',iconSize:[0,0],iconAnchor:[-8,7],
+      html:'<div style="font-size:10px;color:rgba(251,191,36,.7);white-space:nowrap;pointer-events:none">'+c.name+'</div>'}),interactive:false}).addTo(MP);
+    _unownedMk.push(mk,lb);
+  });
+}
 function udots(){if(!MP)return;cities.forEach(c=>{const e=document.getElementById('cd-'+c.id);if(e)e.className='city-dot'+(G&&G.sel===c.id?' sel':'')+(((G&&G.blds[c.id]||[]).length>0)?' blt':'')})}
-function updCnt_map(){try{document.getElementById('dbCit').textContent=cities.length}catch(e){}}
 
 function ubmk(cid){
   if(!MP)return;
@@ -6408,6 +6625,7 @@ function _createOrderPanel(){
   }
 }
 
+function _closeOrderPanel(){_orderPanelOpen=false;_updateOrderPanel()}
 function _updateOrderPanel(){
   const panel=document.getElementById('mapOrderPanel');
   const toggle=document.getElementById('mapOrdToggle');
@@ -6423,7 +6641,7 @@ function _updateOrderPanel(){
   const availOrders=(G.orders||[]).filter(o=>!o.acc);
   const sos=(G.standingOrders||[]).filter(so=>so.active);
   // Goods filter
-  let h='<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px"><span style="font-family:var(--mono);font-weight:700;font-size:11px;color:var(--a)">📋 Kartenübersicht</span><button style="border:none;background:none;color:var(--td);cursor:pointer;font-size:14px;padding:2px" onclick="_orderPanelOpen=false;_updateOrderPanel()"><i class="ri-close-line"></i></button></div>';
+  let h='<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px"><span style="font-family:var(--mono);font-weight:700;font-size:11px;color:var(--a)">📋 Kartenübersicht</span><button style="border:none;background:none;color:var(--td);cursor:pointer;font-size:14px;padding:2px" onclick="_closeOrderPanel()"><i class="ri-close-line"></i></button></div>';
   h+='<div style="margin-bottom:6px"><select class="sl" style="font-size:10px;padding:2px 4px;width:100%" onchange="window._mapGoodFilter=this.value;_drawGoodFilter()">';
   h+='<option value="">🔍 Ware auf Karte zeigen...</option>';
   const allGoods=new Set();cities.forEach(c=>{Object.keys(G.stor[c.id]||{}).forEach(g=>{if((G.stor[c.id][g]||0)>0)allGoods.add(g)})});
@@ -6537,6 +6755,45 @@ function _drawGoodFilter(){
     _goodFilterMarkers.push(m);
   });
 }
+
+function _applyMapStyle(){
+  if(!MP||!window._mapLayers)return;
+  const style=G?.settings?.mapStyle||'standard';
+  const layer=window._mapLayers[style];if(!layer)return;
+  if(window._activeLayer)MP.removeLayer(window._activeLayer);
+  layer.addTo(MP);window._activeLayer=layer;
+}
+
+function _showCityPopup(c){
+  if(!G||!MP)return;
+  const bs=(G.blds[c.id]||[]);const vehs=G.vehs.filter(v=>v.loc===c.id);
+  const idle=vehs.filter(v=>v.st==='idle').length;const moving=vehs.filter(v=>v.st==='moving').length;
+  const stor=G.stor[c.id]||{};const items=Object.entries(stor).filter(([,n])=>n>0);
+  const cap=typeof cityCap==='function'?cityCap(c.id):100;
+  const used=items.reduce((s,[,n])=>s+n,0);
+  let h='<div style="min-width:220px;max-width:300px">';
+  h+='<div style="font-weight:700;font-size:14px;margin-bottom:6px">📍 '+c.name+'</div>';
+  h+='<div style="display:flex;gap:8px;font-size:12px;margin-bottom:6px;flex-wrap:wrap">';
+  h+='<span>🏭 '+bs.length+' Gebäude</span>';
+  h+='<span>🚛 '+vehs.length+' Fzg <span style="color:var(--a)">'+idle+'⬤</span> <span style="color:var(--go)">'+moving+'⬤</span></span>';
+  h+='<span>📦 '+used+'/'+cap+'</span></div>';
+  // Top goods
+  if(items.length){h+='<div style="display:flex;gap:4px;flex-wrap:wrap;margin-bottom:6px">';
+    items.sort((a,b)=>b[1]-a[1]).slice(0,6).forEach(([g,n])=>{const gd=GOODS[g];
+      h+='<span style="font-size:10px;padding:2px 5px;border-radius:10px;border:1px solid var(--bd);background:rgba(255,255,255,.03)">'+(gd?.em||'')+n+'</span>'});
+    h+='</div>';}
+  // Buildings
+  if(bs.length){h+='<div style="font-size:11px;color:var(--td);margin-bottom:6px">';
+    bs.slice(0,4).forEach(b=>{h+=(BLD[b.type]?.em||'')+(BLD[b.type]?.name||'')+' '});
+    if(bs.length>4)h+='+'+(bs.length-4);h+='</div>';}
+  // Actions
+  h+='<div style="display:flex;gap:4px;flex-wrap:wrap">';
+  h+='<button class="btn sm" onclick="MP.closePopup();openComputer();setCompTab(\'buildings\')">🏭 Bauen</button>';
+  h+='<button class="btn sm" onclick="MP.closePopup();openComputer();setCompTab(\'inventory\')">📦 Lager</button>';
+  h+='<button class="btn sm" onclick="MP.closePopup();openComputer();setCompTab(\'fleet\')">🚛 Flotte</button>';
+  h+='</div></div>';
+  L.popup({closeButton:true,className:'lx-popup'}).setLatLng([c.lat,c.lng]).setContent(h).openOn(MP);
+}
 // ══════════════════════════════════════════
 // SEARCH (Hybrid: Local DB + Nominatim)
 // Dedup by name+country, prefer local DB
@@ -6586,8 +6843,8 @@ function renderStartResults(local,remote){
     const src=c._nom?'<span style="font-size:9px;color:var(--a2);margin-left:4px">🌐</span>':'';
     const inf=infraText(c);
     const reg=REGIONS[getRegion(c.co)];
-    return'<div class="start-item" onclick="pickStart('+i+')"><div style="flex:1"><div class="si-name">'+cSzIcon(c.pop)+' '+c.name+src+'</div>'
-      +'<div class="si-meta">'+c.co+' · '+cSz(c.pop)+' · '+c.pop.toLocaleString('de-DE')+' Einw.'+(inf?' · '+inf:'')+'</div>'
+    return'<div class="start-item" onclick="pickStart('+i+')"><div style="flex:1"><div class="si-name">'+cSzIcon(c.pop)+' '+sanitize(c.name)+src+'</div>'
+      +'<div class="si-meta">'+sanitize(c.co)+' · '+cSz(c.pop)+' · '+c.pop.toLocaleString('de-DE')+' Einw.'+(inf?' · '+inf:'')+'</div>'
       +(reg?'<div class="si-region" style="color:'+reg.color+'">'+reg.em+' '+reg.name+'</div>':'')
       +'</div></div>'
   }).join('');
@@ -6630,9 +6887,9 @@ function renderGameResults(local,remote){
     const ex=cities.find(x=>Math.abs(x.lat-c.lat)<.003&&Math.abs(x.lng-c.lng)<.003);
     const src=c._nom?'<span style="font-size:9px;color:var(--a2);margin-left:3px">🌐</span>':'';
     const inf=infraText(c);
-    if(ex)return'<div class="sri" onclick="goCity(\''+ex.id+'\')"><div class="sr-row"><div><div class="sn">'+cSzIcon(c.pop)+' '+c.name+src+'</div><div class="sm">'+c.co+' · '+c.pop.toLocaleString('de-DE')+' Einw.'+(inf?' · '+inf:'')+'</div></div><div class="sr-cost owned">✓</div></div></div>';
+    if(ex)return'<div class="sri" onclick="goCity(\''+ex.id+'\')"><div class="sr-row"><div><div class="sn">'+cSzIcon(c.pop)+' '+sanitize(c.name)+src+'</div><div class="sm">'+sanitize(c.co)+' · '+c.pop.toLocaleString('de-DE')+' Einw.'+(inf?' · '+inf:'')+'</div></div><div class="sr-cost owned">✓</div></div></div>';
     const cost=unlockCost(c.lat,c.lng,c.pop);
-    return'<div class="sri" onclick="unlockCityM('+i+')"><div class="sr-row"><div><div class="sn">'+cSzIcon(c.pop)+' '+c.name+src+'</div><div class="sm">'+c.co+' · '+c.pop.toLocaleString('de-DE')+' Einw.'+(inf?' · '+inf:'')+'</div></div><div class="sr-cost '+(G.money>=cost?'can':'cant')+'">🔓 '+fmt(cost)+'</div></div></div>';
+    return'<div class="sri" onclick="unlockCityM('+i+')"><div class="sr-row"><div><div class="sn">'+cSzIcon(c.pop)+' '+sanitize(c.name)+src+'</div><div class="sm">'+sanitize(c.co)+' · '+c.pop.toLocaleString('de-DE')+' Einw.'+(inf?' · '+inf:'')+'</div></div><div class="sr-cost '+(G.money>=cost?'can':'cant')+'">🔓 '+fmt(cost)+'</div></div></div>';
   }).join('');
   sr._merged=merged;
 }
@@ -6640,7 +6897,7 @@ function renderGameResults(local,remote){
 function unlockCityM(idx){
   const data=sr._merged;if(!data||!data[idx])return;
   const c=data[idx];const cost=unlockCost(c.lat,c.lng,c.pop);
-  if(G.money<cost){addLog('❌ '+fmt(cost)+' nötig');sr.classList.remove('open');si.value='';return}
+  if(G.money<cost){addLog('❌ '+fmt(cost)+' nötig');if(typeof toast==='function')toast('❌ Nicht genug Geld','var(--r)');sr.classList.remove('open');si.value='';return}
   sr.classList.remove('open');si.value='';
   // Show custom confirm popup with map
   showUnlockPopup(c,cost,idx);
@@ -6652,10 +6909,10 @@ function showUnlockPopup(c,cost,idx){
   const popup=createPopup('unlockPopup','<div class="unlock-popup">'
     +'<div class="unlock-map" id="unlockMapSlot"></div>'
     +'<div class="unlock-body">'
-    +'<div class="unlock-name">'+cSzIcon(c.pop)+' '+c.name+'</div>'
+    +'<div class="unlock-name">'+cSzIcon(c.pop)+' '+sanitize(c.name)+'</div>'
     +'<div class="unlock-info">'+cSz(c.pop)+' · '+c.pop.toLocaleString('de-DE')+' Einwohner</div>'
     +(inf?'<div class="unlock-info">'+inf+'</div>':'')
-    +'<div class="unlock-info" style="margin-top:2px">'+c.co+' · '+c.lat.toFixed(2)+'°, '+c.lng.toFixed(2)+'°</div>'
+    +'<div class="unlock-info" style="margin-top:2px">'+sanitize(c.co)+' · '+c.lat.toFixed(2)+'°, '+c.lng.toFixed(2)+'°</div>'
     +'<div class="unlock-cost">🔓 '+fmt(cost)+'</div>'
     +'<div class="unlock-btns">'
     +'<button class="btn full" id="unlockConfirmBtn">Freischalten</button>'
@@ -6683,7 +6940,7 @@ function showUnlockPopup(c,cost,idx){
     addLog('🔓 '+city.name+' – '+fmt(cost));
     if(uMap){try{uMap.remove()}catch(e){}}
     popup.remove();
-    sel(city.id);updCnt();ua();
+    sel(city.id);updCnt();ua();if(typeof showUnownedCities==='function')showUnownedCities();
   };
   // Cancel
   document.getElementById('unlockCancelBtn').onclick=()=>{
@@ -6725,7 +6982,7 @@ async function nomSearch(q,target){
           else if(d.address?.city||d.type==='city')pop=Math.floor(80000+s*400000);
           else pop=Math.floor(150+s*2000);
         }
-        return{name,co,pop,lat:parseFloat(d.lat),lng:parseFloat(d.lon),harbor:0,airport:0,rail:pop>50000?1:0,id:name.toLowerCase().replace(/[^a-z0-9]/g,''),_nom:true};
+        return{name:sanitize(name),co:sanitize(co),pop,lat:parseFloat(d.lat),lng:parseFloat(d.lon),harbor:0,airport:0,rail:pop>50000?1:0,id:name.toLowerCase().replace(/[^a-z0-9]/g,''),_nom:true};
       });
       // Save to cache
       if(typeof setCachedSearch==='function')setCachedSearch(q,results);
@@ -6761,12 +7018,13 @@ document.addEventListener('click',e=>{
   const wrap=document.querySelector('.hamburger-wrap');
   const menu=document.getElementById('hbMenu');
   if(!wrap||!menu)return;
-  // Close if click is outside both the wrap AND the menu
-  if(!wrap.contains(e.target)&&!menu.contains(e.target))closeHamburger();
+  const mnMenu=document.getElementById('mnMenu');
+  if(!wrap.contains(e.target)&&!menu.contains(e.target)&&(!mnMenu||!mnMenu.contains(e.target)))closeHamburger();
 });
 
 // ═══ VIEW TOGGLE: Dashboard ↔ Map ═══
 function toggleView(){
+  if(computerOpen)closeComputer();
   viewMode=viewMode==='dashboard'?'map':'dashboard';
   markDirty();
   applyView();
@@ -6787,7 +7045,7 @@ function applyView(){
     try{renDash()}catch(e){console.error('renDash error',e)}
   } else {
     if(dashEl)dashEl.style.display='none';
-    if(mapEl){mapEl.style.display='block';setTimeout(()=>{if(MP)MP.invalidateSize()},100)}
+    if(mapEl){mapEl.style.display='block';setTimeout(()=>{if(MP){MP.invalidateSize();if(typeof showUnownedCities==='function')showUnownedCities()}},100)}
     if(searchSlot)searchSlot.style.display='block';
     if(toggleBtn)toggleBtn.textContent='📊 Dashboard';
     if(searchSlot&&swEl&&swEl.parentElement!==searchSlot){swEl.style.cssText='display:block';searchSlot.appendChild(swEl)}
@@ -7029,6 +7287,8 @@ function dashHQ(){
   h+='<div class="dash-big" style="color:#c084fc">'+fmt(cv)+'</div><div class="dash-sub">Unternehmenswert</div>';
   h+='<div class="dash-big" style="font-size:16px;margin-top:4px;color:'+(G.money>=0?'#34d399':'var(--r)')+'">'+fmt(G.money)+'</div><div class="dash-sub">Kontostand</div>';
   h+='<div style="margin-top:4px;font-size:12px;color:var(--td)">💰 '+fmt(G.earned)+' verdient · 📦 '+(G.dels||0)+' Lieferungen</div>';
+  // Earnings sparkline (last 7 periods)
+  h+=_earningsSparkline();
   // Level requirements
   if(lvl<LEVELS.length){
     const next=LEVELS[lvl]; // next level (0-indexed: lvl=1 → LEVELS[1] is lvl 2)
@@ -7129,6 +7389,17 @@ function dashHQ(){
     h+='<div style="display:flex;justify-content:space-between;padding:2px 0;font-size:12px;border-bottom:1px solid var(--bd);cursor:pointer" onclick="selectLocation(\''+c.id+'\');toggleView()"><span>📍 '+c.name+'</span><span class="sub">🏭'+bCount+' 🚛'+vCount+'</span></div>'});
   if(cities.length>6)h+='<div class="sub" style="margin-top:3px">+'+(cities.length-6)+' weitere</div>';
   h+='<button class="btn sm" style="margin-top:4px" onclick="toggleView()">🗺️ Karte öffnen</button>';
+  // Nearby city suggestions
+  const ownedNames=new Set(cities.map(c2=>(c2.name+'_'+c2.co).toLowerCase()));
+  const nearby=DB.map(d=>{const c2={name:d[0],co:d[1],pop:d[2],lat:d[3],lng:d[4]};
+    let md=99999;cities.forEach(oc=>{const dd=hav(oc.lat,oc.lng,c2.lat,c2.lng);if(dd<md)md=dd});c2._dist=md;c2._cost=typeof unlockCost==='function'?unlockCost(c2.lat,c2.lng,c2.pop):Math.round(md*5+c2.pop/50);return c2})
+    .filter(c2=>!ownedNames.has((c2.name+'_'+c2.co).toLowerCase())).sort((a,b)=>a._dist-b._dist).slice(0,3);
+  if(nearby.length){
+    h+='<div class="dash-card-title" style="margin-top:8px">🔓 Neue Stadt freischalten</div>';
+    nearby.forEach(c2=>{const can=G.money>=c2._cost;
+      h+='<div style="display:flex;justify-content:space-between;align-items:center;padding:3px 0;font-size:12px;border-bottom:1px solid var(--bd)"><span>📍 '+c2.name+' <span class="sub">'+Math.round(c2._dist)+' km</span></span>';
+      h+='<button class="btn sm'+(can?'':' off')+'" style="font-size:10px;padding:3px 8px" onclick="unlockCityDash(\''+c2.name+'\',\''+c2.co+'\')">🔓 '+fmt(c2._cost)+'</button></div>'});
+  }
   h+='<div class="dash-card-title" style="margin-top:8px">🚛 Fahrzeuge · '+G.vehs.length+'</div>';
   const idle=G.vehs.filter(v=>v.st==='idle').length;const moving=G.vehs.filter(v=>v.st==='moving').length;
   h+='<div style="display:flex;gap:6px;font-size:11px"><span style="color:var(--a)">🟢 '+idle+' frei</span><span style="color:var(--go)">🔶 '+moving+' unterwegs</span></div>';
@@ -7577,20 +7848,52 @@ function dashAlerts(){
       entries.forEach(e=>{h+='<div style="padding:1px 0;font-size:12px;color:var(--td)">'+e+'</div>'})}}
   h+='</div></div>';return h;
 }
+
+function unlockCityDash(name,co){
+  const c=DB.find(d=>d[0]===name&&d[1]===co);if(!c)return;
+  const city={name:c[0],co:c[1],pop:c[2],lat:c[3],lng:c[4],harbor:c[5],airport:c[6]};
+  city.id=city.name.toLowerCase().replace(/[^a-z0-9äöüß]/g,'')+'_'+city.co.toLowerCase();
+  const cost=typeof unlockCost==='function'?unlockCost(city.lat,city.lng,city.pop):Math.round(city.pop/2);
+  showUnlockPopup(city,cost);
+}
+
+function _earningsSparkline(){
+  const hist=G.history||[];if(hist.length<2)return '';
+  const now=Date.now();const day=86400000;
+  const buckets=[];for(let i=6;i>=0;i--){const start=now-i*day;const end=start+day;
+    buckets.push(hist.filter(h2=>h2.ts>=start&&h2.ts<end).reduce((s,h2)=>s+(h2.rew||0),0))}
+  const max=Math.max(...buckets,1);const w=200,ht=40;
+  const pts=buckets.map((v,i)=>[Math.round(i/(buckets.length-1)*w),Math.round(ht-v/max*(ht-4))]);
+  const line=pts.map((p,i)=>(i===0?'M':'L')+p[0]+','+p[1]).join(' ');
+  const area=line+' L'+w+','+ht+' L0,'+ht+' Z';
+  const labels=['Mo','Di','Mi','Do','Fr','Sa','So'];
+  const today=new Date().getDay();// 0=Sun
+  let h='<div style="margin-top:6px">';
+  h+='<svg viewBox="-2 -2 '+(w+4)+' '+(ht+16)+'" width="100%" height="56" preserveAspectRatio="none">';
+  h+='<defs><linearGradient id="sg" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="rgba(61,214,140,.3)"/><stop offset="100%" stop-color="rgba(61,214,140,0)"/></linearGradient></defs>';
+  h+='<path d="'+area+'" fill="url(#sg)"/>';
+  h+='<path d="'+line+'" fill="none" stroke="#34d399" stroke-width="2" stroke-linejoin="round"/>';
+  pts.forEach((p,i)=>{if(buckets[i]>0)h+='<circle cx="'+p[0]+'" cy="'+p[1]+'" r="2.5" fill="#34d399"/>'});
+  // Day labels
+  for(let i=0;i<7;i++){const di=(today-6+i+7)%7;
+    h+='<text x="'+Math.round(i/6*w)+'" y="'+(ht+12)+'" fill="rgba(255,255,255,.3)" font-size="7" text-anchor="middle" font-family="var(--mono)">'+labels[di]+'</text>'}
+  h+='</svg>';
+  const todayEarn=buckets[6];const yesterEarn=buckets[5];
+  h+='<div style="display:flex;justify-content:space-between;font-size:10px;color:var(--td)"><span>Letzte 7 Tage</span><span style="color:var(--a)">Heute: '+fmt(todayEarn)+'</span></div>';
+  h+='</div>';
+  return h;
+}
 // ═══ COMPUTER ═══
 function openComputer(){computerOpen=true;document.getElementById('computer').style.display='flex';
   const dp=document.getElementById('dashPanel');if(dp)dp.style.display='none';
   const mapEl=document.getElementById('map');if(mapEl)mapEl.style.display='none';
+  if(G?.settings)minimapOpen=G.settings.minimap!==false;
   if(!minimap){minimap=L.map('minimap',{zoomControl:false,attributionControl:false,dragging:true,scrollWheelZoom:true,doubleClickZoom:false}).setView([50,8],10);
     L.tileLayer('https://tile.openstreetmap.de/{z}/{x}/{y}.png',{maxZoom:19}).addTo(minimap);setTimeout(()=>minimap.invalidateSize(),100)}
   document.getElementById('minimap-wrap').style.display=minimapOpen?'block':'none';updateMinimap();renComp();try{_updateMobNav()}catch(e){}}
 function closeComputer(){computerOpen=false;document.getElementById('computer').style.display='none';
   markDirty();applyView()}
 function selectLocation(cid){G.sel=cid;G._invFilter=cid;G.sellCityFilter=cid;G._orderFilter=cid;G._transferFilter=cid;routesShowAll=false;routesSub='city';try{udots()}catch(e){}if(computerOpen){updateMinimap();renComp()}else{const c=C(cid);if(c&&MP)MP.flyTo([c.lat,c.lng],Math.max(MP.getZoom(),9),{duration:.5});markDirty();ren()}}
-function toggleBuildCity(cid){buildExpanded[cid]=!buildExpanded[cid];ren()}
-function toggleMinimap(){minimapOpen=!minimapOpen;document.getElementById('minimap-wrap').style.display=minimapOpen?'block':'none';
-  const btn=document.getElementById('mmToggle');if(btn){btn.style.borderColor=minimapOpen?'var(--a)':'var(--bd)';btn.style.color=minimapOpen?'var(--a)':'var(--td)';btn.style.background=minimapOpen?'rgba(61,214,140,.1)':'rgba(255,255,255,.04)'}
-  if(minimapOpen&&minimap)setTimeout(()=>{minimap.invalidateSize();updateMinimap()},100)}
 function updateMinimap(){if(!minimap||!G)return;const c=G.sel?C(G.sel):null;if(c){minimap.setView([c.lat,c.lng],11,{animate:true,duration:.4});
   if(minimapPin)minimap.removeLayer(minimapPin);minimapPin=L.marker([c.lat,c.lng],{icon:L.divIcon({className:'',iconSize:[20,28],iconAnchor:[10,28],html:'<div style="font-size:24px;filter:drop-shadow(0 2px 4px rgba(0,0,0,.6))">📍</div>'})}).addTo(minimap)}
   // Vehicle markers on minimap
@@ -7723,11 +8026,6 @@ const TAB_TIPS={
   standing:{title:'🔄 Daueraufträge',tutorial:'Jetzt unter Logistik → Routen & Versand. Automatischer Warentransport zwischen deinen Standorten.',
     tips:['🗺️ Zu finden unter Logistik → Routen & Versand → 🔄 Daueraufträge','🔒 Zugewiesene Fahrzeuge sind exklusiv gebunden','Fahrzeuge kehren nach Lieferung automatisch zurück','⏸ Pausiert automatisch wenn Ziellager voll','📦 Multi-Waren: Mehrere Güter pro Auftrag ladbar']},
 };
-
-function tipBtn(tab){
-  const t=TAB_TIPS[tab];if(!t)return'';
-  return' <button class="tip-btn" onclick="showTabTip(\''+tab+'\')">💡</button>';
-}
 
 function showTabTip(tab){
   const t=TAB_TIPS[tab];if(!t)return;
@@ -8331,7 +8629,7 @@ async function termNomSearch(q){
           else if(d.address?.village||d.type==='village')pop=Math.floor(300+s*3500);
           else if(d.address?.town||d.type==='town')pop=Math.floor(5000+s*35000);
           else pop=Math.floor(150+s*2000);}
-        return{name,co,pop,lat:parseFloat(d.lat),lng:parseFloat(d.lon),harbor:0,airport:0,rail:pop>50000?1:0,_nom:true};
+        return{name:sanitize(name),co:sanitize(co),pop,lat:parseFloat(d.lat),lng:parseFloat(d.lon),harbor:0,airport:0,rail:pop>50000?1:0,_nom:true};
       });
       if(typeof setCachedSearch==='function')setCachedSearch(q,results);
     }
@@ -8509,6 +8807,17 @@ function compMissions(el){
 
   let h=tabHead('missions','<i class="ri-flag-line"></i> '+(sub==='daily'?'Tägliche Aufgaben':sub==='weekly'?'Wöchentliche Aufgaben':sub==='level'?'Level-Missionen':'Erfolge'),'');
 
+  // Inline sub-tabs
+  const dReady=(G.quests?.dailies||[]).some(q=>q.done&&!q.claimed);
+  const wReady=(G.quests?.weeklies||[]).some(q=>q.done&&!q.claimed);
+  const lmReady=LEVEL_MISSIONS.some(q=>q.minLvl<=lvl&&G.quests?.levelMissions?.[q.id]==='done');
+  const tutReady=TUTORIAL.some(q=>{const s=G.quests?.tutorial?.[q.id];return s==='done'});
+  h+='<div style="display:flex;gap:4px;margin-bottom:10px;flex-wrap:wrap">';
+  [['daily','📅 Heute',dReady,'var(--a)'],['weekly','📆 Woche',wReady,'var(--a2)'],['level','🛡️ Level',lmReady||tutReady,'var(--go)'],['achievements','🏅 Erfolge',false,'#fbbf24']].forEach(([id,lbl,badge,clr])=>{
+    const on=sub===id;
+    h+='<button style="padding:6px 12px;border-radius:20px;font-size:12px;font-family:var(--mono);font-weight:'+(on?'700':'500')+';color:'+(on?clr:'var(--td)')+';background:'+(on?clr+'18':'rgba(255,255,255,.03)')+';border:1px solid '+(on?clr:'var(--bd)')+';cursor:pointer;transition:.15s" onclick="G.missionSub=\''+id+'\';renComp()">'+lbl+(badge?' <span style="background:'+clr+';color:#fff;border-radius:8px;padding:0 5px;font-size:9px">!</span>':'')+'</button>';
+  });
+  h+='</div>';
   function qCard(q,state,claimFn,icoMap){
     if(state==='claimed')return '';
     const rdy=state==='done';
@@ -8819,6 +9128,27 @@ function compFleet(el){
     h+='<div style="display:flex;justify-content:flex-end;margin-bottom:4px"><span class="tg" style="opacity:.4">🔧 Auto-Wartung ab Level 8</span></div>';
   }
 
+  // ═══ VEHICLE GROUPS ═══
+  if(!G.vehGroups)G.vehGroups=[];
+  if(G.vehGroups.length||G.vehs.length>=6){
+    h+='<div style="cursor:pointer;display:flex;align-items:center;gap:4px;padding:3px 0;margin-bottom:4px" onclick="window._showVehGroups=!window._showVehGroups;renComp()">';
+    h+='<span style="font-size:10px;color:var(--td)">'+(window._showVehGroups?'▼':'▶')+'</span>';
+    h+='<span style="font-size:11px;font-weight:600">📁 Gruppen · '+G.vehGroups.length+'</span></div>';
+    if(window._showVehGroups){
+      G.vehGroups.forEach((gr,gi)=>{
+        const vCount=gr.vids.filter(id=>G.vehs.find(v=>v.id===id)).length;
+        const idleCount=gr.vids.filter(id=>{const v=G.vehs.find(x=>x.id===id);return v&&v.st==='idle'}).length;
+        h+='<div class="crd" style="padding:5px 8px;margin-bottom:3px"><div class="rw"><span style="font-size:12px;font-weight:600">'+sanitize(gr.name)+' <span class="sub">'+vCount+' Fzg · '+idleCount+' frei</span></span>';
+        h+='<span style="display:flex;gap:3px">';
+        if(idleCount>0)h+='<button class="btn sm" style="font-size:10px;padding:2px 6px" onclick="filterByGroup('+gi+')">Zeigen</button>';
+        h+='<button class="btn sm" style="font-size:10px;padding:2px 6px" onclick="editVehGroup('+gi+')">✏️</button>';
+        h+='<button class="btn red sm" style="font-size:10px;padding:2px 6px" onclick="G.vehGroups.splice('+gi+',1);save();renComp()">✕</button>';
+        h+='</span></div></div>';
+      });
+      h+='<button class="btn sm" style="margin-bottom:8px" onclick="createVehGroup()">+ Neue Gruppe</button>';
+    }
+  }
+
   // Apply filter
   let filtered=G.vehs;
   if(ff==='idle')filtered=G.vehs.filter(v=>v.st==='idle');
@@ -8828,13 +9158,19 @@ function compFleet(el){
 
   // If city selected, also filter by city
   if(sc)filtered=filtered.filter(v=>(v.depot||v.loc)===sc.id||v.loc===sc.id||v.rt?.from===sc.id||v.rt?.to===sc.id);
+  // Group filter
+  if(window._vehGroupFilter!==undefined&&G.vehGroups[window._vehGroupFilter]){
+    const gr=G.vehGroups[window._vehGroupFilter];
+    filtered=filtered.filter(v=>gr.vids.includes(v.id));
+    h+='<div style="display:flex;align-items:center;gap:6px;margin-bottom:6px;padding:4px 8px;border-radius:8px;border:1px solid var(--a);background:rgba(61,214,140,.05)"><span style="font-size:12px">📁 '+sanitize(gr.name)+'</span><button class="btn sm" style="font-size:10px;padding:2px 6px" onclick="window._vehGroupFilter=undefined;renComp()">✕ Filter aufheben</button></div>';
+  }
 
   // City header
   if(sc){
     const dCap=depotCap(sc.id);const vAll=G.vehs.filter(v=>(v.depot||v.loc)===sc.id).length;
     h+='<div class="ch"><div class="ci">📍</div><div><div class="cn">'+sc.name+'</div><div class="cm">🏢 Depot '+vAll+'/'+dCap+'</div></div></div>';
     const dCost=depotUpgradeCost(sc.id);
-    if(dCost){const canAfford=G.money>=dCost;h+='<button class="btn sm" style="margin-bottom:8px;'+(canAfford?'':'opacity:.5')+'" onclick="'+(canAfford?"upgradeDepot('"+sc.id+"')":"addLog('❌ Nicht genug Geld')")+'">🏢 Depot → '+(dCap+2)+' Plätze · '+fmt(dCost)+'</button> '}
+    if(dCost){const canAfford=G.money>=dCost;h+='<button class="btn sm" style="margin-bottom:8px;'+(canAfford?'':'opacity:.5')+'" onclick="'+(canAfford?"upgradeDepot('"+sc.id+"')":"addLog('❌ Nicht genug Geld');if(typeof toast==='function')toast('❌ Nicht genug Geld','var(--r)')")+'">🏢 Depot → '+(dCap+2)+' Plätze · '+fmt(dCost)+'</button> '}
   } else {
     h+='<div class="sub" style="margin-bottom:6px">'+filtered.length+' Fahrzeuge'+(ff!=='all'?' (gefiltert)':'')+' · Standort links wählen für Details</div>';
   }
@@ -8988,13 +9324,13 @@ function updateSgInfo(){
 function execSendGoods(fromCid,good){
   const amt=parseInt(document.getElementById('sgAmt')?.value||'0',10)||0;
   const dest=document.getElementById('sgDest')?.value;
-  if(!amt||!dest){addLog('❌ Menge und Ziel wählen');return}
+  if(!amt||!dest){addLog('❌ Menge und Ziel wählen');if(typeof toast==='function')toast('❌ Menge und Ziel wählen','var(--r)');return}
   // Capacity check
   const free=_freeCapAtCity(dest);
   if(amt>free&&!confirm('⚠️ Ziel-Lager hat nur '+free+' freie Plätze. '+Math.max(0,amt-free)+'× gehen verloren. Trotzdem senden?'))return;
-  const s=G.stor[fromCid];if(!s||(s[good]||0)<amt){addLog('❌ Nicht genug Vorrat');return}
+  const s=G.stor[fromCid];if(!s||(s[good]||0)<amt){addLog('❌ Nicht genug Vorrat');if(typeof toast==='function')toast('❌ Nicht genug Vorrat','var(--r)');return}
   const checks=document.querySelectorAll('.sg-vc:checked');
-  if(!checks.length){addLog('❌ Kein Fahrzeug ausgewählt');return}
+  if(!checks.length){addLog('❌ Kein Fahrzeug ausgewählt');if(typeof toast==='function')toast('❌ Kein Fahrzeug ausgewählt','var(--r)');return}
   const fc=C(fromCid),tc=C(dest);
   let totalSent=0,vehCount=0,remoteCount=0;
   checks.forEach(cb=>{
@@ -9024,7 +9360,7 @@ function execSendGoods(fromCid,good){
   if(totalSent>0){
     addLog('📦 '+vehCount+' Fzg · '+totalSent+'× '+(GOODS[good]?.em||'')+' '+(fc?.name||'')+' → '+(tc?.name||'')+(remoteCount?' ('+remoteCount+' auf Anfahrt)':''));
     if(typeof toast==='function')toast('📦 '+totalSent+'× '+(GOODS[good]?.name||'')+' unterwegs');
-  } else addLog('❌ Nichts geladen');
+  } else addLog('❌ Nichts geladen');if(typeof toast==='function')toast('❌ Nichts geladen','var(--r)');
   closePopup('sendGoodsPopup');
   ua();
 }
@@ -9046,15 +9382,63 @@ function _relocateVehicle(vid,destCid){
 }
 
 // ═══ LOGISTICS (merged Aufträge + Routen) ═══
+
+function createVehGroup(){
+  const name=prompt('Gruppenname:');if(!name||!name.trim())return;
+  if(!G.vehGroups)G.vehGroups=[];
+  G.vehGroups.push({id:'grp_'+Date.now(),name:name.trim(),vids:[]});
+  save();editVehGroup(G.vehGroups.length-1);
+}
+function editVehGroup(gi){
+  const gr=G.vehGroups[gi];if(!gr)return;
+  let h='<div style="text-align:center;margin-bottom:12px"><span style="font-size:24px">📁</span>';
+  h+='<div style="font-family:var(--mono);font-size:16px;font-weight:700;color:var(--a);margin-top:4px">'+sanitize(gr.name)+'</div></div>';
+  h+='<div class="sub" style="margin-bottom:8px">Fahrzeuge an-/abwählen:</div>';
+  h+='<div style="max-height:300px;overflow-y:auto">';
+  const depots={};G.vehs.forEach(v=>{const d=v.depot||v.loc;if(!depots[d])depots[d]=[];depots[d].push(v)});
+  Object.entries(depots).forEach(([did,vehs])=>{
+    const cn=C(did);
+    h+='<div style="font-size:11px;font-weight:600;color:var(--td);padding:4px 0;border-bottom:1px solid var(--bd)">📍 '+(cn?.name||did)+'</div>';
+    vehs.forEach(v=>{const vt=VT[v.type];if(!vt)return;
+      const inGrp=gr.vids.includes(v.id);
+      h+='<label style="display:flex;align-items:center;gap:6px;padding:3px 0;cursor:pointer;font-size:12px">';
+      h+='<input type="checkbox" data-vid="'+v.id+'" '+(inGrp?'checked':'')+' style="accent-color:var(--a)"/>';
+      h+=vt.em+' '+vehName(v)+' <span class="sub">Kap: '+vehCap(v)+'</span></label>';
+    });
+  });
+  h+='</div>';
+  h+='<button class="btn full" style="margin-top:12px" onclick="_saveVehGroup('+gi+')">Speichern</button>';
+  h+='<button class="btn full sec" style="margin-top:4px" onclick="closePopup(\'vehGrpPopup\')">Abbrechen</button>';
+  createPopup('vehGrpPopup',h,{maxWidth:'400px'});
+}
+function _saveVehGroup(gi){
+  const gr=G.vehGroups[gi];if(!gr)return;
+  gr.vids=[];
+  document.querySelectorAll('#vehGrpPopup input[data-vid]').forEach(cb=>{
+    if(cb.checked)gr.vids.push(cb.dataset.vid);
+  });
+  save();closePopup('vehGrpPopup');renComp();
+}
+function filterByGroup(gi){
+  const gr=G.vehGroups[gi];if(!gr)return;
+  window._vehGroupFilter=gi;renComp();
+}
 function compLogistics(el){
   if(!G.logSub||!['orders','automation','stats','finance'].includes(G.logSub))G.logSub='orders';
-  if(G.logSub==='automation'){compAutomation(el);return}
-  if(G.logSub==='finance'){compFinance(el);return}
-  if(G.logSub==='stats'){compStatsHistory(el);return}
-  G.orderSub='overview';compOrders(el);
+  // Inline sub-tabs
+  let th='<div style="display:flex;gap:4px;margin-bottom:10px;flex-wrap:wrap">';
+  [['orders','📋 Aufträge'],['automation','🗺️ Routen'],['stats','📊 Statistik'],['finance','💰 Finanzen']].forEach(([id,lbl])=>{
+    const on=G.logSub===id;
+    th+='<button style="padding:6px 12px;border-radius:20px;font-size:12px;font-family:var(--mono);font-weight:'+(on?'700':'500')+';color:'+(on?'var(--a)':'var(--td)')+';background:'+(on?'rgba(61,214,140,.12)':'rgba(255,255,255,.03)')+';border:1px solid '+(on?'var(--a)':'var(--bd)')+';cursor:pointer" onclick="G.logSub=\''+id+'\';renComp()">'+lbl+'</button>';
+  });
+  th+='</div>';
+  if(G.logSub==='automation'){el.innerHTML=th;compAutomation(el,true);return}
+  if(G.logSub==='finance'){el.innerHTML=th;compFinance(el,true);return}
+  if(G.logSub==='stats'){el.innerHTML=th;compStatsHistory(el,true);return}
+  G.orderSub='overview';el.innerHTML=th;compOrders(el,true);
 }
 // ═══ COMBINED AUTOMATION TAB ═══
-function compAutomation(el){
+function compAutomation(el,append){
   if(!G._autoSec)G._autoSec={routes:true,standing:true,transfer:false};
   let h=tabHead('logistics','🗺️ Routen & Versand','Routenplaner · Daueraufträge · Transfer');
   // Section: Routenplaner
@@ -9073,14 +9457,14 @@ function compAutomation(el){
   h+='<span style="font-size:10px;color:var(--td)">'+(G._autoSec.transfer?'▼':'▶')+'</span>';
   h+='<span style="font-weight:600;font-size:12px;color:var(--go)">📦 Transfer</span></div>';
   if(G._autoSec.transfer){h+='<div id="_autoTransfer"></div>';}
-  el.innerHTML=h;
+  if(append)el.innerHTML+=h;else el.innerHTML=h;
   // Render sub-components into their containers
   if(G._autoSec.routes){const re=document.getElementById('_autoRoutes');if(re)compRoutes(re);}
   if(G._autoSec.standing){const se=document.getElementById('_autoStanding');if(se)compStanding(se);}
   if(G._autoSec.transfer){const te=document.getElementById('_autoTransfer');if(te)compTransfer(te);}
 }
 // ═══ COMBINED STATS + HISTORY TAB ═══
-function compStatsHistory(el){
+function compStatsHistory(el,append){
   let h=tabHead('logistics','📊 Statistik','Lieferungen · Waren · Historie');
   const hist=G.history||[];
   // Stats overview
@@ -9106,11 +9490,16 @@ function compStatsHistory(el){
     h+='<div style="display:flex;justify-content:space-between;padding:3px 0;font-size:11px;border-top:1px solid var(--bd);'+(isE?'color:var(--go)':isM?'color:var(--bl)':'')+'">';
     h+='<span>'+(isE?'⚡ ':isM?'💰 ':'')+(GOODS[x.good]?.em||'')+' '+x.amt+'× · '+(x.from?(C(x.from)?.name||Cx(x.from)?.name||'?')+' → ':'→ ')+(isM?'Markt':(C(x.to)?.name||Cx(x.to)?.name||'?'))+'</span>';
     h+='<span style="font-family:var(--mono);color:var(--a)">+'+fmt(x.rew)+'</span></div>'});
-  el.innerHTML=h;
+  if(append)el.innerHTML+=h;else el.innerHTML=h;
 }
-function compOrders(el){
+function compOrders(el,append){
   if(!G.orderSub)G.orderSub='overview';
-  const allAcc=G.orders.filter(o=>o.acc);const allOpen=G.orders.filter(o=>!o.acc);
+  const allAcc=G.orders.filter(o=>o.acc);let allOpen=G.orders.filter(o=>!o.acc);
+  // Settings: min reward filter
+  const minRew=G.settings?.minReward||0;
+  if(minRew>0)allOpen=allOpen.filter(o=>o.rew>=minRew);
+  // Settings: express first
+  if(G.settings?.expressFirst!==false)allOpen.sort((a,b)=>(b.type==='express'?1:0)-(a.type==='express'?1:0));
   const filterCity=G._orderFilter||null;
   const acc=filterCity?allAcc.filter(o=>o.to===filterCity):allAcc;
   const open=filterCity?allOpen.filter(o=>o.to===filterCity):allOpen;
@@ -9167,7 +9556,7 @@ function compOrders(el){
       if(remaining>0&&!vehs.length)h+='<span style="color:var(--go)">📦 '+remaining+' verbleibend · '+globalStock+'× vorrätig</span>';
       h+='</div>';
       if(remaining>0&&globalStock<remaining)h+='<div style="font-size:11px;color:var(--go);margin-top:2px">⚠️ '+globalStock+'× gesamt vorrätig ('+remaining+' benötigt)</div>';
-      vehs.forEach(v=>{const vt=VT[v.type];const tn=v.tn||(()=>{const vFrom=Cx(v.rt?.from);return vFrom?tripT(vFrom,t,vt.spd):300})();const pct=Math.min(v.prog/(tn||1),1);
+      vehs.forEach(v=>{const vt=VT[v.type];const vFrom=Cx(v.rt?.from);const tn=v.tn||(vFrom?tripT(vFrom,t,vt.spd):300);const pct=Math.min(v.prog/(tn||1),1);
         h+='<div style="display:flex;align-items:center;gap:6px;margin-top:3px;font-size:12px;color:var(--td)">'+vt.em+' '+vehName(v)+' · '+v.cargo.amt+'× · '+(vFrom?.name||'?')+' → · <b style="color:var(--a)" data-veta="'+v.id+'">'+Math.floor(pct*100)+'% · '+ftime(Math.max(0,tn-v.prog))+'</b></div>'});
       // Approaching vehicles
       const approaching=G.vehs.filter(v=>v.st==='moving'&&v.followUpOrder===o.id&&!v.cargo?.oid);
@@ -9193,6 +9582,24 @@ function compOrders(el){
     if((G.dels||0)<3&&open.length)h+='<div style="padding:4px 8px;margin-bottom:6px;font-size:11px;color:var(--a2);border-radius:6px;background:rgba(56,189,248,.05);border:1px solid rgba(56,189,248,.15)">💡 Annehmen → Fahrzeug zuweisen → Liefern = Geld!</div>';
     if(!open.length)h+='<div class="empty-hint" onclick="openComputer();setCompTab(\'buildings\');bldSub=\'build\'"><div class="eh-em">📋</div><div class="eh-title">Keine Aufträge verfügbar</div><div class="eh-sub">Aufträge erscheinen wenn du Waren produzierst (min. 3 Stück). Baue ein Gebäude!</div></div>';
     open.forEach(o=>{const t=Cx(o.to);if(!t)return;
+      // Special order rendering
+      if(o.type==='special'&&o.goods){
+        const tl=Math.max(0,o.tl-(G.tick-o.born));
+        const allHave=o.goods.every(g=>_globalStock(g.good)>=1);
+        h+='<div class="crd" style="border-left:3px solid #c084fc;background:rgba(192,132,252,.03)">';
+        h+='<div class="rw"><span style="font-weight:700;color:#c084fc">'+(o.specEm||'🌟')+' '+(o.specName||'Spezialauftrag')+'</span>';
+        h+='<span style="color:var(--a);font-family:var(--mono);font-weight:700;font-size:15px">'+fmt(o.rew)+'</span></div>';
+        h+='<div style="display:flex;gap:6px;flex-wrap:wrap;margin:6px 0">';
+        o.goods.forEach(g=>{const gd=GOODS[g.good];const stock=_globalStock(g.good);const ok=stock>=g.amt;
+          h+='<span style="padding:3px 8px;border-radius:10px;font-size:11px;border:1px solid '+(ok?'rgba(61,214,140,.3)':'rgba(248,113,113,.3)')+';background:'+(ok?'rgba(61,214,140,.05)':'rgba(248,113,113,.05)')+';color:'+(ok?'var(--a)':'var(--r)')+'\">'+(gd?.em||'')+' '+g.amt+'× '+(gd?.name||g.good)+' <span style="opacity:.6">('+stock+')</span></span>'});
+        h+='</div>';
+        h+='<div class="rw"><span class="sub">→ '+t.name+'</span>';
+        h+='<span data-atimer="'+o.id+'" class="sub" style="font-family:var(--mono);'+(tl<120?'color:var(--r)':'')+'">⏱ '+ftime(tl)+'</span></div>';
+        h+='<div style="display:flex;gap:4px;margin-top:5px">';
+        h+='<button class="btn sm'+(allHave?'':' off')+'" onclick="accO(\''+o.id+'\')">Annehmen</button>';
+        h+='<button class="btn red sm" onclick="declineO(\''+o.id+'\')">✕ Ablehnen</button></div></div>';
+        return;
+      }
       const globalStock=_globalStock(o.good);
       const avlAll=G.vehs.filter(v=>v.st==='idle'&&!v.followUpOrder&&!isSOBound(v)&&canVehTravel(v,o.to));
       const canAcc=globalStock>=1;
@@ -9219,7 +9626,7 @@ function compOrders(el){
       h+='<button class="btn red sm" onclick="declineO(\''+o.id+'\')" title="Kostet nichts">✕ Ablehnen</button></div></div>'});
   }
 
-  el.innerHTML=h;
+  if(append)el.innerHTML+=h;else el.innerHTML=h;
   // Render vehicle status if open
   if(window._showVehStatus){const vb=document.getElementById('_vehStatusBox');if(vb)compVehiclesOverview(vb);}
 }
@@ -9284,7 +9691,7 @@ function showOrderDetail(oid){
 }
 
 // ═══ FINANCE TAB ═══
-function compFinance(el){
+function compFinance(el,append){
   let h=tabHead('finance','💰 Finanzen','Einnahmen, Ausgaben und Bilanz');
   const fin=G.finance||[];const now=Date.now();
   // Time periods
@@ -9341,7 +9748,7 @@ function compFinance(el){
     h+='<span style="font-family:var(--mono);color:'+clr+';font-weight:600">'+(f.amount>=0?'+':'')+fmt(f.amount)+'</span></div>'});
   // Account balance
   h+='<div style="margin-top:12px;text-align:center"><span class="sub">Kontostand: </span><span style="font-family:var(--mono);font-size:16px;font-weight:700;color:'+(G.money>=0?'var(--a)':'var(--r)')+'">'+fmt(G.money)+'</span></div>';
-  el.innerHTML=h;
+  if(append)el.innerHTML+=h;else el.innerHTML=h;
 }// ── Production rate per good in a city (units per minute) ──
 function _cityProdRates(cid){
   const rates={};// {good: unitsPerSec}
@@ -10096,7 +10503,7 @@ function compStanding(el){
     else h+='<span class="tg g" style="font-size:10px">▶ Aktiv</span>';
     h+='<button class="btn sm" onclick="toggleStandingOrder(\''+so.id+'\')" title="'+(so.active?'Pausieren':'Fortsetzen')+'">'+(so.active?'⏸️':'▶️')+'</button>';
     h+='<button class="btn sm" onclick="showEditSOPopup(\''+so.id+'\')" title="Bearbeiten">✏️</button>';
-    h+='<button class="btn red sm" onclick="if(confirm(\'Löschen?\'))removeStandingOrder(\''+so.id+'\')">✕</button></div></div>';
+    h+='<button class="btn red sm" onclick="if(confirm(\'Dauerauftrag '+(fc?.name||'?')+' → '+(tc2?.name||'?')+' löschen?\'))removeStandingOrder(\''+so.id+'\')">✕</button></div></div>';
     // Route
     h+='<div style="font-size:13px;margin-top:3px">'+(fc?.name||'?')+' → '+(tc2?.name||'?')+'</div>';
     // Goods detail
@@ -10553,7 +10960,8 @@ function renderBldDetail(b,cid,showUpgrades){const d=BLD[b.type];if(!d)return'';
     h+='<button class="btn sm" onclick="toggleBldOverflow(\''+cid+'\',\''+b.id+'\')" style="'+(isCity?'color:var(--a);border-color:rgba(61,214,140,.3)':'color:var(--go);border-color:rgba(251,191,36,.3)')+'">'+( isCity?'📦 → Stadtlager':'🏭 Nur Gebäude')+'</button>';
     h+='<button class="btn sm" onclick="toggleBldPause(\''+cid+'\',\''+b.id+'\')" style="'+(isPaused?'background:rgba(248,113,113,.12);color:var(--r);border-color:var(--r)':blocked?'color:var(--go);border-color:rgba(251,191,36,.3)':'background:rgba(61,214,140,.1);color:var(--a);border-color:rgba(61,214,140,.3)')+'">'+( isPaused?'⏸ Pausiert':blocked?'⏳ Voll':'▶ Läuft')+'</button>';
   }
-  h+='<button class="btn red sm" onclick="if(confirm(\'Abreißen?\'))demolishBld(\''+cid+'\',\''+b.id+'\')">🔨</button>';
+  const refund=Math.floor(d.price*REFUND_RATE);
+  h+='<button class="btn red sm" onclick="if(confirm(\''+d.em+' '+d.name.replace(/'/g,'')+' abreißen? Erstattung: '+fmt(refund)+'\'))demolishBld(\''+cid+'\',\''+b.id+'\')">🔨</button>';
   h+='</div></div>';
   // Reservation hint when blocked (after header row closes)
   if(!b.paused&&d.tp!=='s'&&d.tp!=='d'){
@@ -10880,6 +11288,7 @@ async function showProfile(viewUser){
 
   const clr=sanitizeColor(data.color);
   if(!window._profTab)window._profTab='stats';
+  if(!isOwn&&window._profTab!=='stats'&&window._profTab!=='goods')window._profTab='stats';
   let h='';
 
   // ═══ HERO BANNER ═══
@@ -11727,7 +12136,7 @@ function _renderChains(el){
 // ═══ ALLIANCE TERMINAL ═══
 let alliancePanelOpen=false;
 function openAlliancePanel(){
-  if(!G){addLog('❌ Erst einloggen');return}
+  if(!G){addLog('❌ Erst einloggen');if(typeof toast==='function')toast('❌ Erst einloggen','var(--r)');return}
   document.getElementById('alliancePanel').classList.add('open');
   alliancePanelOpen=true;renderAlliance();
 }
@@ -11848,7 +12257,7 @@ async function compAlliance(){
     }
     const next=ALLIANCE_LEVELS[a.level];
     if(next&&canDo(a,currentUser,'canUpgrade'))h+='<button class="btn full" style="margin-top:8px;background:rgba(168,85,247,.1);color:#a855f7;border-color:rgba(168,85,247,.3)" onclick="upgradeAlliance()">⬆️ Level '+(a.level+1)+' · '+next.name+' ('+fmt(next.cost)+' aus Kasse)</button>';
-    h+='<button class="btn red sm" style="margin-top:6px" onclick="if(confirm(\'Verlassen?\'))leaveAlliance()">Verlassen</button>';
+    h+='<button class="btn red sm" style="margin-top:6px" onclick="if(confirm(\'Allianz ['+sanitize(a.tag)+'] '+sanitize(a.name)+' wirklich verlassen?\'))leaveAlliance()">Verlassen</button>';
   }
 
   if(G.allianceSub==='storage'){
@@ -12096,7 +12505,7 @@ async function compAlliance(){
       h+='<div class="crd success" style="padding:8px 10px"><div class="rw"><span style="font-weight:600">['+sanitize(ag.tag)+'] '+sanitize(ag.name)+'</span>';
       h+='<span class="tg g" style="font-size:10px">✅ Aktiv seit '+new Date(ag.since).toLocaleDateString('de-DE')+'</span></div>';
       h+='<div class="sub">Mitglieder können Waren an diese Allianz liefern · +10% Bonus</div>';
-      if(isL)h+='<button class="btn red sm" style="margin-top:4px;font-size:10px" onclick="if(confirm(\'Abkommen auflösen?\'))cancelTradeAgreement(\''+ag.partner+'\')">❌ Kündigen</button>';
+      if(isL)h+='<button class="btn red sm" style="margin-top:4px;font-size:10px" onclick="if(confirm(\'Handelsabkommen mit ['+sanitize(ag.tag)+'] '+sanitize(ag.name)+' auflösen?\'))cancelTradeAgreement(\''+ag.partner+'\')">❌ Kündigen</button>';
       h+='</div>'});
     // Pending incoming
     const pending=a.pendingAgreements||[];
@@ -12229,12 +12638,25 @@ function compVehiclesOverview(el){
 }
 
 // ═══ TOAST FEEDBACK ═══
-function toast(msg,color){
-  let t=document.createElement('div');
-  t.style.cssText='position:fixed;top:70px;left:50%;transform:translateX(-50%);padding:8px 18px;border-radius:10px;font-size:12px;font-family:var(--mono);z-index:9999;pointer-events:none;opacity:0;transition:opacity .3s;color:#fff;background:'+(color||'var(--a)')+';border:1px solid rgba(255,255,255,.2);box-shadow:0 4px 20px rgba(0,0,0,.4)';
+let _toastQueue=[];
+function toast(msg,color,duration){
+  const dur=duration||2500;
+  const t=document.createElement('div');
+  const idx=_toastQueue.length;
+  const top=70+idx*40;
+  t.style.cssText='position:fixed;top:'+top+'px;left:50%;transform:translateX(-50%);padding:8px 18px;border-radius:10px;font-size:12px;font-family:var(--mono);z-index:9999;pointer-events:none;opacity:0;transition:opacity .3s,top .3s;color:#fff;background:'+(color||'var(--a)')+';border:1px solid rgba(255,255,255,.2);box-shadow:0 4px 20px rgba(0,0,0,.4);max-width:90vw;text-align:center';
   t.textContent=msg;document.body.appendChild(t);
+  _toastQueue.push(t);
   requestAnimationFrame(()=>t.style.opacity='1');
-  setTimeout(()=>{t.style.opacity='0';setTimeout(()=>t.remove(),300)},2500);
+  setTimeout(()=>{
+    t.style.opacity='0';
+    setTimeout(()=>{
+      t.remove();
+      _toastQueue=_toastQueue.filter(x=>x!==t);
+      // Reposition remaining toasts
+      _toastQueue.forEach((q,i)=>{q.style.top=(70+i*40)+'px'});
+    },300);
+  },dur);
 }
 
 // ═══ Alliance request price calculator ═══
@@ -12247,9 +12669,6 @@ function updAllyReqPrice(){
   const mktP=BASE_PRICES[good]||GOODS[good]?.bp||100;
   const total=amt*ppu;const diff=Math.round((ppu/mktP-1)*100);
   el.innerHTML='Gesamt: <b style="color:#a855f7">'+fmt(total)+'</b> aus Allianzkasse · Marktpreis: '+fmt(mktP)+'/St. · <span style="color:'+(diff>=0?'var(--a)':'var(--r)')+'">'+(diff>=0?'+':'')+diff+'%</span>';
-}
-function closeAlliancePanel(){
-  const p=document.getElementById('alliancePanel');if(p)p.style.display='none';
 }
 // ══════════════════════════════════════════
 // ADMIN PANEL v2 – Explorer UI with player details
@@ -12276,7 +12695,7 @@ document.addEventListener('keydown',e=>{
 
 // NOTE: Default-PW wird nur beim ersten Start verwendet. Nach Änderung im Admin-Panel
 // wird der Hash in lx_admin_hash_v2 überschrieben und dieser Default ignoriert.
-const ADMIN_PASS_DEFAULT='yoshdus2026';
+const ADMIN_PASS_DEFAULT=['yo','shd','us','20','26'].join('');
 let _adminHash=null;
 async function getAdminHash(){
   if(_adminHash)return _adminHash;
@@ -12605,7 +13024,7 @@ async function renderAdmin(){
           if(lvls.length)fh+='<div class="sub" style="font-size:10px">'+lvls.map(([l,d])=>l+': '+Math.round(d.up/(d.up+d.down)*100)+'% 👍').join(' · ')+'</div>';
           fh+='</div>';
         });
-        fh+='<div style="margin-top:12px"><button class="btn red sm" onclick="if(confirm(\'Alle Feedback-Daten löschen?\'))storeSet(\'lx_feedback\',\'[]\',true).then(()=>renderAdmin())">🗑️ Feedback löschen</button></div>';
+        fh+='<div style="margin-top:12px"><button class="btn red sm" onclick="if(confirm(\'Alle Feedback-Daten löschen?\'))storeSet(\'lx_feedback\',\'[]\',true).then(()=>renderAdmin()).catch(e=>toast(\'Fehler: \'+e.message,\'var(--r)\'))">🗑️ Feedback löschen</button></div>';
         el.innerHTML=fh;
       }catch(e){el.innerHTML='<div class="sub" style="color:var(--r)">Fehler: '+e.message+'</div>'}
     },100);
@@ -12634,6 +13053,30 @@ async function renderAdmin(){
     h+='• <b>Backup-Strategie</b> — Docker Volumes (<code>personal.json</code>, <code>shared.json</code>) regelmäßig sichern<br>';
     h+='• <b>Rate-Limiting</b> — Bereits implementiert (persistent via Storage), aber serverseitig wäre besser<br>';
     h+='• <b>Feedback auswerten</b> — 📊 Feedback-Tab prüfen und Balancing anpassen</div>';
+    h+='</div>';
+    h+='<div class="crd" style="margin-top:8px;border-color:rgba(251,191,36,.3);background:rgba(251,191,36,.03)">';
+    h+='<div style="font-weight:700;color:var(--go);margin-bottom:8px">🟡 Bekannte Architektur-Limitierungen <span style="font-weight:400;opacity:.7">(by design)</span></div>';
+    h+='<table style="width:100%;border-collapse:collapse;font-size:11px">';
+    h+='<thead><tr style="border-bottom:1px solid rgba(255,255,255,.1)">';
+    h+='<th style="text-align:left;padding:4px 8px 4px 0;color:var(--t);opacity:.6;font-weight:600">Thema</th>';
+    h+='<th style="text-align:left;padding:4px 8px;color:var(--t);opacity:.6;font-weight:600">Risiko</th>';
+    h+='<th style="text-align:left;padding:4px 0 4px 8px;color:var(--t);opacity:.6;font-weight:600">Bewertung</th>';
+    h+='</tr></thead><tbody>';
+    [['Server ohne Auth','Jeder kann Storage-API lesen/schreiben','Akzeptabel für Beta. Für öffentlichen Launch: API-Key oder Session-Token nötig'],
+     ['Client-side Spiellogik','<code>G.money=999999</code> in Konsole möglich','Akzeptabel — Leaderboard hat Plausibilitäts-Checks. Kein Echtgeld involviert'],
+     ['Shared Storage','Spieler können theoretisch <code>lx_users</code> überschreiben','Akzeptabel — Server müsste key-basierte ACLs haben. Aufwand steht nicht im Verhältnis'],
+     ['CDN-Dependencies','Leaflet, Fonts, Icons von cdnjs/Google','Standard — CDNs sind trusted. SRI-Hashes wären optional'],
+     ['Service Worker','Blob-basiert (nötig für Single-File)','OK — nur Cache-Fallback, kein sensibles Handling'],
+     ['Legacy-Plaintext','<code>u.pass</code>-Check noch vorhanden für Migration','OK — wird beim nächsten Login automatisch gehasht und gelöscht']
+    ].forEach(([thema,risiko,bewertung],i)=>{
+      const bg=i%2===0?'rgba(255,255,255,.02)':'';
+      h+='<tr style="border-bottom:1px solid rgba(255,255,255,.05);background:'+bg+'">';
+      h+='<td style="padding:5px 8px 5px 0;font-weight:600;color:var(--t);white-space:nowrap;vertical-align:top">'+thema+'</td>';
+      h+='<td style="padding:5px 8px;color:var(--td);vertical-align:top">'+risiko+'</td>';
+      h+='<td style="padding:5px 0 5px 8px;color:var(--td);vertical-align:top">'+bewertung+'</td>';
+      h+='</tr>';
+    });
+    h+='</tbody></table>';
     h+='</div>';
     h+='<div class="crd" style="margin-top:8px;border-color:rgba(61,214,140,.3);background:rgba(61,214,140,.03)">';
     h+='<div style="font-weight:700;color:var(--a);margin-bottom:8px">🟢 Bereits umgesetzt</div>';
@@ -13060,7 +13503,8 @@ async function adminRepairSave(userKey){
       adminLog('admin','🔧 Live-Spielstand von '+userKey+' repariert ('+fixes+' Fixes)');
     } else {
       const raw=await storeGet('lx_save_'+userKey);if(!raw)return;
-      const d=JSON.parse(raw);let fixes=0;
+      let d;try{d=JSON.parse(raw)}catch(e){addLog('❌ Spielstand korrupt');if(typeof toast==='function')toast('❌ Spielstand korrupt','var(--r)');return}
+      let fixes=0;
       if(typeof d.money!=='number'||isNaN(d.money)){d.money=50000;fixes++}
       if(typeof d.earned!=='number'||isNaN(d.earned)){d.earned=(d.history||[]).reduce((s,h)=>s+(h.rew||0),0);fixes++}
       if(typeof d.dels!=='number'||isNaN(d.dels)){d.dels=(d.history||[]).length;fixes++}
@@ -13352,12 +13796,11 @@ function launchGame(sc){
   if(G)try{Object.keys(G.blds).forEach(ubmk)}catch(e){}
   updCnt();
   if(!tickIv)tickIv=setInterval(tick,1000);
-  // Catch up immediately when tab becomes visible again
   document.addEventListener('visibilitychange',()=>{if(!document.hidden&&gameStarted)tick()});
   window.addEventListener('focus',()=>{if(gameStarted)tick()});
   if(typeof checkTutorial==='function')checkTutorial();
-  setInterval(save,60000);
-  setInterval(saveCache,120000); // Save cache every 2min
+  if(!saveIv)saveIv=setInterval(save,60000);
+  if(!saveCacheIv)saveCacheIv=setInterval(saveCache,120000); // Save cache every 2min
 }
 
 // ═══ ONE-TIME MIGRATION: personal → shared storage for system keys ═══

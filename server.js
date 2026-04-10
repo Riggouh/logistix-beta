@@ -21,7 +21,7 @@ function handleStorage(req,res){
     if(store[key]!==undefined)res.end(JSON.stringify({key,value:store[key],shared}));
     else{res.statusCode=404;res.end(JSON.stringify({error:'not found'}))}
   }else if(p==='/api/storage'&&req.method==='POST'){
-    let body='';req.on('data',c=>body+=c);req.on('end',()=>{
+    let body='';let bodySize=0;req.on('data',c=>{bodySize+=c.length;if(bodySize>2097152){res.statusCode=413;res.end(JSON.stringify({error:'too large'}));req.destroy();return;}body+=c});req.on('end',()=>{
       try{
         const{key,value,shared}=JSON.parse(body);
         const f=shared?SHARED:PERSONAL;const store=readJSON(f);
@@ -44,6 +44,12 @@ function handleStorage(req,res){
 }
 
 const server=http.createServer((req,res)=>{
+  // Security headers
+  res.setHeader('X-Content-Type-Options','nosniff');
+  res.setHeader('X-Frame-Options','SAMEORIGIN');
+  res.setHeader('X-XSS-Protection','1; mode=block');
+  res.setHeader('Referrer-Policy','strict-origin-when-cross-origin');
+  res.setHeader('Content-Security-Policy',"default-src 'self' 'unsafe-inline' 'unsafe-eval' https: data: blob:; img-src 'self' https: data: blob:; font-src 'self' https: data:;");
   if(req.url.startsWith('/api/'))return handleStorage(req,res);
   let file=req.url==='/'?'/index.html':req.url;
   file=path.join(__dirname,'public',file);
